@@ -1,0 +1,373 @@
+/* CrazyTokenomics.module.css */
+
+.tokenomicsSection {
+    background: linear-gradient(180deg, #0a0e1e 0%, #1a1f3a 50%, #2d1b3d 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .tokenomicsContainer {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 6rem 2rem;
+    position: relative;
+    z-index: 1;
+  }
+  
+  .tokenomicsTitle {
+    font-size: 3rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 4rem;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .tokenomicsContent {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4rem;
+    align-items: flex-start;
+    margin-bottom: 4rem;
+  }
+  
+  .chartSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+  }
+  
+  .chartContainer {
+    position: relative;
+  }
+  
+  .pieChart {
+    position: relative;
+  }
+  
+  .pieSlice {
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .chartCenter {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    z-index: 10;
+  }
+  
+  .foxMascot {
+    font-size: 3rem;
+    margin-bottom: 0.5rem;
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  @keyframes float {
+    0%, 100% { 
+      transform: translateY(0); 
+    }
+    50% { 
+      transform: translateY(-10px); 
+    }
+  }
+  
+  .totalSupply {
+    color: #FF6B35;
+    font-weight: bold;
+    font-size: 1.1rem;
+  }
+  
+  .muscleFoxContainer {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .muscleFoxImage {
+    width: 400px;
+    height: auto;
+    z-index: 2;
+    position: relative;
+    border-radius: 15px;
+    /* box-shadow: 0 10px 30px rgba(255, 107, 53, 0.3); */
+  }
+  
+  .foxGlow {
+    position: absolute;
+    width: 250px;
+    height: 250px;
+    background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 1;
+  }
+  
+  .legendSection {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .legend {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .legendItem {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 107, 53, 0.1);
+    border-radius: 15px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .legendItem:hover,
+  .legendItem.active {
+    border-color: rgba(255, 107, 53, 0.3);
+    box-shadow: 0 10px 30px rgba(255, 107, 53, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .legendHeader {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    margin-bottom: 0.5rem;
+  }
+  
+  .legendColor {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px currentColor;
+  }
+  
+  .legendIcon {
+    font-size: 1.5rem;
+  }
+  
+  .legendLabel {
+    font-weight: bold;
+    color: white;
+    font-size: 1.1rem;
+    flex: 1;
+  }
+  
+  .legendPercentage {
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-weight: bold;
+    font-size: 1.2rem;
+  }
+  
+  .legendDescription {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+  }
+  
+  .legendDetails {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    font-style: italic;
+  }
+  
+  .contractSection {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(78, 205, 196, 0.2);
+    border-radius: 25px;
+    padding: 2rem;
+  }
+  
+  .contractTitle {
+    color: #4ECDC4;
+    font-size: 1.8rem;
+    font-weight: bold;
+    margin-bottom: 1.5rem;
+    text-align: center;
+  }
+  
+  .contractGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  
+  .contractInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .infoItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.8rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .infoLabel {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+  }
+  
+  .infoValue {
+    color: #FF6B35;
+    font-weight: bold;
+  }
+  
+  .contractAddress {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(78, 205, 196, 0.2);
+    border-radius: 15px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .contractAddress:hover {
+    background: rgba(78, 205, 196, 0.1);
+    border-color: rgba(78, 205, 196, 0.4);
+  }
+  
+  .addressText {
+    flex: 1;
+    color: white;
+    font-family: monospace;
+    font-size: 0.9rem;
+  }
+  
+  .copyButton {
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+  }
+  
+  .copyButton:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(78, 205, 196, 0.3);
+  }
+  
+  .taxInfo {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+    gap: 1rem;
+  }
+  
+  .taxItem {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 107, 53, 0.1);
+    border-radius: 15px;
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .taxItem:hover {
+    background: rgba(255, 107, 53, 0.15);
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(255, 107, 53, 0.2);
+  }
+  
+  .taxPercentage {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #FF6B35;
+    display: block;
+    margin-bottom: 0.5rem;
+  }
+  
+  .taxLabel {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .tokenomicsContent {
+      grid-template-columns: 1fr;
+      gap: 2rem;
+    }
+  
+    .contractGrid {
+      grid-template-columns: 1fr;
+    }
+  
+    .tokenomicsTitle {
+      font-size: 2.5rem;
+    }
+  
+    .muscleFoxImage {
+      width: 150px;
+      height: 150px;
+    }
+  
+    .foxGlow {
+      width: 180px;
+      height: 180px;
+    }
+  
+    .taxInfo {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .tokenomicsContainer {
+      padding: 4rem 1rem;
+    }
+  
+    .tokenomicsTitle {
+      font-size: 2rem;
+    }
+  
+    .chartSection {
+      gap: 1rem;
+    }
+  
+    .muscleFoxImage {
+      width: 120px;
+      height: 120px;
+    }
+  
+    .foxGlow {
+      width: 150px;
+      height: 150px;
+    }
+  
+    .taxInfo {
+      grid-template-columns: 1fr;
+    }
+  
+    .contractAddress {
+      flex-direction: column;
+      text-align: center;
+    }
+  
+    .addressText {
+      font-size: 0.8rem;
+    }
+  }
