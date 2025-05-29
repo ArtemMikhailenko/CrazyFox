@@ -247,7 +247,7 @@ export default function Home() {
         <Particles
           id="tsparticles"
           init={particlesInit}
-          //@ts-expect-error
+          //@ts-ignore
           options={particlesConfig}
           className={styles.particles}
         />
