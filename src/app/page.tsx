@@ -28,6 +28,7 @@ import styles from './page.module.css';
 import CrazyTokenomics from '@/components/CrazyTokenomics/CrazyTokenomics';
 import CrazyAbout from '@/components/CrazyAbout/CrazyAbout';
 import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
+import CrazyRoadmapMap from '@/components/CrazyRoadmap/CrazyRoadmap';
 
 // Contract address
 const CONTRACT_ADDRESS = "0x742d35Cc7cF66f5e8f20A4C1b8c4A6b8b4E6F5d1C2";
@@ -774,7 +775,7 @@ export default function Home() {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          {/* <CrazyRoadmapMap/> */}
+          <CrazyRoadmapMap/>
         </motion.section>
 
         {/* Community Section */}
