@@ -29,7 +29,8 @@ const CrazyCommunity = () => {
       color: '#0088cc',
       gradient: 'linear-gradient(135deg, #0088cc, #00a6d6)',
       description: 'Join our main community hub',
-      bgPattern: '📱'
+      bgPattern: '📱',
+      url: 'https://t.me/crazyfoxmeme'
     },
     { 
       icon: '🐦', 
@@ -38,34 +39,8 @@ const CrazyCommunity = () => {
       color: '#1da1f2',
       gradient: 'linear-gradient(135deg, #1da1f2, #0d8bd9)',
       description: 'Latest news and updates',
-      bgPattern: '🚀'
-    },
-    { 
-      icon: '📢', 
-      name: 'Discord', 
-      members: '45K', 
-      color: '#7289da',
-      gradient: 'linear-gradient(135deg, #7289da, #5865f2)',
-      description: 'Gaming and voice chats',
-      bgPattern: '🎮'
-    },
-    { 
-      icon: '📺', 
-      name: 'YouTube', 
-      members: '23K', 
-      color: '#ff0000',
-      gradient: 'linear-gradient(135deg, #ff0000, #cc0000)',
-      description: 'Tutorials and entertainment',
-      bgPattern: '🎬'
-    },
-    { 
-      icon: '📸', 
-      name: 'Instagram', 
-      members: '67K', 
-      color: '#e4405f',
-      gradient: 'linear-gradient(135deg, #e4405f, #833ab4)',
-      description: 'Visual content and stories',
-      bgPattern: '📷'
+      bgPattern: '🚀',
+      url: 'https://x.com/crazyfoxmeme?s=21'
     },
     { 
       icon: '🎵', 
@@ -74,15 +49,17 @@ const CrazyCommunity = () => {
       color: '#000000',
       gradient: 'linear-gradient(135deg, #000000, #ff0050)',
       description: 'Viral fox content',
-      bgPattern: '🎭'
+      bgPattern: '🎭',
+      url: 'https://www.tiktok.com/@crazyfoxmeme?_t=ZM-8wpwWp3NVAu&_r=1'
     }
   ];
+  
 
   // Animate stats on mount
   useEffect(() => {
     if (isInView) {
       const animateStats = () => {
-        const targets = { members: 500000, messages: 2500000, countries: 89, memes: 12500 };
+        const targets = { members: 5000, messages: 100000, countries: 12, memes: 12500 };
         const duration = 2000;
         const startTime = Date.now();
 
@@ -294,6 +271,13 @@ const CrazyCommunity = () => {
         {/* Social Platforms Grid */}
         <motion.div className={styles.socialGrid} variants={cardVariants}>
           {socialPlatforms.map((platform, i) => (
+            <a
+            key={i}
+            href={platform.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={styles.linkWrapper}
+          >
             <motion.div
               key={i}
               className={styles.socialCard}
@@ -378,6 +362,7 @@ const CrazyCommunity = () => {
                 style={{ background: platform.gradient }}
               />
             </motion.div>
+            </a>
           ))}
         </motion.div>
 

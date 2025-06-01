@@ -11,20 +11,13 @@ const CrazyTokenomics = () => {
   const tokenData = [
     { 
       label: 'Liquidity Pool', 
-      percentage: 40, 
+      percentage: 65, 
       color: '#FF6B35', 
       icon: '💧',
       description: 'Locked liquidity for stable trading',
       details: '400M tokens permanently locked'
     },
-    { 
-      label: 'Community Rewards', 
-      percentage: 25, 
-      color: '#4ECDC4', 
-      icon: '🎁',
-      description: 'Airdrops, contests, and community events',
-      details: '250M tokens for the crazy fox family'
-    },
+    
     { 
       label: 'Marketing & Partnerships', 
       percentage: 15, 
