@@ -426,7 +426,7 @@ export default function Home() {
       spread: 100,
       origin: { y: 0.8 }
     });
-    toast.success('Redirecting to buy $CFOX! 🚀', { theme: "dark" });
+    toast.success('Redirecting to buy $CRFX! 🚀', { theme: "dark" });
   };
 
   useEffect(() => {
@@ -608,7 +608,7 @@ export default function Home() {
                 whileHover={isConnected ? { scale: 1.05, boxShadow: "0 0 25px #FF6B35" } : {}}
                 whileTap={isConnected ? { scale: 0.95 } : {}}
               >
-                🚀 Buy $CFOX
+                🚀 Buy $CRFX
               </motion.button>
             </div>
           </div>
@@ -647,7 +647,7 @@ export default function Home() {
                   whileHover={isConnected ? { scale: 1.05 } : {}}
                   whileTap={isConnected ? { scale: 0.95 } : {}}
                 >
-                  <span>🚀 Buy $CFOX Now</span>
+                  <span>🚀 Buy $CRFX Now</span>
                 </motion.button>
                 <motion.button
                   className={styles.secondaryButton}

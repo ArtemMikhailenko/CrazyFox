@@ -892,7 +892,6 @@ const CrazyFoxSpaceRoadmap = () => {
               </div>
             )}
             
-            {/* Распределение токенов */}
             {selectedPlanet.distribution && (
               <div style={{marginBottom: '20px'}}>
                 <h3 style={{color: selectedPlanet.color, marginBottom: '15px', fontSize: 'clamp(1.1rem, 3vw, 1.4rem)'}}>

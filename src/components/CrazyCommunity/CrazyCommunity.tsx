@@ -143,7 +143,7 @@ const CrazyCommunity = () => {
             </h2>
             <p className={styles.subtitle}>
               Connect with the craziest crypto community! Over 500K+ foxes worldwide sharing memes, 
-              strategies, and spreading the $CFOX revolution! 🚀
+              strategies, and spreading the $CRFX revolution! 🚀
             </p>
           </div>
         </motion.div>
@@ -232,7 +232,7 @@ const CrazyCommunity = () => {
               </h3>
               <p className={styles.ctaText}>
                 Don't miss out on the most epic crypto community! Choose your platform and 
-                become part of the $CFOX family today!
+                become part of the $CRFX family today!
               </p>
               <div className={styles.ctaButtons}>
                 <motion.button

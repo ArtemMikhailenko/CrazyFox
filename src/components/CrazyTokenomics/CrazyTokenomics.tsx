@@ -48,7 +48,7 @@ const CrazyTokenomics = () => {
     address: "0x742d35Cc7cF66f5e8f20A4C1b8c4A6b8b4E6F5d1C2",
     totalSupply: "1,000,000,000",
     network: "Binance Smart Chain",
-    symbol: "$CFOX",
+    symbol: "$CRFX",
     taxes: {
       buy: 5,
       sell: 5,
@@ -262,7 +262,7 @@ const CrazyTokenomics = () => {
             <div className={styles.contractInfo}>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Total Supply:</span>
-                <span className={styles.infoValue}>{contractDetails.totalSupply} $CFOX</span>
+                <span className={styles.infoValue}>{contractDetails.totalSupply} $CRFX</span>
               </div>
               <div className={styles.infoItem}>
                 <span className={styles.infoLabel}>Network:</span>

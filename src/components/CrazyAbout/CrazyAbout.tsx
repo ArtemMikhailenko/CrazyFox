@@ -19,7 +19,7 @@ const CrazyAbout = () => {
       icon: '💎', 
       title: 'Diamond Hands', 
       desc: 'Strong tokenomics designed to reward long-term holders and punish paper hands.',
-      longDesc: 'Our innovative reflection mechanism rewards holders with passive income. The longer you hold, the more $CFOX tokens you earn automatically. Diamond hands are rewarded, paper hands pay the price.',
+      longDesc: 'Our innovative reflection mechanism rewards holders with passive income. The longer you hold, the more $CRFX tokens you earn automatically. Diamond hands are rewarded, paper hands pay the price.',
       color: '#4ECDC4',
       bgGradient: 'linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%)'
     },
@@ -34,7 +34,7 @@ const CrazyAbout = () => {
     { 
       icon: '🦊', 
       title: 'Crazy Utility', 
-      desc: 'NFTs, games, and DeFi integration coming soon to add real utility to $CFOX.',
+      desc: 'NFTs, games, and DeFi integration coming soon to add real utility to $CRFX.',
       longDesc: 'CrazyFox NFT collection, Play-to-Earn gaming ecosystem, staking pools, and our own DEX. Real utility that goes beyond just being a meme coin.',
       color: '#FECA57',
       bgGradient: 'linear-gradient(135deg, #FECA57 0%, #FF9FF3 100%)'

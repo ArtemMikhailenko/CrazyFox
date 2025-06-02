@@ -463,7 +463,7 @@ export const FEATURES_DATA = [
   {
     icon: '🦊',
     title: 'Crazy Utility',
-    description: 'NFTs, games, and DeFi integration coming soon to add real utility to $CFOX.',
+    description: 'NFTs, games, and DeFi integration coming soon to add real utility to $CRFX.',
     color: '#96CEB4',
   },
 ];
