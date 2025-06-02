@@ -31,7 +31,7 @@ import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
 import CrazyRoadmapMap from '@/components/CrazyRoadmap/CrazyRoadmap';
 
 // Contract address
-const CONTRACT_ADDRESS = "0x742d35Cc7cF66f5e8f20A4C1b8c4A6b8b4E6F5d1C2";
+const CONTRACT_ADDRESS = "0x874641647B9d8a8d991c541BBD48bD597b85aE33";
 
 // Animation variants
 const containerVariants = {
