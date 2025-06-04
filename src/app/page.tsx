@@ -1,37 +1,51 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
-
-// Ethereum provider types
-interface EthereumProvider {
-  isMetaMask?: boolean;
-  isTrust?: boolean;
-  request: (args: { method: string; params?: any[] }) => Promise<any>;
-  on: (event: string, callback: (accounts: string[]) => void) => void;
-  removeListener: (event: string, callback: (accounts: string[]) => void) => void;
-}
-
-declare global {
-  interface Window {
-    ethereum?: EthereumProvider;
-  }
-}
 import Head from 'next/head';
 import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
 import { Particles } from 'react-tsparticles';
 import { loadSlim } from 'tsparticles-slim';
-
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import confetti from 'canvas-confetti';
+
+// ThirdWeb v5 imports
+import { 
+  ThirdwebProvider, 
+  ConnectButton, 
+  useActiveAccount,
+  useReadContract,
+  useSendTransaction,
+  useWalletBalance
+} from "thirdweb/react";
+import { createThirdwebClient, defineChain } from "thirdweb";
+import { prepareContractCall, getContract } from "thirdweb";
+import { bsc } from "thirdweb/chains";
+
 import styles from './page.module.css';
 import CrazyTokenomics from '@/components/CrazyTokenomics/CrazyTokenomics';
 import CrazyAbout from '@/components/CrazyAbout/CrazyAbout';
 import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
 import CrazyRoadmapMap from '@/components/CrazyRoadmap/CrazyRoadmap';
 
-// Contract address
-const CONTRACT_ADDRESS = "0x874641647B9d8a8d991c541BBD48bD597b85aE33";
+// ThirdWeb client configuration
+const client = createThirdwebClient({
+  clientId: "d28d89a66e8eb5e73d6a9c8eeaa0645a" // Замените на ваш Client ID
+});
+
+// Contract addresses
+const TOKEN_CONTRACT_ADDRESS = "0x874641647B9d8a8d991c541BBD48bD597b85aE33";
+const PRESALE_CONTRACT_ADDRESS = "0x..."; // Ваш контракт для пресейла
+
+// Token price in USD
+const TOKEN_PRICE_USD = 0.005;
+
+// Contract instances
+const presaleContract = getContract({
+  client,
+  chain: bsc,
+  address: PRESALE_CONTRACT_ADDRESS,
+});
 
 // Animation variants
 const containerVariants = {
@@ -94,188 +108,173 @@ const useTypewriter = (text: string, speed: number = 50) => {
   return { displayedText, isComplete };
 };
 
-// Wallet Connection Hook with multiple wallet support
-const useWallet = () => {
-  const [isConnected, setIsConnected] = useState(false);
-  const [address, setAddress] = useState('');
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [walletType, setWalletType] = useState('');
-  const [showWalletModal, setShowWalletModal] = useState(false);
+// Buy Token Component for ThirdWeb v5
+const BuyTokenComponent = () => {
+  const account = useActiveAccount();
+  const { mutate: sendTransaction, isPending } = useSendTransaction();
+  const [buyAmount, setBuyAmount] = useState('1');
+  const [showBuyModal, setShowBuyModal] = useState(false);
 
-  const connectMetaMask = async () => {
-    if (typeof window !== 'undefined' && !window.ethereum) {
-      toast.error('MetaMask is not installed! Please install MetaMask first.');
-      window.open('https://metamask.io/download/', '_blank');
+  // Read presale info
+  const { data: presaleInfo } = useReadContract({
+    contract: presaleContract,
+    method: "getPresaleInfo",
+    params: []
+  });
+
+  // Read user info
+  const { data: userInfo } = useReadContract({
+    contract: presaleContract,
+    method: "getUserInfo",
+    params: [account?.address || ""]
+  });
+
+  const calculateTokenAmount = (bnbAmount: string) => {
+    const bnbValue = parseFloat(bnbAmount);
+    // Предполагаем курс BNB к USD (в реальном приложении получайте с API)
+    const BNB_TO_USD = 300; // Примерный курс
+    const usdValue = bnbValue * BNB_TO_USD;
+    return Math.floor(usdValue / TOKEN_PRICE_USD);
+  };
+
+  const handleBuyTokens = async () => {
+    if (!account) {
+      toast.error('Please connect your wallet first!');
       return;
     }
 
-    if (!window.ethereum) return;
-
-    setIsConnecting(true);
     try {
-      // Request BSC network if not already connected
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: '0x38' }], // BSC Mainnet
-        });
-      } catch (switchError: any) {
-        // Network not added, add it
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: '0x38',
-              chainName: 'Binance Smart Chain',
-              nativeCurrency: {
-                name: 'BNB',
-                symbol: 'BNB',
-                decimals: 18,
-              },
-              rpcUrls: ['https://bsc-dataseed.binance.org/'],
-              blockExplorerUrls: ['https://bscscan.com/'],
-            }],
-          });
-        }
-      }
+      const transaction = prepareContractCall({
+        contract: presaleContract,
+        //@ts-ignore
+        method: "buyTokens",
+        params: [],
+        value: BigInt(parseFloat(buyAmount) * 10**18) // Convert to wei
+      });
 
-      const accounts = await window.ethereum.request({
-        method: 'eth_requestAccounts',
+      await sendTransaction(transaction);
+
+      confetti({
+        particleCount: 200,
+        spread: 100,
+        origin: { y: 0.8 }
       });
       
-      if (accounts.length > 0) {
-        setAddress(accounts[0]);
-        setIsConnected(true);
-        setWalletType('MetaMask');
-        setShowWalletModal(false);
-        toast.success('MetaMask connected successfully! 🦊');
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      }
+      toast.success(`Successfully bought ${calculateTokenAmount(buyAmount).toLocaleString()} CRFX tokens! 🚀`);
+      setShowBuyModal(false);
+      setBuyAmount('1');
     } catch (error) {
-      console.error('Failed to connect MetaMask:', error);
-      toast.error('Failed to connect MetaMask');
-    } finally {
-      setIsConnecting(false);
+      console.error('Error buying tokens:', error);
+      toast.error('Failed to buy tokens. Please try again.');
     }
   };
 
-  const connectWalletConnect = async () => {
-    toast.info('WalletConnect integration coming soon! 🚀');
-    setShowWalletModal(false);
-  };
+  return (
+    <>
+      <motion.button
+        className={`${styles.primaryButton} ${!account ? styles.disabled : ''}`}
+        onClick={() => account ? setShowBuyModal(true) : toast.warning('Please connect your wallet first! 🦊')}
+        whileHover={account ? { scale: 1.05 } : {}}
+        whileTap={account ? { scale: 0.95 } : {}}
+      >
+        <span>🚀 Buy $CRFX Now</span>
+      </motion.button>
 
-  const connectTrustWallet = async () => {
-    if (typeof window !== 'undefined' && window.ethereum?.isTrust) {
-      setIsConnecting(true);
-      try {
-        const accounts = await window.ethereum.request({
-          method: 'eth_requestAccounts',
-        });
-        
-        if (accounts.length > 0) {
-          setAddress(accounts[0]);
-          setIsConnected(true);
-          setWalletType('Trust Wallet');
-          setShowWalletModal(false);
-          toast.success('Trust Wallet connected successfully! 🦊');
-          confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 }
-          });
-        }
-      } catch (error) {
-        console.error('Failed to connect Trust Wallet:', error);
-        toast.error('Failed to connect Trust Wallet');
-      } finally {
-        setIsConnecting(false);
-      }
-    } else {
-      toast.error('Trust Wallet not detected!');
-      window.open('https://trustwallet.com/download', '_blank');
-    }
-  };
+      {/* Buy Modal */}
+      <AnimatePresence>
+        {showBuyModal && (
+          <motion.div 
+            className={styles.modalOverlay}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setShowBuyModal(false)}
+          >
+            <motion.div 
+              className={styles.buyModal}
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.8, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className={styles.modalHeader}>
+                <h3>Buy CRFX Tokens</h3>
+                <button 
+                  className={styles.closeButton}
+                  onClick={() => setShowBuyModal(false)}
+                >
+                  ✕
+                </button>
+              </div>
+              
+              <div className={styles.buyContent}>
+                <div className={styles.priceInfo}>
+                  <div className={styles.tokenPrice}>
+                    <span className={styles.priceLabel}>Token Price:</span>
+                    <span className={styles.priceValue}>${TOKEN_PRICE_USD}</span>
+                  </div>
+                </div>
 
-  const disconnectWallet = () => {
-    setIsConnected(false);
-    setAddress('');
-    setWalletType('');
-    toast.info('Wallet disconnected');
-  };
+                <div className={styles.buyForm}>
+                  <div className={styles.inputGroup}>
+                    <label>Amount (BNB)</label>
+                    <input
+                      type="number"
+                      value={buyAmount}
+                      onChange={(e) => setBuyAmount(e.target.value)}
+                      min="0.001"
+                      step="0.001"
+                      placeholder="Enter BNB amount"
+                    />
+                  </div>
 
-  const formatAddress = (addr: string) => {
-    if (!addr) return '';
-    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-  };
+                  <div className={styles.conversionInfo}>
+                    <div className={styles.conversion}>
+                      <span>You will receive:</span>
+                      <span className={styles.tokenAmount}>
+                        ~{calculateTokenAmount(buyAmount).toLocaleString()} CRFX
+                      </span>
+                    </div>
+                  </div>
 
-  // Check if wallet is already connected
-  useEffect(() => {
-    const checkConnection = async () => {
-      if (typeof window !== 'undefined' && window.ethereum) {
-        try {
-          const accounts = await window.ethereum.request({
-            method: 'eth_accounts',
-          });
-          if (accounts.length > 0) {
-            setAddress(accounts[0]);
-            setIsConnected(true);
-            if (window.ethereum.isMetaMask) {
-              setWalletType('MetaMask');
-            } else if (window.ethereum.isTrust) {
-              setWalletType('Trust Wallet');
-            }
-          }
-        } catch (error) {
-          console.error('Error checking wallet connection:', error);
-        }
-      }
-    };
-    checkConnection();
+                  <div className={styles.buyActions}>
+                    <motion.button
+                      className={styles.cancelButton}
+                      onClick={() => setShowBuyModal(false)}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      Cancel
+                    </motion.button>
+                    
+                    <motion.button
+                      className={styles.confirmBuyButton}
+                      onClick={handleBuyTokens}
+                      disabled={isPending || !buyAmount || parseFloat(buyAmount) <= 0}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      {isPending ? (
+                        <span>🔄 Buying...</span>
+                      ) : (
+                        <span>🚀 Buy Tokens</span>
+                      )}
+                    </motion.button>
+                  </div>
+                </div>
 
-    // Listen for account changes
-    if (typeof window !== 'undefined' && window.ethereum) {
-      const handleAccountsChanged = (accounts: string[]) => {
-        if (accounts.length === 0) {
-          disconnectWallet();
-        } else {
-          setAddress(accounts[0]);
-        }
-      };
-
-      const handleChainChanged = () => {
-        window.location.reload();
-      };
-
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-
-      // Cleanup
-      return () => {
-        if (window.ethereum) {
-          window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-          window.ethereum.removeListener('chainChanged', handleChainChanged);
-        }
-      };
-    }
-  }, []);
-
-  return {
-    isConnected,
-    address,
-    isConnecting,
-    walletType,
-    showWalletModal,
-    setShowWalletModal,
-    connectMetaMask,
-    connectWalletConnect,
-    connectTrustWallet,
-    disconnectWallet,
-    formatAddress
-  };
+                <div className={styles.buyFooter}>
+                  <p className={styles.disclaimer}>
+                    ⚠️ Please ensure you have enough BNB for gas fees
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </>
+  );
 };
 
 // Music Player Component
@@ -311,7 +310,7 @@ const MusicPlayer = () => {
 };
 
 // Main Home Component
-export default function Home() {
+const HomeContent = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const [showStats, setShowStats] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -319,20 +318,7 @@ export default function Home() {
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
-  // Wallet hook
-  const {
-    isConnected,
-    address,
-    isConnecting,
-    walletType,
-    showWalletModal,
-    setShowWalletModal,
-    connectMetaMask,
-    connectWalletConnect,
-    connectTrustWallet,
-    disconnectWallet,
-    formatAddress
-  } = useWallet();
+  const account = useActiveAccount();
 
   // Typewriter effect for hero title
   const { displayedText: heroText, isComplete: heroComplete } = useTypewriter(
@@ -343,7 +329,7 @@ export default function Home() {
   const holdersCount = useAnimatedCounter(1000, 3000, showStats);
   const marketCapCount = useAnimatedCounter(50, 3000, showStats);
   const communityCount = useAnimatedCounter(280000, 3000, showStats);
-  const raisedAmount = useAnimatedCounter(262736, 3000, showStats); // Новый счетчик для собранной суммы
+  const raisedAmount = useAnimatedCounter(262736, 3000, showStats);
 
   // Mouse tracking
   useEffect(() => {
@@ -415,24 +401,265 @@ export default function Home() {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Buy button handler
-  const handleBuyClick = () => {
-    if (!isConnected) {
-      toast.warning('Please connect your wallet first! 🦊');
-      return;
-    }
-    confetti({
-      particleCount: 200,
-      spread: 100,
-      origin: { y: 0.8 }
-    });
-    toast.success('Redirecting to buy $CRFX! 🚀', { theme: "dark" });
-  };
-
   useEffect(() => {
     setIsLoaded(true);
   }, []);
 
+  return (
+    <div className={styles.container}>
+      {/* Progress Bar */}
+      <motion.div className={styles.progressBar} style={{ scaleX }} />
+
+      {/* Cursor Follower */}
+      <motion.div
+        className={styles.cursorFollower}
+        animate={{
+          x: mousePosition.x - 10,
+          y: mousePosition.y - 10,
+        }}
+        transition={{ type: "spring", stiffness: 500, damping: 28 }}
+      />
+
+      {/* Background Particles */}
+      <Particles
+        id="tsparticles"
+        init={particlesInit}
+        //@ts-ignore
+        options={particlesConfig}
+        className={styles.particles}
+      />
+
+      {/* Music Player */}
+      <MusicPlayer />
+
+      {/* Navigation */}
+      <motion.nav 
+        className={styles.nav}
+        initial={{ y: -100 }}
+        animate={{ y: 0 }}
+        transition={{ duration: 0.8, ease: "easeOut" }}
+      >
+        <div className={styles.navContainer}>
+          <motion.div 
+            className={styles.logo}
+            whileHover={{ scale: 1.1, rotate: 10 }}
+          >
+           <img src="/fox.png" alt="" />
+          </motion.div>
+          
+          <div className={styles.navLinks}>
+            {['hero', 'about', 'tokenomics', 'roadmap', 'community'].map((section) => (
+              <motion.button
+                key={section}
+                onClick={() => scrollToSection(section)}
+                className={`${styles.navLink} ${activeSection === section ? styles.active : ''}`}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                {section.charAt(0).toUpperCase() + section.slice(1)}
+              </motion.button>
+            ))}
+          </div>
+
+          <div className={styles.navActions}>
+            <ConnectButton 
+              client={client}
+              theme="dark"
+              connectModal={{
+                size: "wide",
+                title: "Connect to CrazyFox",
+                welcomeScreen: {
+                  title: "Welcome to CrazyFox",
+                  subtitle: "Connect your wallet to start buying CRFX tokens",
+                },
+              }}
+            />
+          </div>
+        </div>
+      </motion.nav>
+
+      {/* Hero Section */}
+      <motion.section 
+        id="hero" 
+        className={styles.hero}
+        variants={containerVariants}
+        initial="hidden"
+        animate={isLoaded ? "visible" : "hidden"}
+      >
+        <div className={styles.heroContent}>
+          <motion.div className={styles.heroText} variants={itemVariants}>
+            <motion.h1 className={styles.heroTitle}>
+              {heroText}
+              {!heroComplete && <span className={styles.cursor}>|</span>}
+            </motion.h1>
+            
+            <motion.p 
+              className={styles.heroSubtitle}
+              variants={itemVariants}
+            >
+              The wildest meme coin on Binance Smart Chain that's ready to take you to the moon! 
+              Join our crazy community and experience the fox-tastic journey!
+            </motion.p>
+
+            <motion.div 
+              className={styles.heroButtons}
+              variants={itemVariants}
+            >
+              <BuyTokenComponent />
+              <motion.button
+                className={styles.secondaryButton}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span>📊 Chart</span>
+              </motion.button>
+            </motion.div>
+
+            {/* Raised Amount Display */}
+            <motion.div 
+              className={styles.raisedAmount}
+              variants={itemVariants}
+            >
+              <div className={styles.raisedContainer}>
+                <div className={styles.raisedIcon}>💰</div>
+                <div className={styles.raisedContent}>
+                  <div className={styles.raisedLabel}>Total Raised</div>
+                  <motion.div 
+                    className={styles.raisedNumber}
+                    initial={{ scale: 0.8 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 1.6, type: "spring", stiffness: 200 }}
+                  >
+                    ${raisedAmount.toLocaleString()}.92
+                  </motion.div>
+                  <div className={styles.raisedProgress}>
+                    <div className={styles.progressBar}>
+                      <motion.div 
+                        className={styles.progressFill}
+                        initial={{ width: 0 }}
+                        animate={{ width: "73%" }}
+                        transition={{ delay: 2, duration: 2, ease: "easeOut" }}
+                      />
+                    </div>
+                    <div className={styles.progressText}>73% of soft cap reached</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+
+            <motion.div 
+              className={styles.stats}
+              variants={itemVariants}
+            >
+              <div className={styles.stat}>
+                <motion.span 
+                  className={styles.statNumber}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1 }}
+                >
+                  {holdersCount.toLocaleString()}+
+                </motion.span>
+                <span className={styles.statLabel}>Holders</span>
+              </div>
+              <div className={styles.stat}>
+                <motion.span 
+                  className={styles.statNumber}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.2 }}
+                >
+                  ${marketCapCount}K+
+                </motion.span>
+                <span className={styles.statLabel}>Market Cap</span>
+              </div>
+              <div className={styles.stat}>
+                <motion.span 
+                  className={styles.statNumber}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 1.4 }}
+                >
+                  {communityCount.toLocaleString()}+
+                </motion.span>
+                <span className={styles.statLabel}>Community</span>
+              </div>
+            </motion.div>
+          </motion.div>
+
+          <motion.div 
+            className={styles.heroImage}
+            variants={itemVariants}
+          >
+            <div className={styles.canvasContainer}>
+              <img src="/fox-full.png" alt="" />
+            </div>
+          </motion.div>
+        </div>
+      </motion.section>
+
+      {/* Other Sections */}
+      <motion.section 
+        id="about" 
+        className={styles.about}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <CrazyAbout/>
+      </motion.section>
+
+      <motion.section 
+        id="tokenomics" 
+        className={styles.tokenomics}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+       <CrazyTokenomics/>
+      </motion.section>
+
+      <motion.section 
+        id="roadmap" 
+        className={styles.roadmap}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <CrazyRoadmapMap/>
+      </motion.section>
+
+      <motion.section 
+        id="community" 
+        className={styles.community}
+        transition={{ duration: 0.8 }}
+        viewport={{ once: true }}
+      >
+        <CrazyCommunity/>
+      </motion.section>
+
+      {/* Toast Container */}
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+      />
+    </div>
+  );
+};
+
+// Main Export with ThirdWeb Provider
+export default function Home() {
   return (
     <>
       <Head>
@@ -441,368 +668,9 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className={styles.container}>
-        {/* Progress Bar */}
-        <motion.div className={styles.progressBar} style={{ scaleX }} />
-
-        {/* Cursor Follower */}
-        <motion.div
-          className={styles.cursorFollower}
-          animate={{
-            x: mousePosition.x - 10,
-            y: mousePosition.y - 10,
-          }}
-          transition={{ type: "spring", stiffness: 500, damping: 28 }}
-        />
-
-        {/* Background Particles */}
-        <Particles
-          id="tsparticles"
-          init={particlesInit}
-          //@ts-ignore
-          options={particlesConfig}
-          className={styles.particles}
-        />
-
-        {/* Music Player */}
-        <MusicPlayer />
-
-        {/* Wallet Modal */}
-        <AnimatePresence>
-          {showWalletModal && (
-            <motion.div 
-              className={styles.modalOverlay}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={() => setShowWalletModal(false)}
-            >
-              <motion.div 
-                className={styles.walletModal}
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                onClick={(e) => e.stopPropagation()}
-              >
-                <div className={styles.modalHeader}>
-                  <h3>Connect Your Wallet</h3>
-                  <button 
-                    className={styles.closeButton}
-                    onClick={() => setShowWalletModal(false)}
-                  >
-                    ✕
-                  </button>
-                </div>
-                
-                <div className={styles.walletOptions}>
-                  <motion.button
-                    className={styles.walletOption}
-                    onClick={connectMetaMask}
-                    disabled={isConnecting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className={styles.walletIcon}>🦊</div>
-                    <div className={styles.walletInfo}>
-                      <h4>MetaMask</h4>
-                      <p>Connect using browser wallet</p>
-                    </div>
-                  </motion.button>
-
-                  <motion.button
-                    className={styles.walletOption}
-                    onClick={connectTrustWallet}
-                    disabled={isConnecting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className={styles.walletIcon}>🔷</div>
-                    <div className={styles.walletInfo}>
-                      <h4>Trust Wallet</h4>
-                      <p>Connect using Trust Wallet</p>
-                    </div>
-                  </motion.button>
-
-                  <motion.button
-                    className={styles.walletOption}
-                    onClick={connectWalletConnect}
-                    disabled={isConnecting}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                  >
-                    <div className={styles.walletIcon}>🔗</div>
-                    <div className={styles.walletInfo}>
-                      <h4>WalletConnect</h4>
-                      <p>Scan QR code with mobile wallet</p>
-                    </div>
-                  </motion.button>
-                </div>
-
-                <div className={styles.modalFooter}>
-                  <p>New to wallets? <a href="https://ethereum.org/en/wallets/" target="_blank" rel="noopener noreferrer">Learn more</a></p>
-                </div>
-              </motion.div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
-        {/* Navigation */}
-        <motion.nav 
-          className={styles.nav}
-          initial={{ y: -100 }}
-          animate={{ y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-        >
-          <div className={styles.navContainer}>
-            <motion.div 
-              className={styles.logo}
-              whileHover={{ scale: 1.1, rotate: 10 }}
-            >
-             <img src="/fox.png" alt="" />
-            </motion.div>
-            
-            <div className={styles.navLinks}>
-              {['hero', 'about', 'tokenomics', 'roadmap', 'community'].map((section) => (
-                <motion.button
-                  key={section}
-                  onClick={() => scrollToSection(section)}
-                  className={`${styles.navLink} ${activeSection === section ? styles.active : ''}`}
-                  whileHover={{ scale: 1.1 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {section.charAt(0).toUpperCase() + section.slice(1)}
-                </motion.button>
-              ))}
-            </div>
-
-            <div className={styles.navActions}>
-              {/* Wallet Connection Button */}
-              <motion.button
-                className={`${styles.walletButton} ${isConnected ? styles.connected : ''}`}
-                onClick={isConnected ? disconnectWallet : () => setShowWalletModal(true)}
-                disabled={isConnecting}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {isConnecting ? (
-                  <span>🔄 Connecting...</span>
-                ) : isConnected ? (
-                  <span>
-                    <span className={styles.walletIcon}>
-                      {walletType === 'MetaMask' ? '🦊' : walletType === 'Trust Wallet' ? '🔷' : '🔗'}
-                    </span>
-                    <span className={styles.walletAddress}>{formatAddress(address)}</span>
-                  </span>
-                ) : (
-                  <span>
-                    <span className={styles.walletIcon}>🔗</span>
-                    <span className={styles.walletText}>Connect Wallet</span>
-                  </span>
-                )}
-              </motion.button>
-
-              {/* Buy Button */}
-              <motion.button
-                className={`${styles.buyButton} ${!isConnected ? styles.disabled : ''}`}
-                onClick={handleBuyClick}
-                whileHover={isConnected ? { scale: 1.05, boxShadow: "0 0 25px #FF6B35" } : {}}
-                whileTap={isConnected ? { scale: 0.95 } : {}}
-              >
-                🚀 Buy $CRFX
-              </motion.button>
-            </div>
-          </div>
-        </motion.nav>
-
-        {/* Hero Section */}
-        <motion.section 
-          id="hero" 
-          className={styles.hero}
-          variants={containerVariants}
-          initial="hidden"
-          animate={isLoaded ? "visible" : "hidden"}
-        >
-          <div className={styles.heroContent}>
-            <motion.div className={styles.heroText} variants={itemVariants}>
-              <motion.h1 className={styles.heroTitle}>
-                {heroText}
-                {!heroComplete && <span className={styles.cursor}>|</span>}
-              </motion.h1>
-              
-              <motion.p 
-                className={styles.heroSubtitle}
-                variants={itemVariants}
-              >
-                The wildest meme coin on Binance Smart Chain that's ready to take you to the moon! 
-                Join our crazy community and experience the fox-tastic journey!
-              </motion.p>
-
-              <motion.div 
-                className={styles.heroButtons}
-                variants={itemVariants}
-              >
-                <motion.button
-                  className={`${styles.primaryButton} ${!isConnected ? styles.disabled : ''}`}
-                  onClick={handleBuyClick}
-                  whileHover={isConnected ? { scale: 1.05 } : {}}
-                  whileTap={isConnected ? { scale: 0.95 } : {}}
-                >
-                  <span>🚀 Buy $CRFX Now</span>
-                </motion.button>
-                <motion.button
-                  className={styles.secondaryButton}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span>📊 Chart</span>
-                </motion.button>
-              </motion.div>
-
-              {/* Raised Amount Display */}
-              <motion.div 
-                className={styles.raisedAmount}
-                variants={itemVariants}
-              >
-                <div className={styles.raisedContainer}>
-                  <div className={styles.raisedIcon}>💰</div>
-                  <div className={styles.raisedContent}>
-                    <div className={styles.raisedLabel}>Total Raised</div>
-                    <motion.div 
-                      className={styles.raisedNumber}
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      transition={{ delay: 1.6, type: "spring", stiffness: 200 }}
-                    >
-                      ${raisedAmount.toLocaleString()}.92
-                    </motion.div>
-                    <div className={styles.raisedProgress}>
-                      <div className={styles.progressBar}>
-                        <motion.div 
-                          className={styles.progressFill}
-                          initial={{ width: 0 }}
-                          animate={{ width: "73%" }}
-                          transition={{ delay: 2, duration: 2, ease: "easeOut" }}
-                        />
-                      </div>
-                      <div className={styles.progressText}>73% of soft cap reached</div>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-
-              <motion.div 
-                className={styles.stats}
-                variants={itemVariants}
-              >
-                <div className={styles.stat}>
-                  <motion.span 
-                    className={styles.statNumber}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1 }}
-                  >
-                    {holdersCount.toLocaleString()}+
-                  </motion.span>
-                  <span className={styles.statLabel}>Holders</span>
-                </div>
-                <div className={styles.stat}>
-                  <motion.span 
-                    className={styles.statNumber}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.2 }}
-                  >
-                    ${marketCapCount}K+
-                  </motion.span>
-                  <span className={styles.statLabel}>Market Cap</span>
-                </div>
-                <div className={styles.stat}>
-                  <motion.span 
-                    className={styles.statNumber}
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ delay: 1.4 }}
-                  >
-                    {communityCount.toLocaleString()}+
-                  </motion.span>
-                  <span className={styles.statLabel}>Community</span>
-                </div>
-              </motion.div>
-            </motion.div>
-
-            <motion.div 
-              className={styles.heroImage}
-              variants={itemVariants}
-            >
-              <div className={styles.canvasContainer}>
-                <img src="/fox-full.png" alt="" />
-              </div>
-            </motion.div>
-          </div>
-
-        </motion.section>
-
-        {/* About Section */}
-        <motion.section 
-          id="about" 
-          className={styles.about}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-        <CrazyAbout/>
-        </motion.section>
-
-        {/* Tokenomics Section */}
-        <motion.section 
-          id="tokenomics" 
-          className={styles.tokenomics}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-         <CrazyTokenomics/>
-        </motion.section>
-
-        {/* Interactive Roadmap */}
-        <motion.section 
-          id="roadmap" 
-          className={styles.roadmap}
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <CrazyRoadmapMap/>
-        </motion.section>
-
-        {/* Community Section */}
-        <motion.section 
-          id="community" 
-          className={styles.community}
-         
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <CrazyCommunity/>
-        </motion.section>
-
-        {/* Toast Container */}
-        <ToastContainer
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="dark"
-        />
-      </div>
+      <ThirdwebProvider>
+        <HomeContent />
+      </ThirdwebProvider>
     </>
   );
 }
