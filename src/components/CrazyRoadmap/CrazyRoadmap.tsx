@@ -53,9 +53,9 @@ const keyframes = `
 const styles: { [key: string]: React.CSSProperties } = {
   galaxy: {
     minHeight: '100vh',
-    background: 'radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)',
+    // background: 'radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)',
     position: 'relative' as const,
-    overflow: 'hidden' as const,
+    // overflow: 'hidden' as const,
     fontFamily: '"Orbitron", monospace'
   },
   

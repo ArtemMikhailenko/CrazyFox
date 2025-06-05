@@ -733,10 +733,7 @@
   background-clip: text;
 }
 
-/* About Section */
-.about {
-  background: linear-gradient(135deg, #1a1f3a 0%, #2d1b3d 100%);
-}
+
 
 .features {
   display: grid;
@@ -778,7 +775,7 @@
 
 /* Tokenomics Section */
 .tokenomics {
-  background: linear-gradient(135deg, #0a0e1e 0%, #1a1f3a 100%);
+  /* background: linear-gradient(135deg, #0a0e1e 0%, #1a1f3a 100%); */
 }
 
 .tokenomicsContent {
@@ -861,7 +858,7 @@
 
 /* Roadmap Section */
 .roadmap {
-  background: linear-gradient(135deg, #2d1b3d 0%, #1a1f3a 100%);
+  /* background: linear-gradient(135deg, #2d1b3d 0%, #1a1f3a 100%); */
 }
 
 .roadmapTimeline {
@@ -926,7 +923,7 @@
 
 /* Community Section */
 .community {
-  background: linear-gradient(135deg, #1a1f3a 0%, #0a0e1e 100%);
+  /* background: linear-gradient(135deg, #1a1f3a 0%, #0a0e1e 100%); */
   text-align: center;
 }
 

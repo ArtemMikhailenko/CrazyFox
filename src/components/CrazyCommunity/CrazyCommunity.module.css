@@ -3,7 +3,7 @@
 .communityWrapper {
     position: relative;
     min-height: 100vh;
-    background: linear-gradient(135deg, #2d1b3d 0%, #1a1f3a 100%);
+    /* background: linear-gradient(135deg, #2d1b3d 0%, #1a1f3a 100%); */
     overflow: hidden;
     padding: 100px 0;
   }

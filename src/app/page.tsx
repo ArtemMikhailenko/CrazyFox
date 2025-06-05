@@ -1,3 +1,4 @@
+// pages/index.tsx или app/page.tsx
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
@@ -12,7 +13,6 @@ import confetti from 'canvas-confetti';
 // ThirdWeb v5 imports
 import { 
   ThirdwebProvider, 
-  ConnectButton, 
   useActiveAccount,
   useReadContract,
   useSendTransaction,
@@ -22,11 +22,14 @@ import { createThirdwebClient, defineChain } from "thirdweb";
 import { prepareContractCall, getContract } from "thirdweb";
 import { bsc } from "thirdweb/chains";
 
-import styles from './page.module.css';
+// Components
+import Header from '@/components/Header/Header';
 import CrazyTokenomics from '@/components/CrazyTokenomics/CrazyTokenomics';
 import CrazyAbout from '@/components/CrazyAbout/CrazyAbout';
 import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
 import CrazyRoadmapMap from '@/components/CrazyRoadmap/CrazyRoadmap';
+
+import styles from './page.module.css';
 
 // ThirdWeb client configuration
 const client = createThirdwebClient({
@@ -410,6 +413,12 @@ const HomeContent = () => {
       {/* Progress Bar */}
       <motion.div className={styles.progressBar} style={{ scaleX }} />
 
+      {/* Header Component */}
+      <Header 
+        activeSection={activeSection}
+        scrollToSection={scrollToSection}
+      />
+
       {/* Cursor Follower */}
       <motion.div
         className={styles.cursorFollower}
@@ -431,52 +440,6 @@ const HomeContent = () => {
 
       {/* Music Player */}
       <MusicPlayer />
-
-      {/* Navigation */}
-      <motion.nav 
-        className={styles.nav}
-        initial={{ y: -100 }}
-        animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
-      >
-        <div className={styles.navContainer}>
-          <motion.div 
-            className={styles.logo}
-            whileHover={{ scale: 1.1, rotate: 10 }}
-          >
-           <img src="/fox.png" alt="" />
-          </motion.div>
-          
-          <div className={styles.navLinks}>
-            {['hero', 'about', 'tokenomics', 'roadmap', 'community'].map((section) => (
-              <motion.button
-                key={section}
-                onClick={() => scrollToSection(section)}
-                className={`${styles.navLink} ${activeSection === section ? styles.active : ''}`}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {section.charAt(0).toUpperCase() + section.slice(1)}
-              </motion.button>
-            ))}
-          </div>
-
-          <div className={styles.navActions}>
-            <ConnectButton 
-              client={client}
-              theme="dark"
-              connectModal={{
-                size: "wide",
-                title: "Connect to CrazyFox",
-                welcomeScreen: {
-                  title: "Welcome to CrazyFox",
-                  subtitle: "Connect your wallet to start buying CRFX tokens",
-                },
-              }}
-            />
-          </div>
-        </div>
-      </motion.nav>
 
       {/* Hero Section */}
       <motion.section 
@@ -510,6 +473,7 @@ const HomeContent = () => {
                 className={styles.secondaryButton}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
+                onClick={() => window.open('https://dexscreener.com/bsc/your-token-address', '_blank')}
               >
                 <span>📊 Chart</span>
               </motion.button>
@@ -533,7 +497,7 @@ const HomeContent = () => {
                     ${raisedAmount.toLocaleString()}.92
                   </motion.div>
                   <div className={styles.raisedProgress}>
-                    <div className={styles.progressBar}>
+                    <div className={styles.progressBarContainer}>
                       <motion.div 
                         className={styles.progressFill}
                         initial={{ width: 0 }}
@@ -592,7 +556,12 @@ const HomeContent = () => {
             variants={itemVariants}
           >
             <div className={styles.canvasContainer}>
-              <img src="/fox-full.png" alt="" />
+              <motion.img 
+                src="/fox-full.png" 
+                alt="CrazyFox Hero"
+                whileHover={{ scale: 1.05, rotate: 5 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              />
             </div>
           </motion.div>
         </div>
@@ -664,8 +633,19 @@ export default function Home() {
     <>
       <Head>
         <title>CrazyFox | The Wildest Meme Coin on BSC 🦊</title>
-        <meta name="description" content="Join the CrazyFox revolution! The most exciting meme coin on Binance Smart Chain." />
+        <meta name="description" content="Join the CrazyFox revolution! The most exciting meme coin on Binance Smart Chain with locked liquidity and moon mission." />
+        <meta name="keywords" content="CrazyFox, CRFX, meme coin, BSC, cryptocurrency, DeFi, moon mission" />
+        <meta property="og:title" content="CrazyFox | The Wildest Meme Coin on BSC 🦊" />
+        <meta property="og:description" content="Join the CrazyFox revolution! 65% liquidity locked forever, aggressive marketing, and moon mission ready!" />
+        <meta property="og:image" content="/fox-full.png" />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="CrazyFox | The Wildest Meme Coin on BSC 🦊" />
+        <meta name="twitter:description" content="Join the CrazyFox revolution! The most secure and exciting meme coin on BSC." />
+        <meta name="twitter:image" content="/fox-full.png" />
         <link rel="icon" href="/favicon.ico" />
+        <link rel="apple-touch-icon" href="/fox.png" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       </Head>
 
       <ThirdwebProvider>

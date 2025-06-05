@@ -1,7 +1,7 @@
 /* CrazyAbout.module.css */
 
 .aboutSection {
-    background: linear-gradient(135deg, #2d1b3d 0%, #1a1f3a 100%);
+    /* background: linear-gradient(135deg, #2d1b3d 0%, #1a1f3a 100%); */
     position: relative;
     overflow: hidden;
     min-height: 100vh;
