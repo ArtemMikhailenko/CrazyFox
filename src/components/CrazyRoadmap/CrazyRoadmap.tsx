@@ -53,9 +53,7 @@ const keyframes = `
 const styles: { [key: string]: React.CSSProperties } = {
   galaxy: {
     minHeight: '100vh',
-    // background: 'radial-gradient(ellipse at center, #1a1a2e 0%, #16213e 50%, #0f0f23 100%)',
     position: 'relative' as const,
-    // overflow: 'hidden' as const,
     fontFamily: '"Orbitron", monospace'
   },
   
@@ -160,7 +158,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     top: '50%',
     left: '50%',
     transform: 'translate(-50%, -50%)',
-    pointerEvents: 'none' as const  // Орбитальные кольца не должны блокировать клики
+    pointerEvents: 'none' as const
   },
   
   planet: {
@@ -176,13 +174,13 @@ const styles: { [key: string]: React.CSSProperties } = {
     animation: 'planet-glow 3s ease-in-out infinite',
     border: '3px solid rgba(255, 255, 255, 0.3)',
     backdropFilter: 'blur(10px)',
-    pointerEvents: 'auto' as const,  // Важно! Планета должна получать события мыши
-    zIndex: 20  // Высокий z-index чтобы быть выше других элементов
+    pointerEvents: 'auto' as const,
+    zIndex: 20
   },
   
   planetHover: {
     transform: 'scale(1.3)',
-    zIndex: 100,  // Еще более высокий z-index при hover
+    zIndex: 100,
     boxShadow: '0 0 40px currentColor, 0 0 80px currentColor'
   },
   
@@ -190,7 +188,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     position: 'absolute' as const,
     borderRadius: '50%',
     animation: 'orbit 60s linear infinite',
-    pointerEvents: 'none' as const  // Важно! Орбита не должна блокировать события мыши
+    pointerEvents: 'none' as const
   },
   
   foxRocket: {
@@ -357,7 +355,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   }
 };
 
-// Данные о планетах-этапах с полной информацией
+// Обновленные данные планет с 90-дневным планом
 const PLANETS_DATA = [
   {
     id: 1,
@@ -371,98 +369,92 @@ const PLANETS_DATA = [
     status: 'completed',
     price: '0.005¢',
     priceUSD: 0.00005,
-    duration: 'Days 1-90',
-    tokensAvailable: '100,000,000',
-    percentage: 10,
-    description: 'The beginning of our cosmic journey! Building the foundation for CrazyFox\'s interstellar mission.',
+    duration: 'Days 1-15',
+    tokensAvailable: '200,000,000',
+    percentage: 20,
+    description: 'The beginning of our cosmic journey! Building the foundation and launching CrazyFox into the crypto universe.',
     objectives: [
-      'Deploy smart contract and launch token on blockchain',
+      'Deploy smart contract with maximum security',
       'Launch website and establish social media presence',
-      'Begin community formation and engagement',
-      'Create comprehensive documentation and whitepaper',
-      'Conduct initial private sale for early supporters'
+      'Create comprehensive whitepaper and documentation',
+      'Begin initial community formation',
+      'Conduct security audit and contract verification'
     ],
     tasks: [
-      { week: '1-2', task: 'Smart contract development and security audit' },
-      { week: '3-4', task: 'Beta website launch and social channel setup' },
-      { week: '5-8', task: 'Initial marketing campaign and community outreach' },
-      { week: '9-12', task: 'Private sale for early investors and supporters' },
-      { week: '13', task: 'Phase 1 completion review and assessment' }
+      { week: '1', task: 'Smart contract development and deployment on BSC' },
+      { week: '2', task: 'Website launch, social media setup, and community creation' }
     ],
-    distribution: '10% of total supply (100,000,000 tokens) + 2% bonus for early community members',
+    distribution: '20% of total supply (200,000,000 tokens) at launch price',
     landmark: '🏁 Launch Pad',
-    stats: { tokens: '100M', progress: '100%', explorers: '1.2K', price: '$50 μUSD' }
+    stats: { tokens: '200M', progress: '100%', explorers: '1.2K', price: '$50 μUSD' }
   },
   {
     id: 2,
-    name: 'Development Nebula',
+    name: 'Community Nebula',
     phase: 'Phase 2',
-    emoji: '🛠️',
-    size: 90,
+    emoji: '👥',
+    size: 85,
     color: '#4ECDC4',
     orbitRadius: 180,
     orbitSpeed: '30s',
     status: 'in-progress',
     price: '0.006¢',
     priceUSD: 0.00006,
-    duration: 'Days 91-180',
-    tokensAvailable: '150,000,000',
-    percentage: 15,
-    description: 'Traveling through the development nebula, expanding our cosmic infrastructure and building advanced systems.',
+    duration: 'Days 16-30',
+    tokensAvailable: '200,000,000',
+    percentage: 20,
+    description: 'Building our space fox community and establishing strong foundations for exponential growth.',
     objectives: [
-      'Expand development team with top talent',
-      'Launch MVP (Minimum Viable Product)',
-      'Establish strategic partnerships',
-      'Scale marketing and community efforts',
-      'Implement advanced tokenomics features'
+      'Launch aggressive marketing campaigns',
+      'Partner with crypto influencers and KOLs',
+      'List on CoinGecko and CoinMarketCap',
+      'Grow community to 10,000+ members',
+      'Begin trending on social media platforms'
     ],
     tasks: [
-      { week: '14-16', task: 'Team expansion and talent acquisition' },
-      { week: '17-20', task: 'MVP development and beta testing' },
-      { week: '21-24', task: 'Partnership integration and collaboration' },
-      { week: '25-26', task: 'Second public token sale at new price point' }
+      { week: '3', task: 'Influencer partnerships and KOL campaigns launch' },
+      { week: '4', task: 'CoinGecko/CMC applications and community contests' }
     ],
-    distribution: '15% of total supply (150,000,000 tokens) + 3% for marketing initiatives',
-    landmark: '🏭 Innovation Factory',
-    stats: { tokens: '150M', progress: '75%', explorers: '2.8K', price: '$60 μUSD' }
+    distribution: '20% of total supply (200,000,000 tokens) + marketing bonuses',
+    landmark: '🌟 Community Hub',
+    stats: { tokens: '200M', progress: '60%', explorers: '5.2K', price: '$60 μUSD' }
   },
   {
     id: 3,
-    name: 'Utility Asteroid Belt',
+    name: 'Marketing Planet',
     phase: 'Phase 3',
-    emoji: '💎',
-    size: 85,
+    emoji: '📈',
+    size: 90,
     color: '#9B59B6',
     orbitRadius: 240,
     orbitSpeed: '40s',
     status: 'planned',
     price: '0.007¢',
     priceUSD: 0.00007,
-    duration: 'Days 181-270',
+    duration: 'Days 31-45',
     tokensAvailable: '200,000,000',
     percentage: 20,
-    description: 'Mining the utility asteroid belt for precious cosmic resources and implementing real-world applications.',
+    description: 'Explosive marketing campaigns across all platforms, targeting viral growth and mass adoption.',
     objectives: [
-      'Deploy user feedback improvements',
-      'Launch native wallet application',
-      'Implement staking and rewards program',
-      'Integrate with major ecosystem projects',
-      'Expand global market presence'
+      'Launch viral TikTok and YouTube campaigns',
+      'Partner with major crypto news outlets',
+      'Implement referral and reward programs',
+      'Target 50,000+ community members',
+      'Begin international expansion'
     ],
     tasks: [
-      { week: '27-30', task: 'Product refinement based on user feedback' },
-      { week: '31-34', task: 'Native wallet development and deployment' },
-      { week: '35-38', task: 'Staking mechanism and reward system launch' }
+      { week: '5', task: 'Viral content creation and social media campaigns' },
+      { week: '6', task: 'International marketing expansion and news coverage' }
     ],
-    distribution: '20% of total supply (200,000,000 tokens) + 5% for staking rewards',
-    landmark: '💎 Diamond Mines',
-    stats: { tokens: '200M', progress: '0%', explorers: '5K+', price: '$70 μUSD' }
+    distribution: '20% of total supply (200,000,000 tokens) + viral rewards',
+    landmark: '📡 Broadcasting Station',
+    stats: { tokens: '200M', progress: '0%', explorers: '25K+', price: '$70 μUSD' }
   },
   {
     id: 4,
-    name: 'Ecosystem Planet Verde',
+    name: 'Exchange Gateway',
     phase: 'Phase 4',
-    emoji: '🌍',
+    emoji: '💱',
     size: 95,
     color: '#2ECC71',
     orbitRadius: 300,
@@ -470,32 +462,30 @@ const PLANETS_DATA = [
     status: 'planned',
     price: '0.008¢',
     priceUSD: 0.00008,
-    duration: 'Days 271-360',
+    duration: 'Days 46-60',
     tokensAvailable: '200,000,000',
     percentage: 20,
-    description: 'Colonizing Planet Verde and building a comprehensive DeFi ecosystem for all space foxes.',
+    description: 'Opening the gateway to major exchanges and preparing for massive liquidity expansion.',
     objectives: [
-      'Develop advanced utility features',
-      'Create decentralized applications (dApps)',
-      'Prepare for DEX listings and liquidity provision',
-      'Expand geographical reach globally',
-      'Launch governance token features'
+      'Apply for major DEX listings (Uniswap, 1inch)',
+      'Prepare for first CEX listings',
+      'Implement advanced tokenomics features',
+      'Launch staking and rewards program',
+      'Scale to 100,000+ holders'
     ],
     tasks: [
-      { week: '39-42', task: 'First dApps development and integration' },
-      { week: '43-46', task: 'DEX listing preparation and documentation' },
-      { week: '47-50', task: 'Global marketing campaign expansion' },
-      { week: '51-52', task: 'Phase 4 completion and progress review' }
+      { week: '7', task: 'DEX listings and advanced features implementation' },
+      { week: '8', task: 'CEX applications and staking platform launch' }
     ],
-    distribution: '20% of total supply (200,000,000 tokens) + 5% for DEX liquidity',
-    landmark: '🌳 Forest of Opportunities',
-    stats: { tokens: '200M', progress: '0%', explorers: '10K+', price: '$80 μUSD' }
+    distribution: '20% of total supply (200,000,000 tokens) + staking rewards',
+    landmark: '🌉 Exchange Bridge',
+    stats: { tokens: '200M', progress: '0%', explorers: '50K+', price: '$80 μUSD' }
   },
   {
     id: 5,
-    name: 'Exchange Gateway Station',
+    name: 'Utility Asteroid',
     phase: 'Phase 5',
-    emoji: '🌌',
+    emoji: '⚡',
     size: 88,
     color: '#F39C12',
     orbitRadius: 360,
@@ -503,25 +493,24 @@ const PLANETS_DATA = [
     status: 'planned',
     price: '0.009¢',
     priceUSD: 0.00009,
-    duration: 'Days 361-450',
-    tokensAvailable: '150,000,000',
-    percentage: 15,
-    description: 'Building the gateway to the greater galactic exchange network and preparing for major CEX listings.',
+    duration: 'Days 61-75',
+    tokensAvailable: '100,000,000',
+    percentage: 10,
+    description: 'Implementing real utility features and preparing for the final moon mission launch.',
     objectives: [
-      'Complete comprehensive security audits',
-      'Prepare for centralized exchange (CEX) listings',
-      'Expand team and ecosystem infrastructure',
-      'Establish major partnerships and collaborations',
-      'Implement advanced governance features'
+      'Launch CrazyFox NFT collection',
+      'Implement burning mechanisms',
+      'Create mobile app and dashboard',
+      'Launch governance features',
+      'Prepare for major CEX listings'
     ],
     tasks: [
-      { week: '53-56', task: 'Comprehensive security audit completion' },
-      { week: '57-60', task: 'CEX listing documentation and preparation' },
-      { week: '61-64', task: 'Exchange negotiations and listing preparation' }
+      { week: '9', task: 'NFT collection launch and utility implementation' },
+      { week: '10-11', task: 'Mobile app development and governance setup' }
     ],
-    distribution: '15% of total supply (150,000,000 tokens) + 10% CEX liquidity reserve',
-    landmark: '🏛️ Palace of Preparation',
-    stats: { tokens: '150M', progress: '0%', explorers: '25K+', price: '$90 μUSD' }
+    distribution: '10% of total supply (100,000,000 tokens) + utility rewards',
+    landmark: '💎 Utility Core',
+    stats: { tokens: '100M', progress: '0%', explorers: '100K+', price: '$90 μUSD' }
   },
   {
     id: 6,
@@ -535,26 +524,24 @@ const PLANETS_DATA = [
     status: 'planned',
     price: '0.01¢',
     priceUSD: 0.0001,
-    duration: 'Days 451-540',
+    duration: 'Days 76-90',
     tokensAvailable: '100,000,000',
     percentage: 10,
-    description: 'The ultimate destination - establishing our legendary moon base and achieving galactic recognition!',
+    description: 'The ultimate destination - WE HAVE REACHED THE MOON! 🚀🌙 Time to celebrate and plan our journey to Mars!',
     objectives: [
-      'Official listing on major centralized exchanges',
-      'Launch comprehensive marketing campaign',
-      'Ensure token price stability and growth',
-      'Prepare long-term development strategy',
-      'Establish CrazyFox as a major crypto player'
+      'Launch on major CEX (Binance goal)',
+      'Achieve $100M+ market cap',
+      'Implement burning to reduce supply',
+      'Launch advanced DeFi features',
+      'Plan roadmap 2026 to Mars 🔴'
     ],
     tasks: [
-      { week: '65-68', task: 'First centralized exchange listings go live' },
-      { week: '69-72', task: 'Global marketing campaign execution' },
-      { week: '73-76', task: 'Additional exchange listings expansion' },
-      { week: '77-78', task: 'Long-term strategy presentation and roadmap 2026' }
+      { week: '12', task: 'Major CEX listings and moon celebration' },
+      { week: '13', task: 'Mars mission planning and roadmap 2026 presentation' }
     ],
-    distribution: '10% of total supply (100,000,000 tokens) + 5% marketing reserve',
+    distribution: '10% of total supply (100,000,000 tokens) + moon rewards',
     landmark: '🌙 TO THE MOON!',
-    stats: { tokens: '100M', progress: '0%', explorers: '100K+', price: '$100 μUSD' }
+    stats: { tokens: '100M', progress: '0%', explorers: '500K+', price: '$100 μUSD' }
   }
 ];
 
@@ -593,7 +580,7 @@ const CrazyFoxSpaceRoadmap = () => {
 
   const completedCount = PLANETS_DATA.filter(p => p.status === 'completed').length;
   const inProgressCount = PLANETS_DATA.filter(p => p.status === 'in-progress').length;
-  const totalProgress = ((completedCount + inProgressCount * 0.75) / PLANETS_DATA.length) * 100;
+  const totalProgress = ((completedCount + inProgressCount * 0.6) / PLANETS_DATA.length) * 100;
 
   const handlePlanetClick = (planet: any) => {
     setSelectedPlanet(planet);
@@ -635,7 +622,7 @@ const CrazyFoxSpaceRoadmap = () => {
       {/* Заголовок */}
       <div style={styles.spaceTitle}>
         <h1 style={styles.mainTitle}>🦊 CRAZYFOX GALAXY</h1>
-        <p style={styles.subtitle}>SPACE ROADMAP 2025</p>
+        <p style={styles.subtitle}>90-DAY MOON MISSION 2025</p>
       </div>
       
       {/* Солнечная система роадмапа */}
@@ -708,12 +695,10 @@ const CrazyFoxSpaceRoadmap = () => {
                   }}
                   onClick={(e) => {
                     e.stopPropagation();
-                    console.log('Planet clicked:', planet.name); // Debug
                     handlePlanetClick(planet);
                   }}
                   onMouseEnter={(e) => {
                     e.stopPropagation();
-                    console.log('Planet hovered:', planet.name); // Debug
                     setHoveredPlanet(planet);
                   }}
                   onMouseLeave={(e) => {
@@ -741,7 +726,7 @@ const CrazyFoxSpaceRoadmap = () => {
           </div>
         </div>
         <div style={{color: '#4ECDC4', fontWeight: 'bold', marginLeft: '15px'}}>
-          {totalProgress.toFixed(1)}%
+          {totalProgress.toFixed(1)}% to 🌙
         </div>
       </div>
       
@@ -827,7 +812,7 @@ const CrazyFoxSpaceRoadmap = () => {
               <div style={{background: 'rgba(255,255,255,0.1)', padding: '15px', borderRadius: '12px', textAlign: 'center' as const}}>
                 <div style={{fontSize: 'clamp(1.5rem, 4vw, 2rem)'}}>👥</div>
                 <div style={{color: selectedPlanet.color, fontWeight: 'bold', fontSize: 'clamp(1rem, 2.5vw, 1.3rem)'}}>{selectedPlanet.stats.explorers}</div>
-                <div style={{fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)', color: 'rgba(255,255,255,0.7)'}}>Explorers</div>
+                <div style={{fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)', color: 'rgba(255,255,255,0.7)'}}>Target Holders</div>
               </div>
             </div>
             
@@ -849,7 +834,7 @@ const CrazyFoxSpaceRoadmap = () => {
             {selectedPlanet.tasks && (
               <div style={{marginBottom: '25px'}}>
                 <h3 style={{color: selectedPlanet.color, marginBottom: '15px', fontSize: 'clamp(1.1rem, 3vw, 1.4rem)'}}>
-                  🗓️ Weekly Mission Timeline
+                  🗓️ Mission Timeline
                 </h3>
                 <div style={{display: 'grid', gap: '12px'}}>
                   {selectedPlanet.tasks.map((task: any, index: number) => (
@@ -911,6 +896,27 @@ const CrazyFoxSpaceRoadmap = () => {
               </div>
             )}
             
+            {/* Специальное сообщение для последней фазы */}
+            {selectedPlanet.id === 6 && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 107, 53, 0.2))',
+                border: '2px solid rgba(255, 215, 0, 0.4)',
+                borderRadius: '15px',
+                padding: '20px',
+                marginBottom: '20px',
+                textAlign: 'center' as const
+              }}>
+                <div style={{fontSize: 'clamp(2rem, 5vw, 3rem)', marginBottom: '10px'}}>🎉🚀🌙</div>
+                <h4 style={{color: '#FFD700', fontSize: 'clamp(1.2rem, 3.5vw, 1.6rem)', marginBottom: '10px'}}>
+                  MOON MISSION ACCOMPLISHED!
+                </h4>
+                <p style={{fontSize: 'clamp(0.9rem, 2.2vw, 1rem)', color: 'rgba(255,255,255,0.9)'}}>
+                  🦊 CrazyFox has successfully reached the moon! Time to celebrate our astronomical achievement 
+                  and prepare for the next adventure to Mars! 🔴✨
+                </p>
+              </div>
+            )}
+            
             {/* Статус миссии */}
             <div style={{
               textAlign: 'center' as const,
@@ -932,6 +938,16 @@ const CrazyFoxSpaceRoadmap = () => {
               <div style={{fontSize: 'clamp(0.8rem, 2vw, 0.9rem)', color: 'rgba(255,255,255,0.8)'}}>
                 Status: {selectedPlanet.status.charAt(0).toUpperCase() + selectedPlanet.status.slice(1).replace('-', ' ')}
               </div>
+              {selectedPlanet.id === 6 && (
+                <div style={{
+                  marginTop: '10px',
+                  fontSize: 'clamp(0.8rem, 2vw, 0.9rem)',
+                  color: '#FFD700',
+                  fontWeight: 'bold'
+                }}>
+                  🌙 Next Stop: Mars Mission 2026! 🔴🚀
+                </div>
+              )}
             </div>
           </div>
         </div>
