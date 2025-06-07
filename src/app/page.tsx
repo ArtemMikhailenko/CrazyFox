@@ -1,54 +1,24 @@
-// pages/index.tsx или app/page.tsx
+// pages/index.tsx
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Head from 'next/head';
-import { motion, AnimatePresence, useScroll, useTransform, useSpring } from 'framer-motion';
+import { motion, AnimatePresence, useScroll, useSpring } from 'framer-motion';
 import { Particles } from 'react-tsparticles';
 import { loadSlim } from 'tsparticles-slim';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import confetti from 'canvas-confetti';
-
-// ThirdWeb v5 imports
-import { 
-  ThirdwebProvider, 
-  useActiveAccount,
-  useReadContract,
-  useSendTransaction,
-  useWalletBalance
-} from "thirdweb/react";
-import { createThirdwebClient, defineChain } from "thirdweb";
-import { prepareContractCall, getContract } from "thirdweb";
-import { bsc } from "thirdweb/chains";
 
 // Components
-import Header from '@/components/Header/Header';
-import CrazyTokenomics from '@/components/CrazyTokenomics/CrazyTokenomics';
-import CrazyAbout from '@/components/CrazyAbout/CrazyAbout';
-import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
-import CrazyRoadmapMap from '@/components/CrazyRoadmap/CrazyRoadmap';
+import SimpleHeader from '@/components/Header/SimpleHeader'; // Заменили Header на SimpleHeader
+import SimpleWeb3Buy from '@/components/SimpleWeb3Buy'; // Простой компонент
+
 
 import styles from './page.module.css';
-
-// ThirdWeb client configuration
-const client = createThirdwebClient({
-  clientId: "d28d89a66e8eb5e73d6a9c8eeaa0645a" // Замените на ваш Client ID
-});
-
-// Contract addresses
-const TOKEN_CONTRACT_ADDRESS = "0x874641647B9d8a8d991c541BBD48bD597b85aE33";
-const PRESALE_CONTRACT_ADDRESS = "0x..."; // Ваш контракт для пресейла
-
-// Token price in USD
-const TOKEN_PRICE_USD = 0.005;
-
-// Contract instances
-const presaleContract = getContract({
-  client,
-  chain: bsc,
-  address: PRESALE_CONTRACT_ADDRESS,
-});
+import CrazyAbout from '@/components/CrazyAbout/CrazyAbout';
+import CrazyTokenomics from '@/components/CrazyTokenomics/CrazyTokenomics';
+import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
+import CrazyRoadmap from '@/components/CrazyRoadmap/CrazyRoadmap';
 
 // Animation variants
 const containerVariants = {
@@ -64,6 +34,7 @@ const itemVariants = {
   visible: { y: 0, opacity: 1 }
 };
 
+// Custom Hooks
 const useAnimatedCounter = (end: number, duration: number = 2000, startAnimation: boolean = false) => {
   const [count, setCount] = useState(0);
 
@@ -88,7 +59,6 @@ const useAnimatedCounter = (end: number, duration: number = 2000, startAnimation
   return count;
 };
 
-// Typewriter Effect Hook
 const useTypewriter = (text: string, speed: number = 50) => {
   const [displayedText, setDisplayedText] = useState('');
   const [isComplete, setIsComplete] = useState(false);
@@ -111,172 +81,46 @@ const useTypewriter = (text: string, speed: number = 50) => {
   return { displayedText, isComplete };
 };
 
-// Buy Token Component for ThirdWeb v5
-const BuyTokenComponent = () => {
-  const account = useActiveAccount();
-  const { mutate: sendTransaction, isPending } = useSendTransaction();
-  const [buyAmount, setBuyAmount] = useState('1');
-  const [showBuyModal, setShowBuyModal] = useState(false);
+// Price Display Component
+const PriceDisplay = () => {
+  const [currentPrice, setCurrentPrice] = useState(0.005);
+  const [bnbPrice, setBnbPrice] = useState(300);
+  const [ethPrice, setEthPrice] = useState(2000);
 
-  // Read presale info
-  const { data: presaleInfo } = useReadContract({
-    contract: presaleContract,
-    method: "getPresaleInfo",
-    params: []
-  });
+  // Обновление цен (можно подключить к API)
+  useEffect(() => {
+    const updatePrices = () => {
+      // Здесь можно добавить реальные API вызовы
+      setBnbPrice(295 + Math.random() * 10); // Симуляция колебаний
+      setEthPrice(1990 + Math.random() * 20);
+    };
 
-  // Read user info
-  const { data: userInfo } = useReadContract({
-    contract: presaleContract,
-    method: "getUserInfo",
-    params: [account?.address || ""]
-  });
-
-  const calculateTokenAmount = (bnbAmount: string) => {
-    const bnbValue = parseFloat(bnbAmount);
-    // Предполагаем курс BNB к USD (в реальном приложении получайте с API)
-    const BNB_TO_USD = 300; // Примерный курс
-    const usdValue = bnbValue * BNB_TO_USD;
-    return Math.floor(usdValue / TOKEN_PRICE_USD);
-  };
-
-  const handleBuyTokens = async () => {
-    if (!account) {
-      toast.error('Please connect your wallet first!');
-      return;
-    }
-
-    try {
-      const transaction = prepareContractCall({
-        contract: presaleContract,
-        //@ts-ignore
-        method: "buyTokens",
-        params: [],
-        value: BigInt(parseFloat(buyAmount) * 10**18) // Convert to wei
-      });
-
-      await sendTransaction(transaction);
-
-      confetti({
-        particleCount: 200,
-        spread: 100,
-        origin: { y: 0.8 }
-      });
-      
-      toast.success(`Successfully bought ${calculateTokenAmount(buyAmount).toLocaleString()} CRFX tokens! 🚀`);
-      setShowBuyModal(false);
-      setBuyAmount('1');
-    } catch (error) {
-      console.error('Error buying tokens:', error);
-      toast.error('Failed to buy tokens. Please try again.');
-    }
-  };
+    const interval = setInterval(updatePrices, 10000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <>
-      <motion.button
-        className={`${styles.primaryButton} ${!account ? styles.disabled : ''}`}
-        onClick={() => account ? setShowBuyModal(true) : toast.warning('Please connect your wallet first! 🦊')}
-        whileHover={account ? { scale: 1.05 } : {}}
-        whileTap={account ? { scale: 0.95 } : {}}
-      >
-        <span>🚀 Buy $CRFX Now</span>
-      </motion.button>
-
-      {/* Buy Modal */}
-      <AnimatePresence>
-        {showBuyModal && (
-          <motion.div 
-            className={styles.modalOverlay}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setShowBuyModal(false)}
-          >
-            <motion.div 
-              className={styles.buyModal}
-              initial={{ scale: 0.8, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.8, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className={styles.modalHeader}>
-                <h3>Buy CRFX Tokens</h3>
-                <button 
-                  className={styles.closeButton}
-                  onClick={() => setShowBuyModal(false)}
-                >
-                  ✕
-                </button>
-              </div>
-              
-              <div className={styles.buyContent}>
-                <div className={styles.priceInfo}>
-                  <div className={styles.tokenPrice}>
-                    <span className={styles.priceLabel}>Token Price:</span>
-                    <span className={styles.priceValue}>${TOKEN_PRICE_USD}</span>
-                  </div>
-                </div>
-
-                <div className={styles.buyForm}>
-                  <div className={styles.inputGroup}>
-                    <label>Amount (BNB)</label>
-                    <input
-                      type="number"
-                      value={buyAmount}
-                      onChange={(e) => setBuyAmount(e.target.value)}
-                      min="0.001"
-                      step="0.001"
-                      placeholder="Enter BNB amount"
-                    />
-                  </div>
-
-                  <div className={styles.conversionInfo}>
-                    <div className={styles.conversion}>
-                      <span>You will receive:</span>
-                      <span className={styles.tokenAmount}>
-                        ~{calculateTokenAmount(buyAmount).toLocaleString()} CRFX
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className={styles.buyActions}>
-                    <motion.button
-                      className={styles.cancelButton}
-                      onClick={() => setShowBuyModal(false)}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      Cancel
-                    </motion.button>
-                    
-                    <motion.button
-                      className={styles.confirmBuyButton}
-                      onClick={handleBuyTokens}
-                      disabled={isPending || !buyAmount || parseFloat(buyAmount) <= 0}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                    >
-                      {isPending ? (
-                        <span>🔄 Buying...</span>
-                      ) : (
-                        <span>🚀 Buy Tokens</span>
-                      )}
-                    </motion.button>
-                  </div>
-                </div>
-
-                <div className={styles.buyFooter}>
-                  <p className={styles.disclaimer}>
-                    ⚠️ Please ensure you have enough BNB for gas fees
-                  </p>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </>
+    <motion.div 
+      className={styles.priceDisplay}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 1.5 }}
+    >
+      <div className={styles.priceContainer}>
+        <div className={styles.priceRow}>
+          <span className={styles.priceLabel}>🦊 CRFX:</span>
+          <span className={styles.priceValue}>${currentPrice.toFixed(3)}</span>
+        </div>
+        <div className={styles.priceRow}>
+          <span className={styles.priceLabel}>🔶 BNB:</span>
+          <span className={styles.priceValue}>${bnbPrice.toFixed(0)}</span>
+        </div>
+        <div className={styles.priceRow}>
+          <span className={styles.priceLabel}>💎 ETH:</span>
+          <span className={styles.priceValue}>${ethPrice.toFixed(0)}</span>
+        </div>
+      </div>
+    </motion.div>
   );
 };
 
@@ -290,7 +134,9 @@ const MusicPlayer = () => {
       if (isPlaying) {
         audioRef.current.pause();
       } else {
-        audioRef.current.play();
+        audioRef.current.play().catch(() => {
+          toast.info('Click to enable music! 🎵');
+        });
       }
       setIsPlaying(!isPlaying);
     }
@@ -299,40 +145,163 @@ const MusicPlayer = () => {
   return (
     <motion.div 
       className={styles.musicPlayer}
-      whileHover={{ scale: 1.1 }}
-      whileTap={{ scale: 0.9 }}
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      transition={{ delay: 2, type: "spring", stiffness: 200 }}
     >
-      <button onClick={togglePlay} className={styles.playButton}>
+      <motion.button 
+        onClick={togglePlay} 
+        whileHover={{ scale: 1.1 }}
+        whileTap={{ scale: 0.9 }}
+        className={styles.playButton}
+      >
         {isPlaying ? '⏸️' : '🎵'}
-      </button>
-      <audio ref={audioRef} loop>
+      </motion.button>
+      <audio ref={audioRef} loop volume={0.3}>
         <source src="/fox-theme.mp3" type="audio/mpeg" />
       </audio>
     </motion.div>
   );
 };
 
+// Stats Component
+const StatsDisplay = ({ showStats }: { showStats: boolean }) => {
+  const holdersCount = useAnimatedCounter(1342, 3000, showStats);
+  const marketCapCount = useAnimatedCounter(156, 3000, showStats);
+  const communityCount = useAnimatedCounter(294780, 3000, showStats);
+  const raisedAmount = useAnimatedCounter(78420, 3000, showStats);
+
+  return (
+    <>
+      {/* Raised Amount */}
+      <motion.div 
+        className={styles.raisedAmount}
+        variants={itemVariants}
+      >
+        <div className={styles.raisedContainer}>
+          <div className={styles.raisedIcon}>💰</div>
+          <div className={styles.raisedContent}>
+            <div className={styles.raisedLabel}>Total Raised</div>
+            <motion.div 
+              className={styles.raisedNumber}
+              initial={{ scale: 0.8 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 1.6, type: "spring", stiffness: 200 }}
+            >
+              ${raisedAmount.toLocaleString()}
+            </motion.div>
+            <div className={styles.raisedSubtext}>
+              Growing every minute! 🚀
+            </div>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Stats Grid */}
+      <motion.div 
+        className={styles.stats}
+        variants={itemVariants}
+      >
+        <motion.div 
+          className={styles.stat}
+          whileHover={{ scale: 1.05, y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <motion.span 
+            className={styles.statNumber}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1 }}
+          >
+            {holdersCount.toLocaleString()}+
+          </motion.span>
+          <span className={styles.statLabel}>Holders</span>
+          <div className={styles.statIcon}>👥</div>
+        </motion.div>
+
+        <motion.div 
+          className={styles.stat}
+          whileHover={{ scale: 1.05, y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <motion.span 
+            className={styles.statNumber}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.2 }}
+          >
+            ${marketCapCount}K+
+          </motion.span>
+          <span className={styles.statLabel}>Market Cap</span>
+          <div className={styles.statIcon}>💰</div>
+        </motion.div>
+
+        <motion.div 
+          className={styles.stat}
+          whileHover={{ scale: 1.05, y: -5 }}
+          transition={{ type: "spring", stiffness: 300 }}
+        >
+          <motion.span 
+            className={styles.statNumber}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.4 }}
+          >
+            {communityCount.toLocaleString()}+
+          </motion.span>
+          <span className={styles.statLabel}>Community</span>
+          <div className={styles.statIcon}>🚀</div>
+        </motion.div>
+      </motion.div>
+    </>
+  );
+};
+
+// Floating Elements
+const FloatingElements = ({ show }: { show: boolean }) => (
+  <AnimatePresence>
+    {show && (
+      <div className={styles.floatingElements}>
+        {[...Array(6)].map((_, i) => (
+          <motion.div
+            key={i}
+            className={styles.floatingEmoji}
+            initial={{ opacity: 0, y: 100 }}
+            animate={{ 
+              opacity: [0, 1, 0],
+              y: [-100, -300],
+              x: [0, Math.random() * 100 - 50]
+            }}
+            transition={{
+              duration: 4,
+              delay: i * 0.5,
+              repeat: Infinity,
+              repeatDelay: 8
+            }}
+          >
+            {['🦊', '🚀', '💎', '🌙', '⭐', '🔥'][i]}
+          </motion.div>
+        ))}
+      </div>
+    )}
+  </AnimatePresence>
+);
+
 // Main Home Component
 const HomeContent = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const [showStats, setShowStats] = useState(false);
+  const [showFloatingElements, setShowFloatingElements] = useState(false);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [isLoaded, setIsLoaded] = useState(false);
+  
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
-  const account = useActiveAccount();
-
-  // Typewriter effect for hero title
+  // Typewriter effect
   const { displayedText: heroText, isComplete: heroComplete } = useTypewriter(
-    "Welcome to the CrazyFox Revolution!", 100
+    "Welcome to the CrazyFox Revolution!", 80
   );
-
-  // Animated counters
-  const holdersCount = useAnimatedCounter(1000, 3000, showStats);
-  const marketCapCount = useAnimatedCounter(50, 3000, showStats);
-  const communityCount = useAnimatedCounter(280000, 3000, showStats);
-  const raisedAmount = useAnimatedCounter(302736, 3000, showStats);
 
   // Mouse tracking
   useEffect(() => {
@@ -344,7 +313,7 @@ const HomeContent = () => {
     return () => window.removeEventListener('mousemove', handleMouseMove);
   }, []);
 
-  // Intersection Observer for animations
+  // Intersection Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -352,6 +321,7 @@ const HomeContent = () => {
           if (entry.isIntersecting) {
             if (entry.target.id === 'hero') {
               setShowStats(true);
+              setTimeout(() => setShowFloatingElements(true), 1500);
             }
             setActiveSection(entry.target.id);
           }
@@ -367,7 +337,7 @@ const HomeContent = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Particles configuration
+  // Particles config
   const particlesInit = useCallback(async (engine: any) => {
     await loadSlim(engine);
   }, []);
@@ -381,25 +351,24 @@ const HomeContent = () => {
         color: "#4ECDC4",
         distance: 150,
         enable: true,
-        opacity: 0.2,
+        opacity: 0.15,
         width: 1,
       },
       move: {
         enable: true,
         outModes: { default: "bounce" },
         random: false,
-        speed: 1,
+        speed: 0.8,
         straight: false,
       },
-      number: { density: { enable: true, area: 800 }, value: 50 },
-      opacity: { value: 0.3 },
+      number: { density: { enable: true, area: 1000 }, value: 40 },
+      opacity: { value: 0.4 },
       shape: { type: "circle" },
       size: { value: { min: 1, max: 3 } },
     },
     detectRetina: true,
   };
 
-  // Scroll to section
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -411,10 +380,13 @@ const HomeContent = () => {
   return (
     <div className={styles.container}>
       {/* Progress Bar */}
-      <motion.div className={styles.progressBar} style={{ scaleX }} />
+      <motion.div 
+        className={styles.progressBar} 
+        style={{ scaleX }}
+      />
 
-      {/* Header Component */}
-      <Header 
+      {/* Header */}
+      <SimpleHeader 
         activeSection={activeSection}
         scrollToSection={scrollToSection}
       />
@@ -441,6 +413,9 @@ const HomeContent = () => {
       {/* Music Player */}
       <MusicPlayer />
 
+      {/* Floating Elements */}
+      <FloatingElements show={showFloatingElements} />
+
       {/* Hero Section */}
       <motion.section 
         id="hero" 
@@ -452,7 +427,7 @@ const HomeContent = () => {
         <div className={styles.heroContent}>
           <motion.div className={styles.heroText} variants={itemVariants}>
             <motion.h1 className={styles.heroTitle}>
-              {heroText}
+              <span className={styles.titleGradient}>{heroText}</span>
               {!heroComplete && <span className={styles.cursor}>|</span>}
             </motion.h1>
             
@@ -461,92 +436,72 @@ const HomeContent = () => {
               variants={itemVariants}
             >
               The wildest meme coin on Binance Smart Chain that's ready to take you to the moon! 
-              Join our crazy community and experience the fox-tastic journey!
+              Join our crazy community with{' '}
+              <span className={styles.highlight}>instant payments</span>,{' '}
+              <span className={styles.highlight}>direct delivery</span>, and{' '}
+              <span className={styles.highlight}>no complex setup</span>!
             </motion.p>
 
             <motion.div 
               className={styles.heroButtons}
               variants={itemVariants}
             >
-              <BuyTokenComponent />
+              <SimpleWeb3Buy />
+              
               <motion.button
                 className={styles.secondaryButton}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => window.open('https://dexscreener.com/bsc/your-token-address', '_blank')}
+                onClick={() => window.open('https://dexscreener.com/bsc/0x874641647B9d8a8d991c541BBD48bD597b85aE33', '_blank')}
               >
-                <span>📊 Chart</span>
+                <span className={styles.buttonIcon}>📊</span>
+                <span>Chart</span>
+              </motion.button>
+              
+              <motion.button
+                className={styles.secondaryButton}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => window.open('https://pancakeswap.finance/swap?outputCurrency=0x874641647B9d8a8d991c541BBD48bD597b85aE33', '_blank')}
+              >
+                <span className={styles.buttonIcon}>🥞</span>
+                <span>PancakeSwap</span>
               </motion.button>
             </motion.div>
 
-            {/* Raised Amount Display */}
+            {/* Price Display */}
+            <PriceDisplay />
+
+            {/* Stats */}
+            <StatsDisplay showStats={showStats} />
+
+            {/* Security Badges */}
             <motion.div 
-              className={styles.raisedAmount}
+              className={styles.securityBadges}
               variants={itemVariants}
             >
-              <div className={styles.raisedContainer}>
-                <div className={styles.raisedIcon}>💰</div>
-                <div className={styles.raisedContent}>
-                  <div className={styles.raisedLabel}>Total Raised</div>
-                  <motion.div 
-                    className={styles.raisedNumber}
-                    initial={{ scale: 0.8 }}
-                    animate={{ scale: 1 }}
-                    transition={{ delay: 1.6, type: "spring", stiffness: 200 }}
-                  >
-                    ${raisedAmount.toLocaleString()}.92
-                  </motion.div>
-                  <div className={styles.raisedProgress}>
-                    <div className={styles.progressBarContainer}>
-                      <motion.div 
-                        className={styles.progressFill}
-                        initial={{ width: 0 }}
-                        animate={{ width: "73%" }}
-                        transition={{ delay: 2, duration: 2, ease: "easeOut" }}
-                      />
-                    </div>
-                    <div className={styles.progressText}>73% of soft cap reached</div>
-                  </div>
+              <div className={styles.badge}>
+                <span className={styles.badgeIcon}>💰</span>
+                <div className={styles.badgeContent}>
+                  <span className={styles.badgeTitle}>Direct Payments</span>
+                  <span className={styles.badgeDesc}>To Treasury</span>
                 </div>
               </div>
-            </motion.div>
-
-            <motion.div 
-              className={styles.stats}
-              variants={itemVariants}
-            >
-              <div className={styles.stat}>
-                <motion.span 
-                  className={styles.statNumber}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1 }}
-                >
-                  {holdersCount.toLocaleString()}+
-                </motion.span>
-                <span className={styles.statLabel}>Holders</span>
+              
+              <div className={styles.badge}>
+                <span className={styles.badgeIcon}>⚡</span>
+                <div className={styles.badgeContent}>
+                  <span className={styles.badgeTitle}>Instant Tokens</span>
+                  <span className={styles.badgeDesc}>No Waiting</span>
+                </div>
               </div>
-              <div className={styles.stat}>
-                <motion.span 
-                  className={styles.statNumber}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.2 }}
-                >
-                  ${marketCapCount}K+
-                </motion.span>
-                <span className={styles.statLabel}>Market Cap</span>
-              </div>
-              <div className={styles.stat}>
-                <motion.span 
-                  className={styles.statNumber}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 1.4 }}
-                >
-                  {communityCount.toLocaleString()}+
-                </motion.span>
-                <span className={styles.statLabel}>Community</span>
+              
+              <div className={styles.badge}>
+                <span className={styles.badgeIcon}>🔧</span>
+                <div className={styles.badgeContent}>
+                  <span className={styles.badgeTitle}>Simple Setup</span>
+                  <span className={styles.badgeDesc}>Just MetaMask</span>
+                </div>
               </div>
             </motion.div>
           </motion.div>
@@ -559,12 +514,45 @@ const HomeContent = () => {
               <motion.img 
                 src="/fox-full.png" 
                 alt="CrazyFox Hero"
-                whileHover={{ scale: 1.05, rotate: 5 }}
-                transition={{ type: "spring", stiffness: 300 }}
+                className={styles.heroFox}
+                animate={{
+                  y: [0, -20, 0],
+                  rotate: [0, 5, 0, -5, 0]
+                }}
+                transition={{
+                  duration: 6,
+                  repeat: Infinity,
+                  ease: "easeInOut"
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  transition: { duration: 0.3 }
+                }}
               />
+              
+              {/* Glow effect */}
+              <div className={styles.foxGlow} />
             </div>
           </motion.div>
         </div>
+
+        {/* Scroll indicator */}
+        <motion.div 
+          className={styles.scrollIndicator}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 3, duration: 1 }}
+          onClick={() => scrollToSection('about')}
+        >
+          <div className={styles.scrollText}>Scroll to explore</div>
+          <motion.div 
+            className={styles.scrollArrow}
+            animate={{ y: [0, 10, 0] }}
+            transition={{ duration: 2, repeat: Infinity }}
+          >
+            ⬇️
+          </motion.div>
+        </motion.div>
       </motion.section>
 
       {/* Other Sections */}
@@ -576,7 +564,7 @@ const HomeContent = () => {
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <CrazyAbout/>
+        <CrazyAbout />
       </motion.section>
 
       <motion.section 
@@ -587,7 +575,7 @@ const HomeContent = () => {
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-       <CrazyTokenomics/>
+        <CrazyTokenomics />
       </motion.section>
 
       <motion.section 
@@ -598,22 +586,24 @@ const HomeContent = () => {
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <CrazyRoadmapMap/>
+        <CrazyRoadmap />
       </motion.section>
 
       <motion.section 
         id="community" 
         className={styles.community}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
         transition={{ duration: 0.8 }}
         viewport={{ once: true }}
       >
-        <CrazyCommunity/>
+        <CrazyCommunity />
       </motion.section>
 
       {/* Toast Container */}
       <ToastContainer
         position="top-right"
-        autoClose={3000}
+        autoClose={4000}
         hideProgressBar={false}
         newestOnTop={false}
         closeOnClick
@@ -622,35 +612,43 @@ const HomeContent = () => {
         draggable
         pauseOnHover
         theme="dark"
+        toastStyle={{
+          background: 'linear-gradient(135deg, #1a1a2e, #16213e)',
+          border: '1px solid rgba(255, 107, 53, 0.3)',
+          color: '#ffffff'
+        }}
       />
     </div>
   );
 };
 
-// Main Export with ThirdWeb Provider
+// Main Export (без ThirdWeb Provider)
 export default function Home() {
   return (
     <>
       <Head>
-        <title>CrazyFox | The Wildest Meme Coin on BSC 🦊</title>
-        <meta name="description" content="Join the CrazyFox revolution! The most exciting meme coin on Binance Smart Chain with locked liquidity and moon mission." />
-        <meta name="keywords" content="CrazyFox, CRFX, meme coin, BSC, cryptocurrency, DeFi, moon mission" />
+        <title>CrazyFox | The Wildest Meme Coin on BSC 🦊 | Simple Presale</title>
+        <meta name="description" content="Join the CrazyFox revolution! The most exciting meme coin on Binance Smart Chain with simple setup, instant payments, and direct token delivery." />
+        <meta name="keywords" content="CrazyFox, CRFX, meme coin, BSC, cryptocurrency, DeFi, presale, MetaMask, simple setup" />
         <meta property="og:title" content="CrazyFox | The Wildest Meme Coin on BSC 🦊" />
-        <meta property="og:description" content="Join the CrazyFox revolution! 65% liquidity locked forever, aggressive marketing, and moon mission ready!" />
+        <meta property="og:description" content="Join the CrazyFox revolution! Simple setup with MetaMask, instant payments, direct token delivery!" />
         <meta property="og:image" content="/fox-full.png" />
         <meta property="og:type" content="website" />
+        <meta property="og:url" content="https://crazyfox.meme" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="CrazyFox | The Wildest Meme Coin on BSC 🦊" />
-        <meta name="twitter:description" content="Join the CrazyFox revolution! The most secure and exciting meme coin on BSC." />
+        <meta name="twitter:description" content="The simplest and most secure meme coin presale. Just connect MetaMask and buy!" />
         <meta name="twitter:image" content="/fox-full.png" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/fox.png" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta name="theme-color" content="#FF6B35" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
       </Head>
 
-      <ThirdwebProvider>
-        <HomeContent />
-      </ThirdwebProvider>
+      <HomeContent />
     </>
   );
 }
