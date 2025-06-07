@@ -469,16 +469,25 @@ const HomeContent = () => {
               variants={itemVariants}
             >
               <BuyTokenComponent />
-              <motion.button
-                className={styles.secondaryButton}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                onClick={() => window.open('https://dexscreener.com/bsc/your-token-address', '_blank')}
-              >
-                <span>📊 Chart</span>
-              </motion.button>
+              <motion.div 
+  className={styles.tokenPriceBadge}
+  variants={itemVariants}
+  initial={{ scale: 0.8, opacity: 0 }}
+  animate={{ scale: 1, opacity: 1 }}
+  transition={{ delay: 1.8, type: "spring", stiffness: 200 }}
+>
+  {/* <div className={styles.priceContainer}> */}
+    
+    <div className={styles.priceInfo}>
+    
+      <span className={styles.priceLabel}><span className={styles.priceIcon}>💰</span>Current Price</span>
+      <span className={styles.priceAmount}>$0.005</span>
+    </div>
+    
+  {/* </div> */}
+</motion.div>
             </motion.div>
-
+         
             {/* Raised Amount Display */}
             <motion.div 
               className={styles.raisedAmount}

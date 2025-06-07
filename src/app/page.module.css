@@ -365,7 +365,173 @@
   0%, 100% { transform: scale(1); opacity: 0.5; }
   50% { transform: scale(1.2); opacity: 0.8; }
 }
+/* Token Price Badge в Hero секции */
+.tokenPriceBadge {
+  display: flex;
+  justify-content: center;
+}
 
+.priceContainer {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(78, 205, 196, 0.2) 100%);
+  backdrop-filter: blur(20px);
+  border: 2px solid rgba(78, 205, 196, 0.4);
+  border-radius: 25px;
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 8px 32px rgba(78, 205, 196, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.priceContainer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+  animation: priceShimmer 3s infinite;
+}
+
+@keyframes priceShimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+.priceIcon,
+.priceEmoji {
+  font-size: 1.5rem;
+  animation: bounce 2s infinite;
+}
+
+.priceInfo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+}
+
+.priceLabel {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.priceAmount {
+  font-size: 1.8rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: gradientShift 3s ease-in-out infinite;
+  text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
+}
+
+/* Live Price Ticker в Navigation */
+.livePriceTicker {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 20px;
+  padding: 0.6rem 1.2rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.livePriceTicker::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(45deg, transparent 30%, rgba(78, 205, 196, 0.1) 50%, transparent 70%);
+  animation: tickerGlow 4s infinite;
+}
+
+@keyframes tickerGlow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+.tickerLabel {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #4ECDC4;
+  text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+}
+
+.tickerPrice {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #FF6B35;
+  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  font-family: 'Courier New', monospace;
+}
+
+.tickerChange {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4CAF50;
+  background: rgba(76, 175, 80, 0.2);
+  padding: 0.2rem 0.5rem;
+  border-radius: 10px;
+  border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+/* Responsive для мобильных */
+@media (max-width: 768px) {
+  .livePriceTicker {
+    order: 1;
+    margin-bottom: 0.5rem;
+  }
+  
+  .priceContainer {
+    padding: 0.8rem 1.5rem;
+    gap: 0.8rem;
+  }
+  
+  .priceAmount {
+    font-size: 1.5rem;
+  }
+  
+  .priceIcon,
+  .priceEmoji {
+    font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .livePriceTicker {
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+  }
+  
+  .tickerLabel,
+  .tickerPrice {
+    font-size: 0.9rem;
+  }
+  
+  .priceContainer {
+    padding: 0.6rem 1.2rem;
+  }
+  
+  .priceAmount {
+    font-size: 1.3rem;
+  }
+}
 .heroContent {
   max-width: 1200px;
   margin: 0 auto;
@@ -434,6 +600,7 @@
   border: none;
   color: white;
   padding: 1rem 2rem;
+  max-height: 70px;
   border-radius: 50px;
   font-size: 1.1rem;
   font-weight: bold;
@@ -1540,6 +1707,7 @@
   .heroButtons {
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     gap: 1rem;
     margin-bottom: 2rem;
   }
