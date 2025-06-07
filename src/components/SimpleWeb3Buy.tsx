@@ -9,6 +9,7 @@ import confetti from 'canvas-confetti';
 // Простой Web3 интерфейс без ThirdWeb
 declare global {
   interface Window {
+    //@ts-ignore
     ethereum?: any;
   }
 }
@@ -89,6 +90,7 @@ const SimpleWeb3Buy = () => {
   // Переключение на BSC
   const switchToBSC = async () => {
     try {
+      //@ts-ignore
       await window.ethereum.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: NETWORK_ID }],
@@ -97,6 +99,7 @@ const SimpleWeb3Buy = () => {
       // Если сеть не добавлена, добавляем её
       if (switchError.code === 4902) {
         try {
+          //@ts-ignore
           await window.ethereum.request({
             method: 'wallet_addEthereumChain',
             params: [
@@ -213,6 +216,7 @@ const SimpleWeb3Buy = () => {
       const amountHex = '0x' + amountInWei.toString(16);
 
       // Вызов функции buyWithBNB
+      //@ts-ignore
       const txHash = await window.ethereum.request({
         method: 'eth_sendTransaction',
         params: [
