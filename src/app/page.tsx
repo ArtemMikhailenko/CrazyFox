@@ -157,6 +157,7 @@ const MusicPlayer = () => {
       >
         {isPlaying ? '⏸️' : '🎵'}
       </motion.button>
+      {/* @ts-ignore */}
       <audio ref={audioRef} loop volume={0.3}>
         <source src="/fox-theme.mp3" type="audio/mpeg" />
       </audio>
