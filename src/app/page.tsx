@@ -332,7 +332,7 @@ const HomeContent = () => {
   const holdersCount = useAnimatedCounter(1000, 3000, showStats);
   const marketCapCount = useAnimatedCounter(50, 3000, showStats);
   const communityCount = useAnimatedCounter(280000, 3000, showStats);
-  const raisedAmount = useAnimatedCounter(302736, 3000, showStats);
+  const raisedAmount = useAnimatedCounter(3036, 3000, showStats);
 
   // Mouse tracking
   useEffect(() => {
