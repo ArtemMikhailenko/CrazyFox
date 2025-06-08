@@ -16,7 +16,7 @@ const CrazyTokenomics = () => {
       color: '#FF6B35', 
       icon: '💧',
       description: 'Locked liquidity for stable trading',
-      details: '400M tokens permanently locked'
+      details: '650M tokens permanently locked'
     },
     { 
       label: 'Marketing & Partnerships', 
