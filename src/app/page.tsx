@@ -507,11 +507,11 @@ const HomeContent = () => {
                       <motion.div 
                         className={styles.progressFill}
                         initial={{ width: 0 }}
-                        animate={{ width: "73%" }}
+                        animate={{ width: "32%" }}
                         transition={{ delay: 2, duration: 2, ease: "easeOut" }}
                       />
                     </div>
-                    <div className={styles.progressText}>73% of soft cap reached</div>
+                    <div className={styles.progressText}>32% of soft cap reached</div>
                   </div>
                 </div>
               </div>
