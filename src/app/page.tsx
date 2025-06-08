@@ -10,17 +10,20 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import confetti from 'canvas-confetti';
 
-// ThirdWeb v5 imports
+// ThirdWeb v5 ТОЛЬКО imports - убираем все v4
 import { 
   ThirdwebProvider, 
   useActiveAccount,
   useReadContract,
   useSendTransaction,
-  useWalletBalance
+  ConnectButton
 } from "thirdweb/react";
-import { createThirdwebClient, defineChain } from "thirdweb";
+import { createThirdwebClient } from "thirdweb";
 import { prepareContractCall, getContract } from "thirdweb";
 import { bsc } from "thirdweb/chains";
+import { toWei } from "thirdweb/utils";
+// Убираем эти импорты - они из v4:
+// import { useContract, useContractWrite } from "@thirdweb-dev/react";
 
 // Components
 import Header from '@/components/Header/Header';
@@ -38,7 +41,7 @@ const client = createThirdwebClient({
 
 // Contract addresses
 const TOKEN_CONTRACT_ADDRESS = "0x874641647B9d8a8d991c541BBD48bD597b85aE33";
-const PRESALE_CONTRACT_ADDRESS = "0x..."; // Ваш контракт для пресейла
+const PRESALE_CONTRACT_ADDRESS = "0xD80AC08a2effF26c4465aAF6ff00BE3DaecFF476";
 
 // Token price in USD
 const TOKEN_PRICE_USD = 0.005;
@@ -111,64 +114,61 @@ const useTypewriter = (text: string, speed: number = 50) => {
   return { displayedText, isComplete };
 };
 
-// Buy Token Component for ThirdWeb v5
+// Buy Token Component для ThirdWeb v5 (исправленная версия)
 const BuyTokenComponent = () => {
   const account = useActiveAccount();
-  const { mutate: sendTransaction, isPending } = useSendTransaction();
+  const { mutate: sendTransaction, isPending, error } = useSendTransaction();
   const [buyAmount, setBuyAmount] = useState('1');
   const [showBuyModal, setShowBuyModal] = useState(false);
 
-  // Read presale info
-  const { data: presaleInfo } = useReadContract({
-    contract: presaleContract,
-    method: "getPresaleInfo",
-    params: []
-  });
-
-  // Read user info
-  const { data: userInfo } = useReadContract({
-    contract: presaleContract,
-    method: "getUserInfo",
-    params: [account?.address || ""]
-  });
-
   const calculateTokenAmount = (bnbAmount: string) => {
     const bnbValue = parseFloat(bnbAmount);
-    // Предполагаем курс BNB к USD (в реальном приложении получайте с API)
     const BNB_TO_USD = 300; // Примерный курс
     const usdValue = bnbValue * BNB_TO_USD;
     return Math.floor(usdValue / TOKEN_PRICE_USD);
   };
-
+  
   const handleBuyTokens = async () => {
     if (!account) {
-      toast.error('Please connect your wallet first!');
+      toast.error("Please connect your wallet first!");
       return;
     }
-
+    if (!buyAmount || Number(buyAmount) <= 0) {
+      toast.error("Please enter a valid amount!");
+      return;
+    }
+  
     try {
+      // ThirdWeb v5 способ с правильной обработкой
       const transaction = prepareContractCall({
         contract: presaleContract,
-        //@ts-ignore
-        method: "buyTokens",
+        method: "function _buyWithBNB() payable",
         params: [],
-        value: BigInt(parseFloat(buyAmount) * 10**18) // Convert to wei
+        value: toWei(buyAmount) // Используем toWei из thirdweb/utils
       });
 
-      await sendTransaction(transaction);
-
-      confetti({
-        particleCount: 200,
-        spread: 100,
-        origin: { y: 0.8 }
+      sendTransaction(transaction, {
+        onSuccess: (result) => {
+          toast.success("Purchase successful! 🦊");
+          setBuyAmount("1");
+          setShowBuyModal(false);
+          
+          // Добавляем конфетти при успешной покупке
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#FF6B35', '#4ECDC4', '#45B7D1']
+          });
+        },
+        onError: (error) => {
+          console.error("Transaction error:", error);
+          toast.error("Transaction failed: " + (error.message || "Unknown error"));
+        }
       });
-      
-      toast.success(`Successfully bought ${calculateTokenAmount(buyAmount).toLocaleString()} CRFX tokens! 🚀`);
-      setShowBuyModal(false);
-      setBuyAmount('1');
-    } catch (error) {
-      console.error('Error buying tokens:', error);
-      toast.error('Failed to buy tokens. Please try again.');
+    } catch (err: any) {
+      console.error("Prepare transaction error:", err);
+      toast.error("Failed to prepare transaction: " + (err.message || "Unknown error"));
     }
   };
 
@@ -470,22 +470,19 @@ const HomeContent = () => {
             >
               <BuyTokenComponent />
               <motion.div 
-  className={styles.tokenPriceBadge}
-  variants={itemVariants}
-  initial={{ scale: 0.8, opacity: 0 }}
-  animate={{ scale: 1, opacity: 1 }}
-  transition={{ delay: 1.8, type: "spring", stiffness: 200 }}
->
-  {/* <div className={styles.priceContainer}> */}
-    
-    <div className={styles.priceInfo}>
-    
-      <span className={styles.priceLabel}><span className={styles.priceIcon}>💰</span>Current Price</span>
-      <span className={styles.priceAmount}>$0.005</span>
-    </div>
-    
-  {/* </div> */}
-</motion.div>
+                className={styles.tokenPriceBadge}
+                variants={itemVariants}
+                initial={{ scale: 0.8, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 1.8, type: "spring", stiffness: 200 }}
+              >
+                <div className={styles.priceInfo}>
+                  <span className={styles.priceLabel}>
+                    <span className={styles.priceIcon}>💰</span>Current Price
+                  </span>
+                  <span className={styles.priceAmount}>$0.005</span>
+                </div>
+              </motion.div>
             </motion.div>
          
             {/* Raised Amount Display */}

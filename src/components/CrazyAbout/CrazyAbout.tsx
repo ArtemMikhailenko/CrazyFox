@@ -1,10 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import styles from './CrazyAbout.module.css';
 
 const CrazyAbout = () => {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const intervalRef = useRef(null);
 
   const features = [
     { 
@@ -48,17 +50,51 @@ const CrazyAbout = () => {
     { number: '24/7', label: 'Support', icon: '🛠️' }
   ];
 
+  // Initialize visibility
   useEffect(() => {
     const timer = setTimeout(() => setIsVisible(true), 300);
     return () => clearTimeout(timer);
   }, []);
 
+  // Auto-rotation with pause functionality
   useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveFeature((prev) => (prev + 1) % features.length);
-    }, 4000);
-    return () => clearInterval(interval);
-  }, []);
+    const startInterval = () => {
+      //@ts-ignore
+      intervalRef.current = setInterval(() => {
+        if (!isPaused) {
+          setActiveFeature((prev) => (prev + 1) % features.length);
+        }
+      }, 4000);
+    };
+
+    startInterval();
+
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isPaused, features.length]);
+
+  // Handle manual feature selection
+  const handleFeatureClick = (index:any) => {
+    setActiveFeature(index);
+    setIsPaused(true);
+    
+    // Resume auto-rotation after 8 seconds of inactivity
+    setTimeout(() => {
+      setIsPaused(false);
+    }, 8000);
+  };
+
+  // Pause on hover
+  const handleMouseEnter = () => {
+    setIsPaused(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsPaused(false);
+  };
 
   return (
     <div className={styles.aboutSection}>
@@ -96,17 +132,10 @@ const CrazyAbout = () => {
                 className={styles.foxTeamImage}
                 initial={{ scale: 0.8 }}
                 whileInView={{ scale: 1 }}
-                transition={{ duration: 1, type: "spring" }}
+                transition={{ duration: 1, type: "spring", bounce: 0.3 }}
                 viewport={{ once: true }}
               />
               
-              {/* Floating Elements */}
-    
-              
-             
-
-              
-
               {/* Glow Effect */}
               <div className={styles.imageGlow} />
             </div>
@@ -129,7 +158,10 @@ const CrazyAbout = () => {
                   }}
                   initial={{ y: 20, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.1 + 0.8 }}
+                  transition={{ 
+                    delay: index * 0.1 + 0.8,
+                    duration: 0.5
+                  }}
                   viewport={{ once: true }}
                 >
                   <div className={styles.statIcon}>{stat.icon}</div>
@@ -147,34 +179,44 @@ const CrazyAbout = () => {
             whileInView={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.4 }}
             viewport={{ once: true }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
           >
             <div className={styles.featuresContainer}>
               {features.map((feature, index) => (
                 <motion.div
                   key={index}
                   className={`${styles.featureCard} ${activeFeature === index ? styles.active : ''}`}
-                  onClick={() => setActiveFeature(index)}
+                  onClick={() => handleFeatureClick(index)}
                   whileHover={{ 
                     scale: 1.02,
                     y: -5
                   }}
                   initial={{ y: 50, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
-                  transition={{ delay: index * 0.15 + 0.5 }}
+                  transition={{ 
+                    delay: index * 0.15 + 0.5,
+                    duration: 0.6
+                  }}
                   viewport={{ once: true }}
                   style={{
-                    borderColor: activeFeature === index ? feature.color : 'rgba(255, 255, 255, 0.1)'
+                    borderColor: activeFeature === index ? feature.color : 'rgba(255, 255, 255, 0.1)',
+                    transition: 'border-color 0.3s ease, transform 0.3s ease'
                   }}
                 >
                   <motion.div 
                     className={styles.featureIcon}
-                    whileHover={{ 
-                      scale: 1.2, 
-                      rotate: activeFeature === index ? 360 : 0 
+                    animate={{
+                      scale: activeFeature === index ? 1.1 : 1,
+                      rotate: activeFeature === index ? 5 : 0
                     }}
-                    transition={{ duration: 0.3 }}
+                    transition={{ 
+                      duration: 0.5,
+                      ease: "easeInOut"
+                    }}
                     style={{
-                      background: activeFeature === index ? feature.bgGradient : 'rgba(255, 255, 255, 0.1)'
+                      background: activeFeature === index ? feature.bgGradient : 'rgba(255, 255, 255, 0.1)',
+                      transition: 'background 0.3s ease'
                     }}
                   >
                     {feature.icon}
@@ -182,20 +224,33 @@ const CrazyAbout = () => {
                   
                   <div className={styles.featureContent}>
                     <h3 className={styles.featureTitle}>{feature.title}</h3>
-                    <p className={styles.featureDesc}>
-                      {activeFeature === index ? feature.longDesc : feature.desc}
-                    </p>
+                    <AnimatePresence mode="wait">
+                      <motion.p 
+                        key={activeFeature === index ? 'long' : 'short'}
+                        className={styles.featureDesc}
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -10 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {activeFeature === index ? feature.longDesc : feature.desc}
+                      </motion.p>
+                    </AnimatePresence>
                   </div>
 
                   {/* Active Indicator */}
-                  {activeFeature === index && (
-                    <motion.div 
-                      className={styles.activeIndicator}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      style={{ background: feature.color }}
-                    />
-                  )}
+                  <AnimatePresence>
+                    {activeFeature === index && (
+                      <motion.div 
+                        className={styles.activeIndicator}
+                        initial={{ scale: 0, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0, opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        style={{ background: feature.color }}
+                      />
+                    )}
+                  </AnimatePresence>
                 </motion.div>
               ))}
             </div>
@@ -206,12 +261,13 @@ const CrazyAbout = () => {
                 <motion.button
                   key={index}
                   className={`${styles.navDot} ${activeFeature === index ? styles.activeDot : ''}`}
-                  onClick={() => setActiveFeature(index)}
+                  onClick={() => handleFeatureClick(index)}
                   whileHover={{ scale: 1.2 }}
                   whileTap={{ scale: 0.9 }}
-                  style={{
+                  animate={{
                     backgroundColor: activeFeature === index ? features[index].color : 'rgba(255, 255, 255, 0.3)'
                   }}
+                  transition={{ duration: 0.3 }}
                 />
               ))}
             </div>
