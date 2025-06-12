@@ -1,0 +1,436 @@
+/* components/TokenPriceProgression/TokenPriceProgression.module.css */
+
+.container {
+    width: 100%;
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+    background: linear-gradient(135deg, rgba(26, 31, 58, 0.8) 0%, rgba(45, 27, 61, 0.8) 100%);
+    backdrop-filter: blur(20px);
+    border-radius: 25px;
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+    animation: containerShimmer 4s infinite;
+  }
+  
+  @keyframes containerShimmer {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+  
+  .titleSection {
+    text-align: center;
+    margin-bottom: 2rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: titleGradient 3s ease-in-out infinite;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+  
+  .icon {
+    font-size: 1.8rem;
+    animation: iconBounce 2s infinite;
+    text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+  }
+  
+  @keyframes titleGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  @keyframes iconBounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  
+  .progressionGrid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+    max-width: 900px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .stageCard {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(15px);
+    border-radius: 15px;
+    padding: 1.5rem 1rem;
+    text-align: center;
+    position: relative;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    overflow: hidden;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+  
+  .stageCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    pointer-events: none;
+    border-radius: inherit;
+  }
+  
+  .priceSection {
+    font-size: 1.5rem;
+    font-weight: 900;
+    margin-bottom: 0.8rem;
+    font-family: 'Courier New', monospace;
+    position: relative;
+    z-index: 2;
+  }
+  
+  .stageLabel {
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+  }
+  
+  /* Past Stage Styles */
+  .stagePast {
+    border-color: rgba(76, 175, 80, 0.4);
+    background: rgba(76, 175, 80, 0.1);
+    box-shadow: 0 8px 25px rgba(76, 175, 80, 0.2);
+  }
+  
+  .stagePast .priceSection {
+    color: #4CAF50;
+    text-shadow: 0 0 15px rgba(76, 175, 80, 0.6);
+  }
+  
+  .stagePast .stageLabel {
+    color: rgba(76, 175, 80, 0.9);
+  }
+  
+  /* Active Stage Styles */
+  .stageActive {
+    border-color: rgba(78, 205, 196, 0.6);
+    background: rgba(78, 205, 196, 0.15);
+    box-shadow: 
+      0 8px 32px rgba(78, 205, 196, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+  }
+  
+  .stageActive .priceSection {
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: activeGradient 2s ease-in-out infinite;
+  }
+  
+  .stageActive .stageLabel {
+    color: #4ECDC4;
+    text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
+  }
+  
+  @keyframes activeGradient {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  /* Future Stage Styles */
+  .stageFuture {
+    border-color: rgba(255, 255, 255, 0.2);
+    background: rgba(255, 255, 255, 0.03);
+  }
+  
+  .stageFuture .priceSection {
+    color: rgba(255, 255, 255, 0.6);
+  }
+  
+  .stageFuture .stageLabel {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  /* Active Indicator */
+  .activeIndicator {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background: linear-gradient(135deg, #4ECDC4, #45B7D1);
+    border-radius: 15px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .pulse {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: inherit;
+  }
+  
+  /* Completed Indicator */
+  .completedIndicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, #4CAF50, #66BB6A);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 1rem;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+  }
+  
+  /* Connection Lines */
+  .connectionLine {
+    position: absolute;
+    top: 50%;
+    right: -0.75rem;
+    height: 2px;
+    width: 1.5rem;
+    background: linear-gradient(90deg, #4ECDC4, #45B7D1);
+    border-radius: 2px;
+    z-index: 1;
+  }
+  
+  /* Progress Info Section */
+  .progressInfo {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    border-radius: 15px;
+    padding: 1.2rem 1.8rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .currentStageInfo,
+  .nextStageInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .infoLabel {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .infoValue {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #4ECDC4;
+    text-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+  }
+  
+  /* Hover Effects */
+  .stageCard:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(78, 205, 196, 0.2);
+  }
+  
+  .stagePast:hover {
+    box-shadow: 0 15px 35px rgba(76, 175, 80, 0.3);
+  }
+  
+  .stageActive:hover {
+    transform: scale(1.08) translateY(-3px);
+    box-shadow: 
+      0 20px 40px rgba(78, 205, 196, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  }
+  
+  .stageFuture:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 15px 35px rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1024px) {
+    .progressionGrid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+    
+    .title {
+      font-size: 1.8rem;
+    }
+    
+    .priceSection {
+      font-size: 1.3rem;
+    }
+    
+    .container {
+      padding: 2rem 1.5rem;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .container {
+      padding: 1.5rem 1rem;
+      max-width: none;
+    }
+    
+    .progressionGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+      max-width: none;
+    }
+    
+    .title {
+      font-size: 1.6rem;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .icon {
+      font-size: 1.5rem;
+    }
+    
+    .stageCard {
+      padding: 1.2rem 0.8rem;
+      min-height: 100px;
+    }
+    
+    .priceSection {
+      font-size: 1.2rem;
+    }
+    
+    .stageLabel {
+      font-size: 0.75rem;
+    }
+    
+    .progressInfo {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+      padding: 1rem 1.2rem;
+      max-width: none;
+    }
+    
+    .connectionLine {
+      display: none;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .progressionGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.6rem;
+    }
+    
+    .title {
+      font-size: 1.4rem;
+    }
+    
+    .stageCard {
+      padding: 1rem 0.6rem;
+      min-height: 90px;
+    }
+    
+    .priceSection {
+      font-size: 1.1rem;
+    }
+    
+    .activeIndicator {
+      top: -6px;
+      right: -6px;
+      padding: 0.2rem 0.5rem;
+      font-size: 0.6rem;
+    }
+    
+    .completedIndicator {
+      width: 22px;
+      height: 22px;
+      font-size: 0.8rem;
+    }
+  }
+  
+  /* Accessibility */
+  @media (prefers-reduced-motion: reduce) {
+    .container::before,
+    .titleGradient,
+    .iconBounce,
+    .activeGradient,
+    .pulse {
+      animation: none;
+    }
+    
+    .stageCard:hover,
+    .stageActive:hover {
+      transform: none;
+    }
+  }
+  
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .stageCard {
+      border-width: 3px;
+    }
+    
+    .stagePast {
+      border-color: #4CAF50;
+      background: rgba(76, 175, 80, 0.2);
+    }
+    
+    .stageActive {
+      border-color: #4ECDC4;
+      background: rgba(78, 205, 196, 0.2);
+    }
+    
+    .stageFuture {
+      border-color: #ffffff;
+      background: rgba(255, 255, 255, 0.1);
+    }
+  }

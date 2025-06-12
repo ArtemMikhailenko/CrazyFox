@@ -31,6 +31,7 @@ import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
 import CrazyRoadmapMap from '@/components/CrazyRoadmap/CrazyRoadmap';
 
 import styles from './page.module.css';
+import TokenPriceProgression from '@/components/TokenPriceProgression/TokenPriceProgression';
 
 // ThirdWeb client configuration
 const client = createThirdwebClient({
@@ -636,7 +637,7 @@ const HomeContent = () => {
                 </div>
               </motion.div>
             </motion.div>
-         
+            
             {/* Raised Amount Display */}
             <motion.div 
               className={styles.raisedAmount}
@@ -724,7 +725,7 @@ const HomeContent = () => {
           </motion.div>
         </div>
       </motion.section>
-
+      <TokenPriceProgression currentStage={1} />        
       {/* Other Sections */}
       <motion.section 
         id="about" 

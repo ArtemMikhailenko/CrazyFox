@@ -44,9 +44,9 @@ const CrazyAbout = () => {
   ];
 
   const stats = [
-    { number: '5K+', label: 'Holders', icon: '👥' },
-    { number: '$50K+', label: 'Market Cap', icon: '💰' },
-    { number: '280K+', label: 'Community', icon: '🌍' },
+    { number: '1K+', label: 'Holders', icon: '👥' },
+    { number: '$300K+', label: 'Market Cap', icon: '💰' },
+    { number: '50K+', label: 'Community', icon: '🌍' },
     { number: '24/7', label: 'Support', icon: '🛠️' }
   ];
 
