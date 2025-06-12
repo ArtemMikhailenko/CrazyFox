@@ -10,7 +10,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import confetti from 'canvas-confetti';
 
-// ThirdWeb v5 ТОЛЬКО imports - убираем все v4
+// ThirdWeb v5 imports
 import { 
   ThirdwebProvider, 
   useActiveAccount,
@@ -21,9 +21,7 @@ import {
 import { createThirdwebClient } from "thirdweb";
 import { prepareContractCall, getContract } from "thirdweb";
 import { bsc } from "thirdweb/chains";
-import { toWei } from "thirdweb/utils";
-// Убираем эти импорты - они из v4:
-// import { useContract, useContractWrite } from "@thirdweb-dev/react";
+import { toWei, toEther } from "thirdweb/utils";
 
 // Components
 import Header from '@/components/Header/Header';
@@ -36,21 +34,24 @@ import styles from './page.module.css';
 
 // ThirdWeb client configuration
 const client = createThirdwebClient({
-  clientId: "d28d89a66e8eb5e73d6a9c8eeaa0645a" // Замените на ваш Client ID
+  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
 });
 
 // Contract addresses
 const TOKEN_CONTRACT_ADDRESS = "0x874641647B9d8a8d991c541BBD48bD597b85aE33";
 const PRESALE_CONTRACT_ADDRESS = "0xD80AC08a2effF26c4465aAF6ff00BE3DaecFF476";
 
-// Token price in USD
-const TOKEN_PRICE_USD = 0.005;
-
 // Contract instances
 const presaleContract = getContract({
   client,
   chain: bsc,
   address: PRESALE_CONTRACT_ADDRESS,
+});
+
+const tokenContract = getContract({
+  client,
+  chain: bsc,
+  address: TOKEN_CONTRACT_ADDRESS,
 });
 
 // Animation variants
@@ -114,46 +115,89 @@ const useTypewriter = (text: string, speed: number = 50) => {
   return { displayedText, isComplete };
 };
 
-// Buy Token Component для ThirdWeb v5 (исправленная версия)
+// Fixed Buy Token Component для ThirdWeb v5
 const BuyTokenComponent = () => {
   const account = useActiveAccount();
   const { mutate: sendTransaction, isPending, error } = useSendTransaction();
-  const [buyAmount, setBuyAmount] = useState('1');
+  const [buyAmount, setBuyAmount] = useState('0.1');
   const [showBuyModal, setShowBuyModal] = useState(false);
 
-  const calculateTokenAmount = (bnbAmount: string) => {
-    const bnbValue = parseFloat(bnbAmount);
-    const BNB_TO_USD = 300; // Примерный курс
-    const usdValue = bnbValue * BNB_TO_USD;
-    return Math.floor(usdValue / TOKEN_PRICE_USD);
+  // Read contract data to get real-time info
+  const { data: presaleInfo, isLoading: presaleLoading } = useReadContract({
+    contract: presaleContract,
+    method: "function getPresaleInfo() view returns (uint256 _totalSoldTokens, uint256 _totalRaisedUSD, uint256 _tokenPriceUSD, address _paymentWallet, address _tokenWallet, uint256 _bnbPrice, uint256 _ethPrice)",
+    params: []
+  });
+
+  // Calculate tokens for BNB amount
+  const { data: tokensForBNB } = useReadContract({
+    contract: presaleContract,
+    method: "function calculateTokensForBNB(uint256 bnbAmount) view returns (uint256)",
+    params: [toWei(buyAmount || "0")]
+  });
+
+  // Get current BNB price
+  const { data: currentPrices } = useReadContract({
+    contract: presaleContract,
+    method: "function getCurrentPrices() view returns (uint256 bnbPrice, uint256 ethPrice)",
+    params: []
+  });
+
+  const calculateTokenAmount = () => {
+    if (tokensForBNB) {
+      return toEther(tokensForBNB);
+    }
+    return "0";
   };
-  
+
+  const getTokenPriceInUSD = () => {
+    if (presaleInfo) {
+      // tokenPriceUSD is in wei format (5e15 for $0.005)
+      return parseFloat(toEther(presaleInfo[2]));
+    }
+    return 0.005; // fallback
+  };
+
+  const getBNBPriceInUSD = () => {
+    if (currentPrices) {
+      // BNB price from Chainlink has 8 decimals
+      return parseFloat(currentPrices[0].toString()) / 1e8;
+    }
+    return 300; // fallback
+  };
+
+  // Method 1: Call buyWithBNB() function directly
   const handleBuyTokens = async () => {
     if (!account) {
-      toast.error("Please connect your wallet first!");
+      toast.error("Please connect your wallet first! 🦊");
       return;
     }
+    
     if (!buyAmount || Number(buyAmount) <= 0) {
       toast.error("Please enter a valid amount!");
       return;
     }
-  
+
     try {
-      // ThirdWeb v5 способ с правильной обработкой
+      console.log("Preparing buyWithBNB transaction...");
+      
       const transaction = prepareContractCall({
         contract: presaleContract,
-        method: "function _buyWithBNB() payable",
+        method: "function buyWithBNB() payable",
         params: [],
-        value: toWei(buyAmount) // Используем toWei из thirdweb/utils
+        value: toWei(buyAmount)
       });
+
+      console.log("Transaction prepared:", transaction);
 
       sendTransaction(transaction, {
         onSuccess: (result) => {
-          toast.success("Purchase successful! 🦊");
-          setBuyAmount("1");
+          console.log("Transaction successful:", result);
+          toast.success("🎉 Purchase successful! Welcome to the CrazyFox family! 🦊");
+          setBuyAmount("0.1");
           setShowBuyModal(false);
           
-          // Добавляем конфетти при успешной покупке
+          // Celebration confetti
           confetti({
             particleCount: 100,
             spread: 70,
@@ -162,13 +206,75 @@ const BuyTokenComponent = () => {
           });
         },
         onError: (error) => {
-          console.error("Transaction error:", error);
-          toast.error("Transaction failed: " + (error.message || "Unknown error"));
+          console.error("Transaction failed:", error);
+          
+          let errorMessage = "Transaction failed";
+          if (error.message?.includes("insufficient funds")) {
+            errorMessage = "Insufficient BNB balance for transaction + gas fees";
+          } else if (error.message?.includes("user rejected") || error.message?.includes("denied")) {
+            errorMessage = "Transaction cancelled by user";
+          } else if (error.message?.includes("Send BNB")) {
+            errorMessage = "BNB amount must be greater than 0";
+          } else if (error.message?.includes("Payment failed")) {
+            errorMessage = "Payment transfer failed";
+          } else if (error.message?.includes("Token transfer failed") || error.message?.includes("transfer amount exceeds allowance")) {
+            errorMessage = "⚠️ Contract Setup Issue: The presale contract doesn't have permission to transfer tokens. Please contact the team to fix the token allowance.";
+          } else if (error.message?.includes("Invalid price")) {
+            errorMessage = "Price oracle error - please try again";
+          }
+          
+          toast.error(errorMessage, {
+            autoClose: error.message?.includes("allowance") ? 8000 : 3000
+          });
+        }
+      });
+
+    } catch (err: any) {
+      console.error("Prepare transaction error:", err);
+      toast.error("Failed to prepare transaction. Please try again.");
+    }
+  };
+
+  // Method 2: Simple BNB transfer (uses receive() function)
+  const handleSimpleBuyTokens = async () => {
+    if (!account) {
+      toast.error("Please connect your wallet first! 🦊");
+      return;
+    }
+
+    try {
+      console.log("Preparing simple BNB transfer...");
+      
+      // Simple BNB transfer to contract address
+      // This will trigger the receive() function which calls buyWithBNB()
+      const transaction = {
+        to: PRESALE_CONTRACT_ADDRESS,
+        value: toWei(buyAmount),
+        data: "0x" // empty data
+      };
+
+      sendTransaction(transaction as any, {
+        onSuccess: (result) => {
+          console.log("Simple transfer successful:", result);
+          toast.success("🎉 Purchase successful via simple transfer! 🦊");
+          setBuyAmount("0.1");
+          setShowBuyModal(false);
+          
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#FF6B35', '#4ECDC4', '#45B7D1']
+          });
+        },
+        onError: (error) => {
+          console.error("Simple transfer failed:", error);
+          toast.error("Simple transfer failed: " + (error.message || "Unknown error"));
         }
       });
     } catch (err: any) {
-      console.error("Prepare transaction error:", err);
-      toast.error("Failed to prepare transaction: " + (err.message || "Unknown error"));
+      console.error("Simple transfer error:", err);
+      toast.error("Failed to prepare simple transfer");
     }
   };
 
@@ -201,7 +307,7 @@ const BuyTokenComponent = () => {
               onClick={(e) => e.stopPropagation()}
             >
               <div className={styles.modalHeader}>
-                <h3>Buy CRFX Tokens</h3>
+                <h3>🦊 Buy CRFX Tokens</h3>
                 <button 
                   className={styles.closeButton}
                   onClick={() => setShowBuyModal(false)}
@@ -211,12 +317,30 @@ const BuyTokenComponent = () => {
               </div>
               
               <div className={styles.buyContent}>
-                <div className={styles.priceInfo}>
-                  <div className={styles.tokenPrice}>
-                    <span className={styles.priceLabel}>Token Price:</span>
-                    <span className={styles.priceValue}>${TOKEN_PRICE_USD}</span>
+                {/* Contract Info Display */}
+                {presaleInfo && (
+                  <div className={styles.presaleStats}>
+                    <h4>📊 Presale Stats</h4>
+                    <div className={styles.statGrid}>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>💰 Token Price:</span>
+                        <span className={styles.statValue}>${getTokenPriceInUSD().toFixed(3)} USD</span>
+                      </div>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>🎯 Total Sold:</span>
+                        <span className={styles.statValue}>{parseFloat(toEther(presaleInfo[0])).toLocaleString()} CRFX</span>
+                      </div>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>💵 Total Raised:</span>
+                        <span className={styles.statValue}>${parseFloat(toEther(presaleInfo[1])).toLocaleString()} USD</span>
+                      </div>
+                      <div className={styles.statItem}>
+                        <span className={styles.statLabel}>🔥 BNB Price:</span>
+                        <span className={styles.statValue}>${getBNBPriceInUSD().toFixed(0)} USD</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className={styles.buyForm}>
                   <div className={styles.inputGroup}>
@@ -235,8 +359,11 @@ const BuyTokenComponent = () => {
                     <div className={styles.conversion}>
                       <span>You will receive:</span>
                       <span className={styles.tokenAmount}>
-                        ~{calculateTokenAmount(buyAmount).toLocaleString()} CRFX
+                        ~{parseFloat(calculateTokenAmount()).toLocaleString()} CRFX
                       </span>
+                    </div>
+                    <div className={styles.usdValue}>
+                      ≈ ${(parseFloat(buyAmount || "0") * getBNBPriceInUSD()).toFixed(2)} USD value
                     </div>
                   </div>
 
@@ -258,17 +385,40 @@ const BuyTokenComponent = () => {
                       whileTap={{ scale: 0.98 }}
                     >
                       {isPending ? (
-                        <span>🔄 Buying...</span>
+                        <span>🔄 Processing...</span>
                       ) : (
                         <span>🚀 Buy Tokens</span>
                       )}
+                    </motion.button>
+                  </div>
+
+                  {/* Contract Issue Warning */}
+                  <div className={styles.contractWarning}>
+                    <h4>⚠️ Known Issue</h4>
+                    <p>If you get an "allowance" error, it means the contract needs to be configured by the team. This is a one-time setup required.</p>
+                    <p>The transaction is safe - you'll only be charged gas fees if it fails.</p>
+                  </div>
+
+                  {/* Alternative Method */}
+                  <div className={styles.alternativeMethod}>
+                    <p className={styles.alternativeText}>
+                      💡 If main button fails, try simple transfer:
+                    </p>
+                    <motion.button
+                      className={styles.alternativeButton}
+                      onClick={handleSimpleBuyTokens}
+                      disabled={isPending}
+                      whileHover={!isPending ? { scale: 1.02 } : {}}
+                      whileTap={!isPending ? { scale: 0.98 } : {}}
+                    >
+                      🔄 Try Simple Transfer
                     </motion.button>
                   </div>
                 </div>
 
                 <div className={styles.buyFooter}>
                   <p className={styles.disclaimer}>
-                    ⚠️ Please ensure you have enough BNB for gas fees
+                    ⚠️ Please ensure you have enough BNB for gas fees (~$1-2)
                   </p>
                 </div>
               </div>
@@ -280,34 +430,21 @@ const BuyTokenComponent = () => {
   );
 };
 
-// Music Player Component
-const MusicPlayer = () => {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const audioRef = useRef<HTMLAudioElement>(null);
-
-  const togglePlay = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
+// Support Button Component
+const SupportButton = () => {
+  const handleSupportClick = () => {
+    window.open('https://t.me/CrazyFoxSupport', '_blank');
   };
 
   return (
     <motion.div 
-      className={styles.musicPlayer}
+      className={styles.supportButton}
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
     >
-      <button onClick={togglePlay} className={styles.playButton}>
-        {isPlaying ? '⏸️' : '🎵'}
+      <button onClick={handleSupportClick} className={styles.supportButtonInner} title="Support & Help">
+        💬
       </button>
-      <audio ref={audioRef} loop>
-        <source src="/fox-theme.mp3" type="audio/mpeg" />
-      </audio>
     </motion.div>
   );
 };
@@ -323,16 +460,26 @@ const HomeContent = () => {
 
   const account = useActiveAccount();
 
+  // Read presale data for dynamic stats
+  const { data: presaleInfo } = useReadContract({
+    contract: presaleContract,
+    method: "function getPresaleInfo() view returns (uint256 _totalSoldTokens, uint256 _totalRaisedUSD, uint256 _tokenPriceUSD, address _paymentWallet, address _tokenWallet, uint256 _bnbPrice, uint256 _ethPrice)",
+    params: []
+  });
+
   // Typewriter effect for hero title
   const { displayedText: heroText, isComplete: heroComplete } = useTypewriter(
     "Welcome to the CrazyFox Revolution!", 100
   );
 
+  // Get real-time raised amount or fallback to static
+  const realRaisedAmount = presaleInfo ? parseFloat(toEther(presaleInfo[1])) : 302736;
+
   // Animated counters
   const holdersCount = useAnimatedCounter(1000, 3000, showStats);
   const marketCapCount = useAnimatedCounter(50, 3000, showStats);
   const communityCount = useAnimatedCounter(280000, 3000, showStats);
-  const raisedAmount = useAnimatedCounter(302736, 3000, showStats);
+  const raisedAmount = useAnimatedCounter(Math.floor(realRaisedAmount), 3000, showStats);
 
   // Mouse tracking
   useEffect(() => {
@@ -438,8 +585,8 @@ const HomeContent = () => {
         className={styles.particles}
       />
 
-      {/* Music Player */}
-      <MusicPlayer />
+      {/* Support Button */}
+      <SupportButton />
 
       {/* Hero Section */}
       <motion.section 
@@ -480,7 +627,12 @@ const HomeContent = () => {
                   <span className={styles.priceLabel}>
                     <span className={styles.priceIcon}>💰</span>Current Price
                   </span>
-                  <span className={styles.priceAmount}>$0.005</span>
+                  <span className={styles.priceAmount}>
+                    {presaleInfo ? 
+                      `${parseFloat(toEther(presaleInfo[2])).toFixed(3)}` : 
+                      '$0.005'
+                    }
+                  </span>
                 </div>
               </motion.div>
             </motion.div>

@@ -273,26 +273,6 @@ const CrazyAbout = () => {
             </div>
           </motion.div>
         </div>
-
-        {/* Call to Action */}
-        <motion.div 
-          className={styles.ctaSection}
-          initial={{ y: 50, opacity: 0 }}
-          whileInView={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <motion.button
-            className={styles.ctaButton}
-            whileHover={{ 
-              scale: 1.05,
-              boxShadow: "0 15px 40px rgba(255, 107, 53, 0.4)"
-            }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <span>🚀 Join the Fox Revolution</span>
-          </motion.button>
-        </motion.div>
       </div>
     </div>
   );
