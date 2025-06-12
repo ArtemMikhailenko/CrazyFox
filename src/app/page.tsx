@@ -652,7 +652,7 @@ const HomeContent = () => {
                     animate={{ scale: 1 }}
                     transition={{ delay: 1.6, type: "spring", stiffness: 200 }}
                   >
-                    ${raisedAmount.toLocaleString()}.92
+                    $320 500
                   </motion.div>
                   <div className={styles.raisedProgress}>
                     <div className={styles.progressBarContainer}>
@@ -691,7 +691,7 @@ const HomeContent = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2 }}
                 >
-                  ${marketCapCount}K+
+                  $300K+
                 </motion.span>
                 <span className={styles.statLabel}>Market Cap</span>
               </div>
@@ -702,7 +702,7 @@ const HomeContent = () => {
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.4 }}
                 >
-                  {communityCount.toLocaleString()}+
+                  50K+
                 </motion.span>
                 <span className={styles.statLabel}>Community</span>
               </div>

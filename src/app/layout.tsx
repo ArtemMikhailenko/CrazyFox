@@ -47,7 +47,7 @@ export const metadata: Metadata = {
   authors: [
     {
       name: "CrazyFox Team",
-      url: "https://crazyfox.io"
+      url: "https://www.crazy-fox.io/"
     }
   ],
   creator: "CrazyFox Development Team",
@@ -57,7 +57,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL('https://crazyfox.io'),
+  metadataBase: new URL('https://www.crazy-fox.io/'),
   alternates: {
     canonical: '/',
     languages: {
@@ -71,7 +71,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: 'website',
     locale: 'en_US',
-    url: 'https://crazyfox.io',
+    url: 'https://www.crazy-fox.io/',
     siteName: 'CrazyFox - Revolutionary Meme Coin',
     title: 'CrazyFox ($CFOX) | The Wildest Meme Coin Revolution 🦊🚀',
     description: '🦊 Join 500K+ foxes in the craziest crypto community! CrazyFox ($CFOX) is the most exciting meme coin on BSC with epic tokenomics, amazing roadmap, and moon potential. Buy $CFOX now! 🚀💎',
