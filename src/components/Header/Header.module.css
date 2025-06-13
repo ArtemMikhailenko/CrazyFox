@@ -1,815 +1,880 @@
 /* Header.module.css */
 
 .header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 1000;
-    background: rgba(20, 20, 30, 0.95);
-    backdrop-filter: blur(20px);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.3s ease;
-    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
-  }
-  
-  .header.scrolled {
-    background: rgba(15, 15, 25, 0.98);
-    border-bottom: 1px solid rgba(255, 107, 53, 0.3);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  }
-  
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: rgba(20, 20, 30, 0.95);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+}
+
+.header.scrolled {
+  background: rgba(15, 15, 25, 0.98);
+  border-bottom: 1px solid rgba(255, 107, 53, 0.3);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 80px;
+}
+
+/* Logo */
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  z-index: 1002;
+}
+
+.logo img {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #FF6B35;
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+}
+
+.logoText {
+  font-size: 24px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #FF6B35, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Desktop Navigation */
+.desktopNav {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: none;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 50px;
+  transition: all 0.3s ease;
+  font-size: 14px;
+  font-weight: 600;
+  position: relative;
+  overflow: hidden;
+}
+
+.navLink::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.navLink:hover::before {
+  left: 100%;
+}
+
+.navLink:hover {
+  background: rgba(255, 107, 53, 0.1);
+  color: #FF6B35;
+  transform: translateY(-2px);
+}
+
+.navLink.active {
+  background: linear-gradient(135deg, #FF6B35, #4ECDC4);
+  color: #ffffff;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+}
+
+.navIcon {
+  font-size: 16px;
+}
+
+.navLabel {
+  white-space: nowrap;
+}
+
+/* Actions */
+.actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 1002;
+}
+
+.whitePaperButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 50px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+}
+
+.whitePaperButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+}
+
+.buttonIcon {
+  font-size: 16px;
+}
+
+.buttonText {
+  font-size: 14px;
+}
+
+.connectWallet {
+  /* Стили для кнопки подключения кошелька будут применены через ThirdWeb */
+}
+
+/* Mobile Menu Button */
+.mobileMenuButton {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+  z-index: 1002;
+  position: relative;
+}
+
+.mobileMenuButton:hover {
+  background: rgba(255, 107, 53, 0.2);
+  border-color: rgba(255, 107, 53, 0.4);
+}
+
+.hamburger {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  width: 20px;
+  height: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.hamburger span {
+  width: 20px;
+  height: 2px;
+  background: #ffffff;
+  transition: all 0.3s ease;
+  border-radius: 2px;
+  display: block;
+}
+
+.hamburger.open span:nth-child(1) {
+  transform: rotate(45deg) translate(4px, 3px);
+  background: #FF6B35;
+}
+
+.hamburger.open span:nth-child(2) {
+  opacity: 0;
+  transform: translateX(20px);
+}
+
+.hamburger.open span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -6px);
+  background: #FF6B35;
+}
+
+/* Mobile Menu - ИСПРАВЛЕНО */
+.mobileMenu {
+  position: fixed;
+  top: 80px;
+  left: 0;
+  right: 0;
+  background: rgba(15, 15, 25, 0.98);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 1001;
+  max-height: calc(100vh - 80px);
+}
+
+.mobileMenuContent {
+  padding: 24px 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.mobileNavLink {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: 100%;
+  padding: 20px 24px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  border-radius: 16px;
+  transition: all 0.3s ease;
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 12px;
+  text-align: left;
+  backdrop-filter: blur(10px);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobileNavLink:hover,
+.mobileNavLink:active,
+.mobileNavLink:focus {
+  background: rgba(255, 107, 53, 0.15);
+  border-color: rgba(255, 107, 53, 0.3);
+  color: #FF6B35;
+  transform: translateX(8px);
+  outline: none;
+}
+
+.mobileNavLink.active {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(78, 205, 196, 0.2));
+  border-color: rgba(255, 107, 53, 0.4);
+  color: #FF6B35;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+}
+
+.mobileNavLink .navIcon {
+  font-size: 20px;
+  min-width: 24px;
+  text-align: center;
+}
+
+.mobileNavLink .navLabel {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.mobileActions {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.mobileWhitePaperButton {
+  width: 100%;
+  padding: 20px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  border: none;
+  border-radius: 16px;
+  color: white;
+  font-weight: 700;
+  font-size: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
+  backdrop-filter: blur(10px);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mobileWhitePaperButton:hover,
+.mobileWhitePaperButton:active {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+}
+
+/* White Paper Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
+}
+
+.whitePaperModal {
+  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  border-radius: 20px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 30px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(78, 205, 196, 0.1));
+}
+
+.modalTitle {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.titleIcon {
+  font-size: 28px;
+}
+
+.modalTitle h3 {
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #FF6B35, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.closeButton {
+  width: 40px;
+  height: 40px;
+  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.closeButton:hover {
+  background: rgba(255, 107, 53, 0.2);
+  transform: rotate(90deg);
+}
+
+.modalContent {
+  padding: 30px;
+  overflow-y: auto;
+  max-height: calc(90vh - 120px);
+}
+
+.whitePaperPreview {
+  display: grid;
+  grid-template-columns: 1fr 2fr;
+  gap: 30px;
+  margin-bottom: 30px;
+}
+
+.previewImage {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+}
+
+.previewImage img {
+  width: 100%;
+  height: auto;
+  border-radius: 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.previewContent h4 {
+  color: #FF6B35;
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 15px;
+}
+
+.previewContent p {
+  color: #b0b0b0;
+  line-height: 1.6;
+  margin-bottom: 20px;
+}
+
+.previewContent ul {
+  list-style: none;
+  padding: 0;
+}
+
+.previewContent li {
+  color: #ffffff;
+  margin-bottom: 10px;
+  padding-left: 30px;
+  position: relative;
+}
+
+.downloadActions {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 30px;
+}
+
+.downloadButton,
+.viewOnlineButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 16px 24px;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-decoration: none;
+  font-size: 16px;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.downloadButton {
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+}
+
+.viewOnlineButton {
+  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+  color: white;
+}
+
+.downloadButton:hover,
+.viewOnlineButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+}
+
+.downloadIcon,
+.viewIcon {
+  font-size: 18px;
+}
+
+.socialShare {
+  text-align: center;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.socialShare p {
+  color: #b0b0b0;
+  margin-bottom: 15px;
+}
+
+.shareButtons {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+.shareButton {
+  width: 50px;
+  height: 50px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.shareButton:hover {
+  background: rgba(255, 107, 53, 0.2);
+  transform: translateY(-2px);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
   .container {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 20px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    height: 80px;
-  }
-  
-  /* Logo */
-  .logo {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .logo img {
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 2px solid #FF6B35;
-    box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
-  }
-  
-  .logoText {
-    font-size: 24px;
-    font-weight: 800;
-    background: linear-gradient(135deg, #FF6B35, #4ECDC4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  /* Desktop Navigation */
-  .desktopNav {
-    display: flex;
-    gap: 8px;
-    align-items: center;
+    padding: 0 16px;
   }
   
   .navLink {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 20px;
-    background: none;
-    border: none;
-    color: #ffffff;
-    cursor: pointer;
-    border-radius: 50px;
-    transition: all 0.3s ease;
-    font-size: 14px;
-    font-weight: 600;
-    position: relative;
-    overflow: hidden;
-  }
-  
-  .navLink::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    transition: left 0.5s ease;
-  }
-  
-  .navLink:hover::before {
-    left: 100%;
-  }
-  
-  .navLink:hover {
-    background: rgba(255, 107, 53, 0.1);
-    color: #FF6B35;
-    transform: translateY(-2px);
-  }
-  
-  .navLink.active {
-    background: linear-gradient(135deg, #FF6B35, #4ECDC4);
-    color: #ffffff;
-    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-  }
-  
-  .navIcon {
-    font-size: 16px;
-  }
-  
-  .navLabel {
-    white-space: nowrap;
-  }
-  
-  /* Actions */
-  .actions {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-  }
-  
-  .whitePaperButton {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 24px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border: none;
-    border-radius: 50px;
-    color: white;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-  }
-  
-  .whitePaperButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
-  }
-  
-  .buttonIcon {
-    font-size: 16px;
+    padding: 12px 16px;
   }
   
   .buttonText {
-    font-size: 14px;
-  }
-  
-  .connectWallet {
-    /* Стили для кнопки подключения кошелька будут применены через ThirdWeb */
-  }
-  
-  /* Mobile Menu Button */
-  .mobileMenuButton {
     display: none;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    width: 44px;
-    height: 44px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    cursor: pointer;
-    border-radius: 12px;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    z-index: 1001;
   }
   
-  .mobileMenuButton:hover {
-    background: rgba(255, 107, 53, 0.2);
-    border-color: rgba(255, 107, 53, 0.4);
+  .whitePaperButton {
+    padding: 12px 16px;
+    min-width: 44px;
   }
   
-  .hamburger {
+  .whitePaperButton .buttonIcon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 768px) {
+  .desktopNav,
+  .whitePaperButton {
+    display: none;
+  }
+  
+  .mobileMenuButton {
     display: flex;
-    flex-direction: column;
-    gap: 5px;
-    width: 20px;
-    height: 20px;
-    justify-content: center;
-    align-items: center;
   }
   
-  .hamburger span {
-    width: 20px;
-    height: 2px;
-    background: #ffffff;
-    transition: all 0.3s ease;
-    border-radius: 2px;
+  .container {
+    height: 75px;
+    padding: 0 16px;
+  }
+  
+  .logo img {
+    width: 42px;
+    height: 42px;
+  }
+  
+  .logoText {
+    font-size: 22px;
     display: block;
   }
   
-  .hamburger.open span:nth-child(1) {
-    transform: rotate(45deg) translate(4px, 3px);
-    background: #FF6B35;
-  }
-  
-  .hamburger.open span:nth-child(2) {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  
-  .hamburger.open span:nth-child(3) {
-    transform: rotate(-45deg) translate(7px, -6px);
-    background: #FF6B35;
-  }
-  
-  /* Mobile Menu */
   .mobileMenu {
-    display: none;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: rgba(15, 15, 25, 0.98);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  }
-  
-  .mobileMenuContent {
-    padding: 24px 20px;
-    margin: 0 auto;
-  }
-  
-  .mobileNavLink {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    width: 100%;
-    padding: 20px 24px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    cursor: pointer;
-    border-radius: 16px;
-    transition: all 0.3s ease;
-    font-size: 18px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    text-align: left;
-    backdrop-filter: blur(10px);
-  }
-  
-  .mobileNavLink:hover {
-    background: rgba(255, 107, 53, 0.15);
-    border-color: rgba(255, 107, 53, 0.3);
-    color: #FF6B35;
-    transform: translateX(8px);
-  }
-  
-  .mobileNavLink.active {
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(78, 205, 196, 0.2));
-    border-color: rgba(255, 107, 53, 0.4);
-    color: #FF6B35;
-    box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
-  }
-  
-  .mobileNavLink .navIcon {
-    font-size: 20px;
-    min-width: 24px;
-    text-align: center;
-  }
-  
-  .mobileNavLink .navLabel {
-    font-size: 18px;
-    font-weight: 600;
-  }
-  
-  .mobileActions {
-    margin-top: 24px;
-    padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .mobileWhitePaperButton {
-    width: 100%;
-    padding: 20px;
-    background: linear-gradient(135deg, #6366f1, #8b5cf6);
-    border: none;
-    border-radius: 16px;
-    color: white;
-    font-weight: 700;
-    font-size: 18px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-    backdrop-filter: blur(10px);
-  }
-  
-  .mobileWhitePaperButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
-  }
-  
-  /* White Paper Modal */
-  .modalOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 10000;
-    padding: 20px;
+    top: 75px;
+    max-height: calc(100vh - 75px);
   }
   
   .whitePaperModal {
-    background: linear-gradient(145deg, #1a1a2e, #16213e);
-    border-radius: 20px;
-    max-width: 800px;
-    width: 100%;
-    max-height: 90vh;
-    overflow: hidden;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    margin: 16px;
+    max-height: 92vh;
+    border-radius: 16px;
   }
   
   .modalHeader {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 30px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(78, 205, 196, 0.1));
-  }
-  
-  .modalTitle {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  
-  .titleIcon {
-    font-size: 28px;
+    padding: 24px 20px;
   }
   
   .modalTitle h3 {
+    font-size: 22px;
+  }
+  
+  .titleIcon {
     font-size: 24px;
-    font-weight: 700;
-    background: linear-gradient(135deg, #FF6B35, #4ECDC4);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin: 0;
+  }
+  
+  .closeButton {
+    width: 44px;
+    height: 44px;
+    font-size: 20px;
+  }
+  
+  .modalContent {
+    padding: 24px 20px;
+    max-height: calc(92vh - 140px);
+  }
+  
+  .whitePaperPreview {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .previewContent h4 {
+    font-size: 18px;
+  }
+  
+  .previewContent p {
+    font-size: 15px;
+  }
+  
+  .previewContent li {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  
+  .downloadActions {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .downloadButton,
+  .viewOnlineButton {
+    padding: 18px 20px;
+    font-size: 16px;
+  }
+  
+  .shareButtons {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .shareButton {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 12px;
+    height: 70px;
+  }
+  
+  .logo img {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .logoText {
+    font-size: 20px;
+  }
+  
+  .mobileMenuButton {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .hamburger span {
+    width: 18px;
+  }
+  
+  .mobileMenu {
+    top: 70px;
+    max-height: calc(100vh - 70px);
+  }
+  
+  .mobileMenuContent {
+    padding: 20px 16px;
+  }
+  
+  .mobileNavLink {
+    padding: 18px 20px;
+    font-size: 16px;
+    margin-bottom: 10px;
+  }
+  
+  .mobileNavLink .navIcon {
+    font-size: 18px;
+  }
+  
+  .mobileNavLink .navLabel {
+    font-size: 16px;
+  }
+  
+  .mobileWhitePaperButton {
+    padding: 18px;
+    font-size: 16px;
+  }
+  
+  .whitePaperModal {
+    margin: 12px;
+    max-height: 95vh;
+    border-radius: 12px;
+  }
+  
+  .modalHeader {
+    padding: 20px 16px;
+  }
+  
+  .modalTitle h3 {
+    font-size: 20px;
+  }
+  
+  .titleIcon {
+    font-size: 22px;
   }
   
   .closeButton {
     width: 40px;
     height: 40px;
-    border: none;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    border-radius: 50%;
-    cursor: pointer;
-    transition: all 0.3s ease;
     font-size: 18px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .closeButton:hover {
-    background: rgba(255, 107, 53, 0.2);
-    transform: rotate(90deg);
   }
   
   .modalContent {
-    padding: 30px;
-    overflow-y: auto;
-    max-height: calc(90vh - 120px);
-  }
-  
-  .whitePaperPreview {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 30px;
-    margin-bottom: 30px;
-  }
-  
-  .previewImage {
-    background: rgba(255, 255, 255, 0.05);
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 200px;
-  }
-  
-  .previewImage img {
-    width: 100%;
-    height: auto;
-    border-radius: 8px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    padding: 20px 16px;
+    max-height: calc(95vh - 120px);
   }
   
   .previewContent h4 {
-    color: #FF6B35;
-    font-size: 20px;
-    font-weight: 700;
-    margin-bottom: 15px;
+    font-size: 16px;
   }
   
   .previewContent p {
-    color: #b0b0b0;
-    line-height: 1.6;
-    margin-bottom: 20px;
-  }
-  
-  .previewContent ul {
-    list-style: none;
-    padding: 0;
+    font-size: 14px;
   }
   
   .previewContent li {
-    color: #ffffff;
-    margin-bottom: 10px;
-    padding-left: 30px;
-    position: relative;
-  }
-  
-  .downloadActions {
-    display: flex;
-    gap: 16px;
-    margin-bottom: 30px;
+    font-size: 14px;
   }
   
   .downloadButton,
   .viewOnlineButton {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-    padding: 16px 24px;
-    border: none;
-    border-radius: 12px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    font-size: 16px;
-  }
-  
-  .downloadButton {
-    background: linear-gradient(135deg, #10b981, #059669);
-    color: white;
-  }
-  
-  .viewOnlineButton {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-    color: white;
-  }
-  
-  .downloadButton:hover,
-  .viewOnlineButton:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
+    padding: 16px 18px;
+    font-size: 15px;
   }
   
   .downloadIcon,
   .viewIcon {
-    font-size: 18px;
-  }
-  
-  .socialShare {
-    text-align: center;
-    padding-top: 20px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  
-  .socialShare p {
-    color: #b0b0b0;
-    margin-bottom: 15px;
-  }
-  
-  .shareButtons {
-    display: flex;
-    justify-content: center;
-    gap: 12px;
+    font-size: 16px;
   }
   
   .shareButton {
-    width: 50px;
-    height: 50px;
-    border: none;
-    border-radius: 50%;
-    background: rgba(255, 255, 255, 0.1);
-    color: #ffffff;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-size: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: 44px;
+    height: 44px;
+    font-size: 16px;
   }
   
-  .shareButton:hover {
+  .socialShare p {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .container {
+    padding: 0 10px;
+    height: 65px;
+  }
+  
+  .logo img {
+    width: 35px;
+    height: 35px;
+  }
+  
+  .logoText {
+    font-size: 18px;
+  }
+  
+  .mobileMenuButton {
+    width: 38px;
+    height: 38px;
+  }
+  
+  .mobileMenu {
+    top: 65px;
+    max-height: calc(100vh - 65px);
+  }
+  
+  .mobileMenuContent {
+    padding: 16px 12px;
+  }
+  
+  .mobileNavLink {
+    padding: 16px 18px;
+    font-size: 15px;
+  }
+  
+  .mobileWhitePaperButton {
+    padding: 16px;
+    font-size: 15px;
+  }
+  
+  .modalContent {
+    padding: 16px 12px;
+  }
+  
+  .downloadButton,
+  .viewOnlineButton {
+    padding: 14px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Touch and Click Improvements for Mobile */
+@media (hover: none) and (pointer: coarse) {
+  .mobileNavLink,
+  .mobileWhitePaperButton,
+  .closeButton,
+  .downloadButton,
+  .viewOnlineButton,
+  .shareButton {
+    min-height: 44px;
+    -webkit-tap-highlight-color: rgba(255, 107, 53, 0.2);
+  }
+  
+  .mobileNavLink:active {
     background: rgba(255, 107, 53, 0.2);
-    transform: translateY(-2px);
+    transform: scale(0.98);
   }
   
-  /* Responsive Design */
-  @media (max-width: 1024px) {
-    .container {
-      padding: 0 16px;
-    }
-    
-    .navLink {
-      padding: 12px 16px;
-    }
-    
-    .buttonText {
-      display: none;
-    }
-    
-    .whitePaperButton {
-      padding: 12px 16px;
-      min-width: 44px;
-    }
-    
-    .whitePaperButton .buttonIcon {
-      font-size: 18px;
-    }
+  .mobileWhitePaperButton:active {
+    transform: scale(0.98);
   }
-  
-  @media (max-width: 768px) {
-    .desktopNav,
-    .whitePaperButton {
-      display: none;
-    }
-    
-    .mobileMenuButton,
-    .mobileMenu {
-      display: flex;
-    }
-    
-    .container {
-      height: 75px;
-      padding: 0 16px;
-    }
-    
-    .logo img {
-      width: 42px;
-      height: 42px;
-    }
-    
-    .logoText {
-      font-size: 22px;
-      display: block;
-    }
-    
-    .whitePaperModal {
-      margin: 16px;
-      max-height: 92vh;
-      border-radius: 16px;
-    }
-    
-    .modalHeader {
-      padding: 24px 20px;
-    }
-    
-    .modalTitle h3 {
-      font-size: 22px;
-    }
-    
-    .titleIcon {
-      font-size: 24px;
-    }
-    
-    .closeButton {
-      width: 44px;
-      height: 44px;
-      font-size: 20px;
-    }
-    
-    .modalContent {
-      padding: 24px 20px;
-      max-height: calc(92vh - 140px);
-    }
-    
-    .whitePaperPreview {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    
-    .previewContent h4 {
-      font-size: 18px;
-    }
-    
-    .previewContent p {
-      font-size: 15px;
-    }
-    
-    .previewContent li {
-      font-size: 15px;
-      margin-bottom: 8px;
-    }
-    
-    .downloadActions {
-      flex-direction: column;
-      gap: 12px;
-    }
-    
-    .downloadButton,
-    .viewOnlineButton {
-      padding: 18px 20px;
-      font-size: 16px;
-    }
-    
-    .shareButtons {
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    
-    .shareButton {
-      width: 48px;
-      height: 48px;
-      font-size: 18px;
-    }
+}
+
+/* Animation Classes */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
-  @media (max-width: 480px) {
-    .container {
-      padding: 0 12px;
-      height: 70px;
-    }
-    
-    .logo img {
-      width: 38px;
-      height: 38px;
-    }
-    
-    .logoText {
-      font-size: 20px;
-    }
-    
-    .mobileMenuButton {
-      width: 40px;
-      height: 40px;
-    }
-    
-    .hamburger span {
-      width: 18px;
-    }
-    
-    .whitePaperModal {
-      margin: 12px;
-      max-height: 95vh;
-      border-radius: 12px;
-    }
-    
-    .modalHeader {
-      padding: 20px 16px;
-    }
-    
-    .modalTitle h3 {
-      font-size: 20px;
-    }
-    
-    .titleIcon {
-      font-size: 22px;
-    }
-    
-    .closeButton {
-      width: 40px;
-      height: 40px;
-      font-size: 18px;
-    }
-    
-    .modalContent {
-      padding: 20px 16px;
-      max-height: calc(95vh - 120px);
-    }
-    
-    .previewContent h4 {
-      font-size: 16px;
-    }
-    
-    .previewContent p {
-      font-size: 14px;
-    }
-    
-    .previewContent li {
-      font-size: 14px;
-    }
-    
-    .downloadButton,
-    .viewOnlineButton {
-      padding: 16px 18px;
-      font-size: 15px;
-    }
-    
-    .downloadIcon,
-    .viewIcon {
-      font-size: 16px;
-    }
-    
-    .shareButton {
-      width: 44px;
-      height: 44px;
-      font-size: 16px;
-    }
-    
-    .socialShare p {
-      font-size: 14px;
-    }
-    
-    .mobileNavLink {
-      padding: 18px 20px;
-      font-size: 16px;
-      margin-bottom: 10px;
-    }
-    
-    .mobileNavLink .navIcon {
-      font-size: 18px;
-    }
-    
-    .mobileNavLink .navLabel {
-      font-size: 16px;
-    }
-    
-    .mobileWhitePaperButton {
-      padding: 18px;
-      font-size: 16px;
-    }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
-  
-  @media (max-width: 360px) {
-    .container {
-      padding: 0 10px;
-      height: 65px;
-    }
-    
-    .logo img {
-      width: 35px;
-      height: 35px;
-    }
-    
-    .logoText {
-      font-size: 18px;
-    }
-    
-    .mobileMenuButton {
-      width: 38px;
-      height: 38px;
-    }
-    
-    .modalContent {
-      padding: 16px 12px;
-    }
-    
-    .downloadButton,
-    .viewOnlineButton {
-      padding: 14px 16px;
-      font-size: 14px;
-    }
-    
-    .mobileNavLink {
-      padding: 16px 18px;
-      font-size: 15px;
-    }
-    
-    .mobileWhitePaperButton {
-      padding: 16px;
-      font-size: 15px;
-    }
-  }
-  
-  /* Animation Classes */
-  @keyframes fadeInUp {
-    from {
-      opacity: 0;
-      transform: translateY(20px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .fadeInUp {
-    animation: fadeInUp 0.6s ease-out;
-  }
-  
-  /* Custom Scrollbar for Modal */
-  .modalContent::-webkit-scrollbar {
-    width: 6px;
-  }
-  
-  .modalContent::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 3px;
-  }
-  
-  .modalContent::-webkit-scrollbar-thumb {
-    background: rgba(255, 107, 53, 0.5);
-    border-radius: 3px;
-  }
-  
-  .modalContent::-webkit-scrollbar-thumb:hover {
-    background: rgba(255, 107, 53, 0.7);
-  }
+}
+
+.fadeInUp {
+  animation: fadeInUp 0.6s ease-out;
+}
+
+/* Custom Scrollbar for Modal */
+.modalContent::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modalContent::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.modalContent::-webkit-scrollbar-thumb {
+  background: rgba(255, 107, 53, 0.5);
+  border-radius: 3px;
+}
+
+.modalContent::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 107, 53, 0.7);
+}
+
+/* Prevent body scroll when mobile menu is open */
+.mobileMenuOpen {
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
+}
