@@ -1,0 +1,580 @@
+/* components/SupportForm/SupportForm.module.css */
+
+.supportButtonContainer {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    z-index: 100;
+  }
+  
+  .supportButtonInner {
+    background: linear-gradient(135deg, #0088cc 0%, #229ED9 100%);
+    border: none;
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    position: relative;
+    overflow: hidden;
+    z-index: 2;
+  }
+  
+  .supportButtonInner:hover {
+    box-shadow: 0 8px 25px rgba(0, 136, 204, 0.5);
+    background: linear-gradient(135deg, #229ED9, #0088cc);
+    transform: translateY(-2px);
+  }
+  
+  .supportButtonInner::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    animation: supportButtonShine 3s infinite;
+  }
+  
+  @keyframes supportButtonShine {
+    0% { left: -100%; }
+    100% { left: 100%; }
+  }
+  
+  /* Animated pulse ring */
+  .pulseRing {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 70px;
+    height: 70px;
+    border: 2px solid rgba(0, 136, 204, 0.6);
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    animation: pulseAnimation 2s infinite;
+    z-index: 1;
+  }
+  
+  @keyframes pulseAnimation {
+    0% {
+      transform: translate(-50%, -50%) scale(1);
+      opacity: 1;
+    }
+    70% {
+      transform: translate(-50%, -50%) scale(1.3);
+      opacity: 0;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.3);
+      opacity: 0;
+    }
+  }
+  
+  .modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    padding: 20px;
+  }
+  
+  .supportModal {
+    background: linear-gradient(145deg, #1a1a2e, #16213e);
+    border-radius: 25px;
+    max-width: 600px;
+    width: 100%;
+    max-height: 90vh;
+    overflow: hidden;
+    border: 2px solid rgba(0, 136, 204, 0.3);
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+    position: relative;
+  }
+  
+  .supportModal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(ellipse at top left, rgba(0, 136, 204, 0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at bottom right, rgba(34, 158, 217, 0.05) 0%, transparent 50%);
+    pointer-events: none;
+  }
+  
+  .modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2rem 2rem 1rem;
+    position: relative;
+    z-index: 2;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .headerContent {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  
+  .headerContent h2 {
+    font-size: 1.8rem;
+    font-weight: 800;
+    background: linear-gradient(135deg, #0088cc, #229ED9);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+  }
+  
+  .supportIcon {
+    font-size: 2rem;
+    filter: drop-shadow(0 0 10px rgba(0, 136, 204, 0.5));
+  }
+  
+  .closeButton {
+    width: 40px;
+    height: 40px;
+    border: none;
+    background: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .closeButton:hover {
+    background: rgba(0, 136, 204, 0.2);
+    transform: rotate(90deg);
+  }
+  
+  .modalContent {
+    padding: 1rem 2rem 2rem;
+    overflow-y: auto;
+    max-height: calc(90vh - 120px);
+    position: relative;
+    z-index: 2;
+  }
+  
+  .quickActions {
+    margin-bottom: 2rem;
+  }
+  
+  .quickActions h3 {
+    color: #229ED9;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .quickActions h3::before {
+    content: '⚡';
+    font-size: 1.4rem;
+  }
+  
+  .actionButtons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+  
+  .actionButton {
+    background: rgba(0, 136, 204, 0.1);
+    border: 2px solid rgba(0, 136, 204, 0.3);
+    border-radius: 15px;
+    padding: 1rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+    backdrop-filter: blur(10px);
+    text-align: center;
+  }
+  
+  .actionButton:hover {
+    background: rgba(0, 136, 204, 0.2);
+    border-color: rgba(0, 136, 204, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 136, 204, 0.2);
+  }
+  
+  .actionIcon {
+    font-size: 1.5rem;
+  }
+  
+  .formSection {
+    margin-bottom: 2rem;
+  }
+  
+  .formSection h3 {
+    color: #0088cc;
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  
+  .formSection h3::before {
+    content: '📝';
+    font-size: 1.4rem;
+  }
+  
+  .formDescription {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+  
+  .supportForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.2rem;
+  }
+  
+  .formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  
+  .inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .inputGroup label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  
+  .inputGroup input,
+  .inputGroup select,
+  .inputGroup textarea {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(0, 136, 204, 0.2);
+    border-radius: 12px;
+    padding: 0.8rem 1rem;
+    color: white;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+  }
+  
+  .inputGroup input:focus,
+  .inputGroup select:focus,
+  .inputGroup textarea:focus {
+    outline: none;
+    border-color: rgba(0, 136, 204, 0.5);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 20px rgba(0, 136, 204, 0.2);
+  }
+  
+  .inputGroup textarea {
+    resize: vertical;
+    min-height: 80px;
+    font-family: inherit;
+  }
+  
+  .inputGroup select {
+    cursor: pointer;
+  }
+  
+  .formActions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+  }
+  
+  .cancelButton {
+    flex: 1;
+    padding: 0.8rem 1.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: white;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .cancelButton:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .submitButton {
+    flex: 2;
+    padding: 0.8rem 1.5rem;
+    background: linear-gradient(135deg, #0088cc, #229ED9);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
+  }
+  
+  .submitButton:hover {
+    background: linear-gradient(135deg, #229ED9, #0088cc);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 136, 204, 0.4);
+  }
+  
+  .contactInfo {
+    background: rgba(0, 136, 204, 0.1);
+    border-radius: 15px;
+    padding: 1.5rem;
+    border: 1px solid rgba(0, 136, 204, 0.2);
+  }
+  
+  .contactHeader {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1rem;
+  }
+  
+  .contactIcon {
+    font-size: 1.5rem;
+    width: 40px;
+    text-align: center;
+  }
+  
+  .contactHeader div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  
+  .contactHeader strong {
+    color: #229ED9;
+    font-weight: 600;
+  }
+  
+  .contactHeader span {
+    color: rgba(255, 255, 255, 0.8);
+    font-family: 'Courier New', monospace;
+  }
+  
+  .contactNote {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin: 0;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border-left: 3px solid #229ED9;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .supportButtonContainer {
+      bottom: 1.5rem;
+      right: 1.5rem;
+    }
+    
+    .supportButtonInner {
+      width: 55px;
+      height: 55px;
+      font-size: 1.3rem;
+    }
+    
+    .pulseRing {
+      width: 65px;
+      height: 65px;
+    }
+    
+    .supportModal {
+      margin: 1rem;
+      max-height: 95vh;
+      border-radius: 20px;
+    }
+    
+    .modalHeader {
+      padding: 1.5rem 1.5rem 1rem;
+    }
+    
+    .headerContent h2 {
+      font-size: 1.5rem;
+    }
+    
+    .supportIcon {
+      font-size: 1.7rem;
+    }
+    
+    .modalContent {
+      padding: 1rem 1.5rem 1.5rem;
+    }
+    
+    .actionButtons {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 0.8rem;
+    }
+    
+    .actionButton {
+      padding: 0.8rem 0.5rem;
+      font-size: 0.85rem;
+    }
+    
+    .formRow {
+      grid-template-columns: 1fr;
+    }
+    
+    .formActions {
+      flex-direction: column;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .supportButtonContainer {
+      bottom: 1rem;
+      right: 1rem;
+    }
+    
+    .supportButtonInner {
+      width: 50px;
+      height: 50px;
+      font-size: 1.2rem;
+    }
+    
+    .pulseRing {
+      width: 60px;
+      height: 60px;
+    }
+    
+    .modalHeader {
+      padding: 1.2rem 1.2rem 0.8rem;
+    }
+    
+    .headerContent {
+      gap: 0.5rem;
+    }
+    
+    .headerContent h2 {
+      font-size: 1.3rem;
+    }
+    
+    .modalContent {
+      padding: 0.8rem 1.2rem 1.2rem;
+    }
+    
+    .actionButtons {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+    
+    .actionButton {
+      padding: 0.8rem;
+      flex-direction: row;
+      justify-content: flex-start;
+      text-align: left;
+    }
+    
+    .inputGroup input,
+    .inputGroup select,
+    .inputGroup textarea {
+      padding: 0.7rem 0.8rem;
+      font-size: 0.85rem;
+    }
+    
+    .contactNote {
+      font-size: 0.8rem;
+      padding: 0.8rem;
+    }
+  }
+  
+  /* Custom scrollbar */
+  .modalContent::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .modalContent::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+  }
+  
+  .modalContent::-webkit-scrollbar-thumb {
+    background: rgba(0, 136, 204, 0.5);
+    border-radius: 3px;
+  }
+  
+  .modalContent::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 136, 204, 0.7);
+  }
+  
+  /* Focus states for accessibility */
+  .actionButton:focus,
+  .inputGroup input:focus,
+  .inputGroup select:focus,
+  .inputGroup textarea:focus,
+  .cancelButton:focus,
+  .submitButton:focus,
+  .closeButton:focus {
+    outline: 2px solid #229ED9;
+    outline-offset: 2px;
+  }
+  
+  /* Loading state */
+  .loading {
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Reduced motion support */
+  @media (prefers-reduced-motion: reduce) {
+    .supportButtonShine,
+    .pulseAnimation,
+    .loading {
+      animation: none;
+    }
+    
+    .supportButtonInner:hover,
+    .actionButton:hover,
+    .cancelButton:hover,
+    .submitButton:hover {
+      transform: none;
+    }
+  }

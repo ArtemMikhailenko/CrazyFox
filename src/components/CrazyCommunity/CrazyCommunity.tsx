@@ -23,7 +23,7 @@ const CrazyCommunity = () => {
     { 
       icon: '💬', 
       name: 'Telegram', 
-      members: '127K', 
+      members: '10K+', 
       color: '#0088cc',
       gradient: 'linear-gradient(135deg, #0088cc, #00a6d6)',
       description: 'Join our main community hub',
@@ -32,7 +32,7 @@ const CrazyCommunity = () => {
     { 
       icon: '🐦', 
       name: 'Twitter', 
-      members: '89K', 
+      members: '10K+', 
       color: '#1da1f2',
       gradient: 'linear-gradient(135deg, #1da1f2, #0d8bd9)',
       description: 'Latest news and updates',
@@ -41,7 +41,7 @@ const CrazyCommunity = () => {
     { 
       icon: '🎵', 
       name: 'TikTok', 
-      members: '156K', 
+      members: '10K+', 
       color: '#000000',
       gradient: 'linear-gradient(135deg, #000000, #ff0050)',
       description: 'Viral fox content',
@@ -235,18 +235,24 @@ const CrazyCommunity = () => {
                 become part of the $CRFX family today!
               </p>
               <div className={styles.ctaButtons}>
-                <motion.button
-                  className={styles.primaryCta}
+              <motion.a
+                  href="https://t.me/crazyfoxmeme"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                 className={styles.primaryCta}
                   whileTap={{ scale: 0.95 }}
                 >
                   🚀 Join All Platforms
-                </motion.button>
-                <motion.button
+                </motion.a>
+                <motion.a
+                  href="https://x.com/crazyfoxmeme?s=21"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={styles.secondaryCta}
                   whileTap={{ scale: 0.95 }}
                 >
                   💎 Learn More
-                </motion.button>
+                </motion.a>
               </div>
             </div>
           </div>
