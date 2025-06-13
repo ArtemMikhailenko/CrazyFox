@@ -5,24 +5,31 @@ import confetti from 'canvas-confetti';
 import styles from './CrazyTokenomics.module.css';
 
 const CrazyTokenomics = () => {
-  const [activeSlice, setActiveSlice] = useState(null);
+  const [activeSlice, setActiveSlice] = useState<number | null>(null);
   const [isVisible, setIsVisible] = useState(false);
-  const [isChartReady, setIsChartReady] = useState(false);
 
   const tokenData = useMemo(() => [
     { 
-      label: 'Liquidity Pool', 
-      percentage: 65, 
+      label: 'Presale', 
+      percentage: 55, 
       color: '#FF6B35', 
+      icon: '🚀',
+      description: 'Early investor allocation',
+      details: '550M tokens for community presale'
+    },
+    { 
+      label: 'Listing & Liquidity', 
+      percentage: 10, 
+      color: '#4ECDC4', 
       icon: '💧',
-      description: 'Locked liquidity for stable trading',
-      details: '650M tokens permanently locked'
+      description: 'DEX listing and liquidity pool',
+      details: '100M tokens for trading launch'
     },
     { 
       label: 'Marketing & Partnerships', 
       percentage: 15, 
       color: '#45B7D1', 
-      icon: '🚀',
+      icon: '📢',
       description: 'Aggressive marketing campaigns',
       details: '150M tokens for moon mission'
     },
@@ -32,7 +39,7 @@ const CrazyTokenomics = () => {
       color: '#96CEB4', 
       icon: '⚙️',
       description: 'Platform development and utilities',
-      details: '100M tokens for building the ecosystem'
+      details: '100M tokens for building ecosystem'
     },
     { 
       label: 'Team & Advisors', 
@@ -58,23 +65,15 @@ const CrazyTokenomics = () => {
     }
   }), []);
 
-  // Initialize visibility with proper sequencing
   useEffect(() => {
-    const visibilityTimer = setTimeout(() => {
+    const timer = setTimeout(() => {
       setIsVisible(true);
-    }, 100);
-    
-    const chartTimer = setTimeout(() => {
-      setIsChartReady(true);
-    }, 600);
+    }, 200);
 
-    return () => {
-      clearTimeout(visibilityTimer);
-      clearTimeout(chartTimer);
-    };
+    return () => clearTimeout(timer);
   }, []);
 
-  const copyToClipboard = useCallback(async (text:any) => {
+  const copyToClipboard = useCallback(async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
       toast.success('Contract address copied! 🦊', {
@@ -83,11 +82,10 @@ const CrazyTokenomics = () => {
         theme: "dark"
       });
       
-      // Trigger confetti
       confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 },
+        particleCount: 50,
+        spread: 50,
+        origin: { y: 0.7 },
         colors: ['#FF6B35', '#4ECDC4', '#45B7D1']
       });
     } catch (err) {
@@ -95,15 +93,15 @@ const CrazyTokenomics = () => {
     }
   }, []);
 
-  const handleSliceHover = useCallback((index:any) => {
+  const handleSliceHover = useCallback((index: number) => {
     setActiveSlice(index);
   }, []);
 
   const handleSliceLeave = useCallback(() => {
     setActiveSlice(null);
   }, []);
-  //@ts-ignore
-  const createPieSlice = useCallback((item, index) => {
+
+  const createPieSlice = useCallback((item: any, index: number) => {
     const cumulativePercentage = tokenData
       .slice(0, index)
       .reduce((sum, data) => sum + data.percentage, 0);
@@ -114,9 +112,9 @@ const CrazyTokenomics = () => {
     const startAngleRad = (startAngle * Math.PI) / 180;
     const endAngleRad = (endAngle * Math.PI) / 180;
     
-    const radius = 120;
-    const centerX = 150;
-    const centerY = 150;
+    const radius = 110;
+    const centerX = 140;
+    const centerY = 140;
     
     const x1 = centerX + radius * Math.cos(startAngleRad);
     const y1 = centerY + radius * Math.sin(startAngleRad);
@@ -140,126 +138,106 @@ const CrazyTokenomics = () => {
         d={pathData}
         fill={item.color}
         stroke="#0a0e1e"
-        strokeWidth="2"
+        strokeWidth="3"
         className={styles.pieSlice}
-        style={{ 
-          transformOrigin: `${centerX}px ${centerY}px`,
-          transition: 'filter 0.3s ease, transform 0.3s ease',
-          willChange: 'transform, filter'
-        }}
         initial={{ 
           scale: 0, 
-          rotate: 0,
           opacity: 0
         }}
-        animate={isChartReady ? { 
-          scale: isActive ? 1.05 : 1, 
-          rotate: 0,
+        animate={isVisible ? { 
+          scale: isActive ? 1.08 : 1, 
           opacity: 1,
-          filter: isActive 
-            ? 'brightness(1.3) drop-shadow(0 0 20px currentColor)' 
-            : 'brightness(1)'
         } : {
           scale: 0,
-          rotate: 0,
           opacity: 0
         }}
         transition={{ 
-          delay: index * 0.15,
-          duration: 0.6,
+          delay: index * 0.1,
+          duration: 0.5,
           type: "spring",
-          stiffness: 120,
-          damping: 15
+          stiffness: 100
+        }}
+        style={{
+          transformOrigin: `${centerX}px ${centerY}px`,
+          filter: isActive ? `brightness(1.2) drop-shadow(0 0 15px ${item.color}50)` : 'brightness(1)',
+          transition: 'filter 0.3s ease, transform 0.3s ease'
         }}
         onMouseEnter={() => handleSliceHover(index)}
         onMouseLeave={handleSliceLeave}
       />
     );
-  }, [tokenData, isChartReady, activeSlice, handleSliceHover, handleSliceLeave]);
+  }, [tokenData, isVisible, activeSlice, handleSliceHover, handleSliceLeave]);
 
   return (
     <div className={styles.tokenomicsSection}>
       <div className={styles.tokenomicsContainer}>
         <motion.h2 
           className={styles.tokenomicsTitle}
-          initial={{ y: -30, opacity: 0 }}
+          initial={{ y: -20, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          Crazy Tokenomics 🚀
+          <span className={styles.titleIcon}>💰</span>
+          Crazy Tokenomics
         </motion.h2>
 
         <div className={styles.tokenomicsContent}>
-          {/* Left side - Chart and Fox */}
+          {/* Left side - Chart */}
           <motion.div 
             className={styles.chartSection}
-            initial={{ x: -50, opacity: 0 }}
+            initial={{ x: -30, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.1 }}
             viewport={{ once: true }}
           >
             <div className={styles.chartContainer}>
               <div className={styles.pieChart}>
-                <motion.svg 
-                  width="300" 
-                  height="300" 
-                  viewBox="0 0 300 300"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: isVisible ? 1 : 0 }}
-                  transition={{ duration: 0.5, delay: 0.3 }}
+                <svg 
+                  width="280" 
+                  height="280" 
+                  viewBox="0 0 280 280"
+                  className={styles.chartSvg}
                 >
-                  <AnimatePresence>
-                    {tokenData.map((item, index) => 
-                      createPieSlice(item, index)
-                    )}
-                  </AnimatePresence>
-                </motion.svg>
+                  {tokenData.map((item, index) => 
+                    createPieSlice(item, index)
+                  )}
+                </svg>
+                
                 <div className={styles.chartCenter}>
-                  {/* Center content if needed */}
+                  <motion.div 
+                    className={styles.centerContent}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.8, duration: 0.5 }}
+                  >
+                  </motion.div>
                 </div>
               </div>
             </div>
             
-            {/* Muscle Fox Image */}
+            {/* Fox Image */}
             <motion.div 
               className={styles.muscleFoxContainer}
-              initial={{ scale: 0, opacity: 0 }}
+              initial={{ scale: 0.8, opacity: 0 }}
               whileInView={{ scale: 1, opacity: 1 }}
-              transition={{ 
-                duration: 0.8, 
-                delay: 0.4, 
-                type: "spring",
-                stiffness: 100,
-                damping: 12
-              }}
+              transition={{ duration: 0.6, delay: 0.3 }}
               viewport={{ once: true }}
             >
-              <motion.img 
+              <img 
                 src="/fox-tokenomic.png"
-                alt="Muscle Fox with Coin"
+                alt="CrazyFox Tokenomics"
                 className={styles.muscleFoxImage}
                 loading="lazy"
               />
-              <motion.div 
-                className={styles.foxGlow}
-                animate={{ 
-                  scale: [1, 1.1, 1],
-                  opacity: [0.7, 1, 0.7]
-                }}
-                transition={{ 
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut"
-                }}
-              />
+              <div className={styles.foxGlow} />
             </motion.div>
           </motion.div>
 
           {/* Right side - Legend */}
           <motion.div 
             className={styles.legendSection}
-            initial={{ x: 50, opacity: 0 }}
+            initial={{ x: 30, opacity: 0 }}
             whileInView={{ x: 0, opacity: 1 }}
             transition={{ duration: 0.6, delay: 0.2 }}
             viewport={{ once: true }}
@@ -269,35 +247,20 @@ const CrazyTokenomics = () => {
                 <motion.div
                   key={`legend-${index}`}
                   className={`${styles.legendItem} ${activeSlice === index ? styles.active : ''}`}
-                  style={{
-                    transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                    willChange: 'transform'
-                  }}
                   onMouseEnter={() => handleSliceHover(index)}
                   onMouseLeave={handleSliceLeave}
-                  initial={{ y: 20, opacity: 0 }}
+                  initial={{ y: 15, opacity: 0 }}
                   whileInView={{ y: 0, opacity: 1 }}
                   transition={{ 
-                    delay: index * 0.08,
-                    duration: 0.5
+                    delay: index * 0.05,
+                    duration: 0.4
                   }}
                   viewport={{ once: true }}
-                  animate={{
-                    scale: activeSlice === index ? 1.02 : 1,
-                    y: activeSlice === index ? -2 : 0
-                  }}
                 >
                   <div className={styles.legendHeader}>
-                    <motion.div 
+                    <div 
                       className={styles.legendColor} 
                       style={{ backgroundColor: item.color }}
-                      animate={{
-                        scale: activeSlice === index ? 1.2 : 1,
-                        boxShadow: activeSlice === index 
-                          ? `0 0 20px ${item.color}50` 
-                          : '0 0 0px transparent'
-                      }}
-                      transition={{ duration: 0.3 }}
                     />
                     <span className={styles.legendIcon}>{item.icon}</span>
                     <span className={styles.legendLabel}>{item.label}</span>
@@ -314,53 +277,50 @@ const CrazyTokenomics = () => {
         {/* Contract Section */}
         <motion.div 
           className={styles.contractSection}
-          initial={{ y: 50, opacity: 0 }}
+          initial={{ y: 30, opacity: 0 }}
           whileInView={{ y: 0, opacity: 1 }}
           transition={{ duration: 0.6, delay: 0.3 }}
           viewport={{ once: true }}
         >
-          <h3 className={styles.contractTitle}>📊 Contract Details & Tax Structure</h3>
+          <h3 className={styles.contractTitle}>
+            <span className={styles.contractIcon}>📊</span>
+            Contract Details
+          </h3>
           
           <div className={styles.contractGrid}>
-            <motion.div 
-              className={styles.contractInfo}
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              transition={{ delay: 0.4, duration: 0.5 }}
-              viewport={{ once: true }}
-            >
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Total Supply:</span>
-                <span className={styles.infoValue}>{contractDetails.totalSupply} $CRFX</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Network:</span>
-                <span className={styles.infoValue}>{contractDetails.network}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Symbol:</span>
-                <span className={styles.infoValue}>{contractDetails.symbol}</span>
+            <div className={styles.contractInfo}>
+              <div className={styles.infoGrid}>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>🎯 Total Supply:</span>
+                  <span className={styles.infoValue}>{contractDetails.totalSupply} $CRFX</span>
+                </div>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>🌐 Network:</span>
+                  <span className={styles.infoValue}>{contractDetails.network}</span>
+                </div>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>💎 Symbol:</span>
+                  <span className={styles.infoValue}>{contractDetails.symbol}</span>
+                </div>
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>📈 Tax:</span>
+                  <span className={styles.infoValue}>0% Buy / 0% Sell</span>
+                </div>
               </div>
               
               <motion.div 
                 className={styles.contractAddress}
                 onClick={() => copyToClipboard(contractDetails.address)}
-                whileHover={{ 
-                  scale: 1.02,
-                  boxShadow: "0 5px 20px rgba(255, 107, 53, 0.3)"
-                }}
+                whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                style={{
-                  transition: 'all 0.3s ease',
-                  cursor: 'pointer'
-                }}
               >
+                <div className={styles.addressLabel}>📋 Contract Address:</div>
                 <div className={styles.addressText}>
-                  {contractDetails.address.slice(0, 10)}...{contractDetails.address.slice(-8)}
+                  {contractDetails.address.slice(0, 12)}...{contractDetails.address.slice(-10)}
                 </div>
-                <button className={styles.copyButton}>📋 Copy</button>
+                <button className={styles.copyButton}>Copy</button>
               </motion.div>
-            </motion.div>
+            </div>
           </div>
         </motion.div>
       </div>
