@@ -35,6 +35,7 @@ const SupportButton = () => {
     setIsSubmitting(true);
 
     try {
+      // Формируем сообщение для бота
       const telegramMessage = `🦊 NEW SUPPORT REQUEST 🦊
 
 👤 Name: ${formData.name}
@@ -45,13 +46,49 @@ const SupportButton = () => {
 ${formData.message}
 
 ---
-Sent from CrazyFox Website`;
+Sent from CrazyFox Website
+Time: ${new Date().toLocaleString()}`;
 
-      const encodedMessage = encodeURIComponent(telegramMessage);
-      const telegramUrl = `https://t.me/MemeCrazyFox?text=${encodedMessage}`;
+      // Отправляем сообщение через Telegram Bot API
+      const botToken = '7277467815:AAELrWplQE8fBVmcdmtmXdcmGWJDrzufJXo';
+      const chatId = '8199666123';
+      
+      const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          chat_id: chatId,
+          text: telegramMessage,
+          parse_mode: 'HTML'
+        })
+      });
+
+      if (response.ok) {
+        toast.success('🎉 Message sent successfully!');
+        
+        // Очищаем форму
+        setFormData({
+          name: '',
+          email: '',
+          subject: '',
+          message: ''
+        });
+        setShowForm(false);
+      } else {
+        throw new Error('Failed to send message');
+      }
+
+    } catch (error) {
+      console.error('Error sending message:', error);
+      
+      // Fallback к открытию Telegram при ошибке
+      const fallbackMessage = encodeURIComponent(`🦊 Support Request from ${formData.name}: ${formData.message}`);
+      const telegramUrl = `https://t.me/MemeCrazyFox?text=${fallbackMessage}`;
       window.open(telegramUrl, '_blank');
-
-      toast.success('🎉 Redirecting to Telegram!');
+      
+      toast.warn('Redirecting to Telegram as fallback');
       
       setFormData({
         name: '',
@@ -60,10 +97,6 @@ Sent from CrazyFox Website`;
         message: ''
       });
       setShowForm(false);
-
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
