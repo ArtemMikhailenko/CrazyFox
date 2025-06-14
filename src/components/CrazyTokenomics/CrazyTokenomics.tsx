@@ -316,10 +316,6 @@ const CrazyTokenomics = () => {
                   <span className={styles.infoLabel}>💎 Symbol:</span>
                   <span className={styles.infoValue}>{contractDetails.symbol}</span>
                 </div>
-                <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>📈 Tax:</span>
-                  <span className={styles.infoValue}>0% Buy / 0% Sell</span>
-                </div>
               </div>
               
               <div 
