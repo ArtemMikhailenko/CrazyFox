@@ -1,7 +1,7 @@
 // components/SupportButton/SupportButton.tsx
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import styles from './SupportButton.module.css';
@@ -16,15 +16,15 @@ const SupportButton = () => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
-  };
+  }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (!formData.name || !formData.message) {
@@ -35,7 +35,6 @@ const SupportButton = () => {
     setIsSubmitting(true);
 
     try {
-      // Формируем сообщение для Telegram
       const telegramMessage = `🦊 NEW SUPPORT REQUEST 🦊
 
 👤 Name: ${formData.name}
@@ -48,17 +47,12 @@ ${formData.message}
 ---
 Sent from CrazyFox Website`;
 
-      // Encode message for URL
       const encodedMessage = encodeURIComponent(telegramMessage);
-      
-      // Open Telegram with pre-filled message
       const telegramUrl = `https://t.me/MemeCrazyFox?text=${encodedMessage}`;
       window.open(telegramUrl, '_blank');
 
-      // Success feedback
-      toast.success('🎉 Redirecting to Telegram! Your message is ready to send.');
+      toast.success('🎉 Redirecting to Telegram!');
       
-      // Reset form
       setFormData({
         name: '',
         email: '',
@@ -69,87 +63,88 @@ Sent from CrazyFox Website`;
 
     } catch (error) {
       console.error('Error:', error);
-      toast.error('Something went wrong. Please try again or contact us directly on Telegram.');
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setIsSubmitting(false);
     }
-  };
+  }, [formData]);
 
-  const handleDirectTelegram = () => {
+  const handleDirectTelegram = useCallback(() => {
     window.open('https://t.me/MemeCrazyFox', '_blank');
-  };
+  }, []);
+
+  const closeModal = useCallback(() => {
+    setShowForm(false);
+  }, []);
+
+  const openModal = useCallback(() => {
+    setShowForm(true);
+  }, []);
 
   return (
     <>
-      <motion.div 
-        className={styles.supportButton}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.9 }}
-      >
+      {/* Упрощенная кнопка без сложных анимаций */}
+      <div className={styles.supportButton}>
         <button 
-          onClick={() => setShowForm(true)} 
+          onClick={openModal} 
           className={styles.supportButtonInner} 
           title="Support & Help"
           aria-label="Open Support Form"
         >
           💬
         </button>
-      </motion.div>
+      </div>
 
-      {/* Support Form Modal */}
-      <AnimatePresence>
+      {/* Оптимизированная модалка */}
+      <AnimatePresence mode="wait">
         {showForm && (
           <motion.div 
             className={styles.modalOverlay}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={() => setShowForm(false)}
+            transition={{ duration: 0.2 }}
+            onClick={closeModal}
           >
             <motion.div 
               className={styles.supportModal}
-              initial={{ scale: 0.8, opacity: 0, y: 50 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.8, opacity: 0, y: 50 }}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.2 }}
               onClick={(e) => e.stopPropagation()}
             >
-              {/* Modal Header */}
+              {/* Упрощенный хедер */}
               <div className={styles.modalHeader}>
                 <div className={styles.headerContent}>
                   <h3>🦊 CrazyFox Support</h3>
-                  <p>We're here to help! Fill out the form below or contact us directly.</p>
+                  <p>We're here to help!</p>
                 </div>
                 <button 
                   className={styles.closeButton}
-                  onClick={() => setShowForm(false)}
-                  aria-label="Close support form"
+                  onClick={closeModal}
+                  aria-label="Close"
                 >
                   ✕
                 </button>
               </div>
 
-              {/* Support Options */}
+              {/* Прямая связь */}
               <div className={styles.supportOptions}>
                 <button 
                   className={styles.directTelegramButton}
                   onClick={handleDirectTelegram}
                 >
-                  <span className={styles.telegramIcon}>📱</span>
-                  Contact us directly on Telegram
+                  📱 Contact us on Telegram
                 </button>
-                
-                <div className={styles.divider}>
-                  <span>OR</span>
-                </div>
+                <div className={styles.divider}>OR</div>
               </div>
 
-              {/* Support Form */}
+              {/* Упрощенная форма */}
               <form onSubmit={handleSubmit} className={styles.supportForm}>
-                <div className={styles.formGrid}>
+                <div className={styles.formRow}>
                   <div className={styles.inputGroup}>
-                    <label htmlFor="name">
-                      Name <span className={styles.required}>*</span>
-                    </label>
+                    <label htmlFor="name">Name *</label>
                     <input
                       type="text"
                       id="name"
@@ -169,7 +164,7 @@ Sent from CrazyFox Website`;
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      placeholder="your@email.com (optional)"
+                      placeholder="your@email.com"
                     />
                   </div>
                 </div>
@@ -182,28 +177,26 @@ Sent from CrazyFox Website`;
                     value={formData.subject}
                     onChange={handleInputChange}
                   >
-                    <option value="">Select a topic...</option>
-                    <option value="🔧 Technical Support">🔧 Technical Support</option>
-                    <option value="💰 Token Purchase Help">💰 Token Purchase Help</option>
-                    <option value="🦊 General Questions">🦊 General Questions</option>
-                    <option value="🤝 Partnership Inquiry">🤝 Partnership Inquiry</option>
-                    <option value="🐛 Bug Report">🐛 Bug Report</option>
-                    <option value="💡 Feature Request">💡 Feature Request</option>
-                    <option value="❓ Other">❓ Other</option>
+                    <option value="">Select topic...</option>
+                    <option value="Technical Support">🔧 Technical Support</option>
+                    <option value="Token Purchase">💰 Token Purchase</option>
+                    <option value="General Questions">🦊 General Questions</option>
+                    <option value="Partnership">🤝 Partnership</option>
+                    <option value="Bug Report">🐛 Bug Report</option>
+                    <option value="Feature Request">💡 Feature Request</option>
+                    <option value="Other">❓ Other</option>
                   </select>
                 </div>
 
                 <div className={styles.inputGroup}>
-                  <label htmlFor="message">
-                    Message <span className={styles.required}>*</span>
-                  </label>
+                  <label htmlFor="message">Message *</label>
                   <textarea
                     id="message"
                     name="message"
                     value={formData.message}
                     onChange={handleInputChange}
-                    placeholder="Describe your question or issue in detail..."
-                    rows={5}
+                    placeholder="Describe your question..."
+                    rows={4}
                     required
                   />
                   <div className={styles.charCount}>
@@ -211,45 +204,27 @@ Sent from CrazyFox Website`;
                   </div>
                 </div>
 
-                {/* Form Actions */}
+                {/* Упрощенные кнопки */}
                 <div className={styles.formActions}>
-                  <motion.button
+                  <button
                     type="button"
                     className={styles.cancelButton}
-                    onClick={() => setShowForm(false)}
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
+                    onClick={closeModal}
                   >
                     Cancel
-                  </motion.button>
+                  </button>
                   
-                  <motion.button
+                  <button
                     type="submit"
                     className={styles.submitButton}
                     disabled={isSubmitting || !formData.name || !formData.message}
-                    whileHover={!isSubmitting ? { scale: 1.02 } : {}}
-                    whileTap={!isSubmitting ? { scale: 0.98 } : {}}
                   >
-                    {isSubmitting ? (
-                      <span>
-                        🔄 Preparing...
-                      </span>
-                    ) : (
-                      <span>
-                        📨 Send to Telegram
-                      </span>
-                    )}
-                  </motion.button>
+                    {isSubmitting ? '🔄 Sending...' : '📨 Send to Telegram'}
+                  </button>
                 </div>
 
-                {/* Footer Info */}
                 <div className={styles.formFooter}>
-                  <p>
-                    🔒 Your information is secure and will only be used to help you.
-                  </p>
-                  <p>
-                    📞 For urgent issues, contact us directly: <strong>@MemeCrazyFox</strong>
-                  </p>
+                  <p>🔒 Secure • Direct contact: <strong>@MemeCrazyFox</strong></p>
                 </div>
               </form>
             </motion.div>
