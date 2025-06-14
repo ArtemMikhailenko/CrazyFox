@@ -1,7 +1,6 @@
-// components/Header/Header.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectButton } from "thirdweb/react";
 import { createThirdwebClient } from "thirdweb";
@@ -21,76 +20,107 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showWhitePaper, setShowWhitePaper] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const scrollPositionRef = useRef<number>(0);
 
-  // Handle scroll effect
+  // Оптимизированная проверка мобильного устройства
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 50);
+    const checkIsMobile = () => {
+      const isSmallScreen = window.innerWidth <= 768;
+      setIsMobile(isSmallScreen);
     };
 
-    window.addEventListener('scroll', handleScroll);
+    checkIsMobile();
+    
+    // Добавляем debounce для resize
+    let resizeTimeout: NodeJS.Timeout;
+    const handleResize = () => {
+      clearTimeout(resizeTimeout);
+      resizeTimeout = setTimeout(checkIsMobile, 100);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      clearTimeout(resizeTimeout);
+    };
+  }, []);
+
+  // Оптимизированная обработка скролла
+  useEffect(() => {
+    let ticking = false;
+
+    const handleScroll = () => {
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollPosition = window.scrollY;
+          setIsScrolled(scrollPosition > 50);
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
+  // ИСПРАВЛЕНО: Предотвращение скролла при открытии меню
   useEffect(() => {
     if (isMenuOpen) {
       // Сохраняем текущую позицию скролла
-      const scrollY = window.scrollY;
+      scrollPositionRef.current = window.pageYOffset;
+      
+      // Блокируем скролл
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = '100%';
+      document.body.style.top = `-${scrollPositionRef.current}px`;
+      document.body.style.left = '0';
+      document.body.style.right = '0';
     } else {
-      // Восстанавливаем позицию скролла
-      const scrollY = document.body.style.top;
+      // Восстанавливаем скролл без изменения позиции
+      const scrollY = scrollPositionRef.current;
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
-      document.body.style.width = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
       
-      if (scrollY) {
-        const y = parseInt(scrollY || '0') * -1;
-        window.scrollTo(0, y);
-      }
+      // Восстанавливаем позицию без анимации
+      window.scrollTo(0, scrollY);
     }
 
     return () => {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
-      document.body.style.width = '';
+      document.body.style.left = '';
+      document.body.style.right = '';
     };
   }, [isMenuOpen]);
 
-  // Close menu when clicking outside
+  // Закрытие меню при клике вне его
   useEffect(() => {
     const handleClickOutside = (event: Event) => {
       const target = event.target as HTMLElement;
-      if (!target.closest(`.${styles.mobileMenu}`) && !target.closest(`.${styles.mobileMenuButton}`)) {
-        setIsMenuOpen(false);
-      }
-    };
-
-    const handleTouchOutside = (event: TouchEvent) => {
-      const target = event.target as HTMLElement;
-      if (!target.closest(`.${styles.mobileMenu}`) && !target.closest(`.${styles.mobileMenuButton}`)) {
+      if (isMenuOpen && !target.closest(`.${styles.mobileMenu}`) && !target.closest(`.${styles.mobileMenuButton}`)) {
         setIsMenuOpen(false);
       }
     };
 
     if (isMenuOpen) {
       document.addEventListener('click', handleClickOutside);
-      document.addEventListener('touchstart', handleTouchOutside);
+      document.addEventListener('touchstart', handleClickOutside, { passive: true });
     }
 
     return () => {
       document.removeEventListener('click', handleClickOutside);
-      document.removeEventListener('touchstart', handleTouchOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [isMenuOpen]);
 
-  // Close menu on escape key
+  // Закрытие меню на escape
   useEffect(() => {
     const handleEscape = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -111,60 +141,71 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
     { id: 'community', label: 'Community', icon: '👥' }
   ];
 
-  const handleNavClick = (sectionId: string) => {
-    console.log('Navigation clicked:', sectionId); // Для отладки
+  // ИСПРАВЛЕНО: Навигация без автоматического скролла
+  const handleNavClick = useCallback((sectionId: string) => {
+    console.log('Navigation clicked:', sectionId);
     
-    const isMobile = window.innerWidth <= 768;
-    
-    // Сначала закрываем меню
+    // Закрываем меню
     setIsMenuOpen(false);
-    
-    // Используем requestAnimationFrame для обеспечения выполнения после ререндера
-    requestAnimationFrame(() => {
-      setTimeout(() => {
-        console.log('Attempting to scroll to:', sectionId); // Для отладки
+
+    // Небольшая задержка для завершения анимации закрытия меню
+    setTimeout(() => {
+      const element = document.getElementById(sectionId);
+      
+      if (element) {
+        const headerHeight = isMobile ? 75 : 80;
+        const elementPosition = element.offsetTop - headerHeight;
         
-        const element = document.getElementById(sectionId);
-        
-        if (element) {
-          const headerHeight = isMobile ? 75 : 80;
-          
-          if (isMobile) {
-            // Для мобильных - принудительный скролл
-            const elementRect = element.getBoundingClientRect();
-            const absoluteElementTop = elementRect.top + window.pageYOffset;
-            const top = absoluteElementTop - headerHeight;
-            
-            console.log('Mobile scroll to:', top); // Для отладки
-            window.scrollTo(0, top);
-          } else {
-            // Для десктопа - плавный скролл
-            try {
-              element.scrollIntoView({ 
-                behavior: 'smooth', 
-                block: 'start',
-                inline: 'nearest'
-              });
-            } catch (error) {
-              console.error('ScrollIntoView failed:', error);
-              const elementPosition = element.offsetTop - headerHeight;
-              window.scrollTo({
-                top: elementPosition,
-                behavior: 'smooth'
-              });
-            }
-          }
-        } else {
-          console.error('Element not found:', sectionId);
-          // Fallback к оригинальной функции
-          scrollToSection(sectionId);
-        }
-      }, isMobile ? 500 : 300); // Увеличенная задержка для мобильных
-    });
+        // Плавный скролл к секции
+        window.scrollTo({
+          top: elementPosition,
+          behavior: 'smooth'
+        });
+      } else {
+        // Fallback к оригинальной функции
+        scrollToSection(sectionId);
+      }
+    }, isMenuOpen ? 150 : 0); // Уменьшенная задержка
+  }, [isMobile, isMenuOpen, scrollToSection]);
+
+  const toggleMobileMenu = useCallback(() => {
+    setIsMenuOpen(prev => !prev);
+  }, []);
+
+  // Упрощенные анимации для мобильных устройств
+  const mobileMenuVariants = {
+    hidden: { 
+      height: 0, 
+      opacity: 0,
+      transition: {
+        duration: isMobile ? 0.2 : 0.3,
+        ease: "easeInOut"
+      }
+    },
+    visible: { 
+      height: 'auto', 
+      opacity: 1,
+      transition: {
+        duration: isMobile ? 0.2 : 0.3,
+        ease: "easeInOut"
+      }
+    }
   };
 
-  const toggleMobileMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
+  const mobileNavItemVariants = {
+    hidden: { 
+      x: -20, 
+      opacity: 0 
+    },
+    visible: (index: number) => ({
+      x: 0,
+      opacity: 1,
+      transition: {
+        delay: isMobile ? index * 0.05 : index * 0.08,
+        duration: isMobile ? 0.2 : 0.4,
+        ease: "easeOut"
+      }
+    })
   };
 
   return (
@@ -173,13 +214,14 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
         className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}
         initial={{ y: -100 }}
         animate={{ y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.6, ease: "easeOut" }}
       >
         <div className={styles.container}>
           {/* Logo */}
           <motion.div 
             className={styles.logo}
-            whileHover={{ scale: 1.1, rotate: 10 }}
+            whileHover={!isMobile ? { scale: 1.05 } : {}}
+            whileTap={{ scale: 0.95 }}
             onClick={() => handleNavClick('hero')}
           >
             <img src="/fox.png" alt="CrazyFox Logo" />
@@ -193,7 +235,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                 key={item.id}
                 onClick={() => handleNavClick(item.id)}
                 className={`${styles.navLink} ${activeSection === item.id ? styles.active : ''}`}
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
                 <span className={styles.navIcon}>{item.icon}</span>
@@ -248,15 +290,15 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
           </div>
         </div>
 
-        {/* Mobile Menu */}
+        {/* ОПТИМИЗИРОВАННОЕ Мобильное меню */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
               className={styles.mobileMenu}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
+              variants={mobileMenuVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
             >
               <div className={styles.mobileMenuContent}>
                 {navigationItems.map((item, index) => (
@@ -264,10 +306,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                     key={item.id}
                     onClick={() => handleNavClick(item.id)}
                     className={`${styles.mobileNavLink} ${activeSection === item.id ? styles.active : ''}`}
-                    initial={{ x: -50, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    transition={{ delay: index * 0.1 }}
-                    whileTap={{ scale: 0.95 }}
+                    custom={index}
+                    variants={mobileNavItemVariants}
+                    initial="hidden"
+                    animate="visible"
+                    exit="hidden"
+                    whileTap={{ scale: 0.98 }}
                   >
                     <span className={styles.navIcon}>{item.icon}</span>
                     <span className={styles.navLabel}>{item.label}</span>
@@ -277,8 +321,22 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                 <motion.div 
                   className={styles.mobileActions}
                   initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  transition={{ delay: 0.5 }}
+                  animate={{ 
+                    y: 0, 
+                    opacity: 1,
+                    transition: {
+                      delay: isMobile ? 0.25 : 0.4,
+                      duration: isMobile ? 0.2 : 0.4,
+                      ease: "easeOut"
+                    }
+                  }}
+                  exit={{
+                    y: 10,
+                    opacity: 0,
+                    transition: {
+                      duration: 0.2
+                    }
+                  }}
                 >
                   <button
                     className={styles.mobileWhitePaperButton}
@@ -415,7 +473,6 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                       whileTap={{ scale: 0.9 }}
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/whitepaper`);
-                        // Можно добавить toast уведомление о копировании
                       }}
                       aria-label="Copy link"
                     >

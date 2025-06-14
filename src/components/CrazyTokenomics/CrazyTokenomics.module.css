@@ -1,26 +1,10 @@
 /* CrazyTokenomics.module.css */
-
 .tokenomicsSection {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(135deg, rgba(10, 14, 30, 0.95) 0%, rgba(26, 31, 58, 0.95) 50%, rgba(45, 27, 61, 0.95) 100%);
   backdrop-filter: blur(20px);
-  border-radius: 30px;
+  
   margin: 2rem 0;
-  border: 1px solid rgba(255, 107, 53, 0.1);
-}
-
-.tokenomicsSection::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: 
-    radial-gradient(ellipse at top left, rgba(255, 107, 53, 0.05) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom right, rgba(78, 205, 196, 0.05) 0%, transparent 50%);
-  pointer-events: none;
 }
 
 .tokenomicsContainer {
@@ -46,11 +30,35 @@
   justify-content: center;
   gap: 1rem;
   filter: drop-shadow(0 0 10px rgba(78, 205, 196, 0.3));
+  position: relative;
 }
 
 .titleIcon {
   font-size: 2.5rem;
   filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.5));
+}
+
+.fireworks {
+  position: absolute;
+  right: -50px;
+  top: 0;
+  font-size: 2rem;
+  animation: explode 1s ease-out;
+}
+
+@keyframes explode {
+  0% {
+    transform: scale(0) rotate(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 0;
+  }
 }
 
 .tokenomicsContent {
@@ -83,11 +91,22 @@
 }
 
 .chartSvg {
-  filter: drop-shadow(0 4px 20px rgba(0, 0, 0, 0.3));
+  filter: drop-shadow(0 8px 25px rgba(0, 0, 0, 0.4));
+}
+
+.backgroundRing {
+  opacity: 0.5;
 }
 
 .pieSlice {
   cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.pieSlice:hover,
+.pieSlice.activeSlice {
+  transform: scale(1.05);
+  filter: brightness(1.3) drop-shadow(0 0 20px currentColor);
 }
 
 .chartCenter {
@@ -108,7 +127,7 @@
 
 .foxMascot {
   font-size: 3rem;
-  filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.5));
+  filter: drop-shadow(0 0 15px rgba(255, 107, 53, 0.8));
 }
 
 .totalSupply {
@@ -138,7 +157,7 @@
 
 .muscleFoxImage:hover {
   transform: scale(1.02);
-  filter: drop-shadow(0 12px 35px rgba(255, 107, 53, 0.4));
+  filter: drop-shadow(0 12px 35px rgba(255, 107, 53, 0.5));
 }
 
 .foxGlow {
@@ -148,18 +167,28 @@
   background: radial-gradient(circle, rgba(255, 107, 53, 0.2) 0%, transparent 70%);
   border-radius: 50%;
   z-index: 1;
-  animation: foxPulse 4s ease-in-out infinite;
+  opacity: 0.6;
 }
 
-@keyframes foxPulse {
-  0%, 100% { 
-    opacity: 0.5; 
-    transform: scale(1); 
-  }
-  50% { 
-    opacity: 0.8; 
-    transform: scale(1.1); 
-  }
+/* Floating stats around fox */
+.floatingStats {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+.floatingStat {
+  position: absolute;
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.9), rgba(78, 205, 196, 0.9));
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  font-size: 0.9rem;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
 }
 
 .legendSection {
@@ -183,21 +212,6 @@
   cursor: pointer;
   position: relative;
   overflow: hidden;
-}
-
-.legendItem::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.05), transparent);
-  transition: left 0.5s ease;
-}
-
-.legendItem:hover::before {
-  left: 100%;
 }
 
 .legendItem:hover,
@@ -262,6 +276,39 @@
   font-size: 0.8rem;
   font-style: italic;
   font-weight: 500;
+  margin-bottom: 0.8rem;
+}
+
+/* Progress bar */
+.progressBar {
+  width: 100%;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 1s ease-out;
+  position: relative;
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
 }
 
 .contractSection {
@@ -276,22 +323,6 @@
   overflow: hidden;
 }
 
-.contractSection::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(78, 205, 196, 0.1), transparent);
-  animation: contractShimmer 6s infinite;
-}
-
-@keyframes contractShimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
 .contractTitle {
   color: #4ECDC4;
   font-size: 2rem;
@@ -303,6 +334,21 @@
   justify-content: center;
   gap: 0.8rem;
   text-shadow: 0 0 15px rgba(78, 205, 196, 0.3);
+  position: relative;
+}
+
+.titleGlow {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(45deg, transparent, rgba(78, 205, 196, 0.1), transparent);
+  animation: titleGlow 3s ease-in-out infinite;
+  border-radius: 10px;
+}
+
+@keyframes titleGlow {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
 }
 
 .contractIcon {
@@ -335,12 +381,29 @@
   border-radius: 15px;
   border: 1px solid rgba(255, 255, 255, 0.15);
   transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.infoItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.infoItem:hover::before {
+  left: 100%;
 }
 
 .infoItem:hover {
   background: rgba(255, 255, 255, 0.12);
   border-color: rgba(78, 205, 196, 0.3);
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 .infoLabel {
@@ -370,8 +433,7 @@
   overflow: hidden;
 }
 
-.contractAddress::before {
-  content: '';
+.copyHoverEffect {
   position: absolute;
   top: 0;
   left: -100%;
@@ -381,15 +443,15 @@
   transition: left 0.5s ease;
 }
 
-.contractAddress:hover::before {
+.contractAddress:hover .copyHoverEffect {
   left: 100%;
 }
 
 .contractAddress:hover {
-  background: linear-gradient(135deg, rgba(78, 205, 196, 0.2) 0%, rgba(255, 107, 53, 0.2) 100%);
+  background: linear-gradient(135deg, rgba(78, 205, 196, 0.25) 0%, rgba(255, 107, 53, 0.25) 100%);
   border-color: rgba(78, 205, 196, 0.6);
   transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(78, 205, 196, 0.2);
+  box-shadow: 0 15px 40px rgba(78, 205, 196, 0.3);
 }
 
 .addressLabel {
@@ -407,6 +469,10 @@
   text-align: center;
   word-break: break-all;
   letter-spacing: 0.5px;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .copyButton {
@@ -420,12 +486,33 @@
   transition: all 0.3s ease;
   align-self: center;
   box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.copyButton::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: left 0.5s ease;
+}
+
+.copyButton:hover::before {
+  left: 100%;
 }
 
 .copyButton:hover {
   transform: scale(1.05);
-  box-shadow: 0 6px 20px rgba(78, 205, 196, 0.4);
+  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.5);
   background: linear-gradient(135deg, #45B7D1, #4ECDC4);
+}
+
+.copyButton:active {
+  transform: scale(0.95);
 }
 
 /* Responsive Design */
@@ -433,13 +520,17 @@
   .tokenomicsContent {
     gap: 2rem;
   }
-  
+
   .muscleFoxImage {
     width: 280px;
   }
-  
+
   .infoGrid {
     grid-template-columns: 1fr;
+  }
+
+  .floatingStats {
+    display: none;
   }
 }
 
@@ -447,58 +538,63 @@
   .tokenomicsContainer {
     padding: 3rem 1rem;
   }
-  
+
   .tokenomicsContent {
     grid-template-columns: 1fr;
     gap: 2rem;
   }
-  
+
   .tokenomicsTitle {
     font-size: 2.2rem;
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .titleIcon {
     font-size: 2rem;
   }
-  
+
   .chartSection {
     order: 2;
   }
-  
+
   .legendSection {
     order: 1;
   }
-  
+
   .muscleFoxImage {
     width: 220px;
   }
-  
+
   .foxGlow {
     width: 150px;
     height: 150px;
   }
-  
+
   .contractSection {
     padding: 2rem 1.5rem;
   }
-  
+
   .contractTitle {
     font-size: 1.6rem;
   }
-  
+
   .infoGrid {
     grid-template-columns: 1fr;
     gap: 0.8rem;
   }
-  
+
   .infoItem {
     padding: 0.8rem 1rem;
   }
-  
+
   .contractAddress {
     padding: 1.2rem;
+  }
+
+  .particle,
+  .floatingStat {
+    display: none;
   }
 }
 
@@ -506,84 +602,92 @@
   .tokenomicsContainer {
     padding: 2rem 0.8rem;
   }
-  
+
   .tokenomicsTitle {
     font-size: 1.8rem;
   }
-  
+
   .chartSection {
     gap: 1rem;
   }
-  
+
   .muscleFoxImage {
     width: 180px;
   }
-  
+
   .foxGlow {
     width: 120px;
     height: 120px;
   }
-  
+
   .legendItem {
     padding: 1rem;
   }
-  
+
   .legendHeader {
     gap: 0.8rem;
   }
-  
+
   .legendPercentage {
     font-size: 1.1rem;
   }
-  
+
   .contractSection {
     padding: 1.5rem 1rem;
     border-radius: 20px;
   }
-  
+
   .contractTitle {
     font-size: 1.4rem;
     flex-direction: column;
     gap: 0.5rem;
   }
-  
+
   .contractIcon {
     font-size: 1.5rem;
   }
-  
+
   .infoItem {
     flex-direction: column;
     text-align: center;
     gap: 0.5rem;
   }
-  
+
   .addressText {
     font-size: 0.9rem;
   }
-  
+
   .copyButton {
     padding: 0.7rem 1.2rem;
     font-size: 0.9rem;
   }
+
+  .floatingStat {
+    display: none;
+  }
 }
 
-/* Animation optimizations */
+/* Performance optimizations */
 @media (prefers-reduced-motion: reduce) {
-  .foxGlow,
-  .contractSection::before,
-  .legendItem::before,
-  .contractAddress::before {
+  .titleIcon,
+  .foxMascot,
+  .progressFill::after,
+  .titleGlow,
+  .floatingStat {
     animation: none;
   }
-  
-  .muscleFoxImage:hover {
-    transform: none;
-  }
-  
+
+  .muscleFoxImage:hover,
   .legendItem:hover,
   .legendItem.active,
   .infoItem:hover,
-  .contractAddress:hover {
+  .contractAddress:hover,
+  .copyButton:hover {
+    transform: none;
+  }
+
+  .pieSlice:hover,
+  .pieSlice.activeSlice {
     transform: none;
   }
 }
@@ -594,16 +698,16 @@
     border-color: #FF6B35;
     background: rgba(0, 0, 0, 0.9);
   }
-  
+
   .legendItem,
   .contractSection {
     border-width: 3px;
   }
-  
+
   .legendItem {
     background: rgba(255, 255, 255, 0.1);
   }
-  
+
   .contractSection {
     background: rgba(78, 205, 196, 0.2);
   }
@@ -633,15 +737,20 @@
     color: black;
     border: 2px solid black;
   }
-  
+
   .tokenomicsTitle,
   .contractTitle {
     color: black;
   }
-  
+
   .legendItem,
   .contractSection {
     border: 1px solid black;
     background: transparent;
+  }
+
+  .foxGlow,
+  .floatingStats {
+    display: none;
   }
 }

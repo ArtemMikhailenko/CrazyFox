@@ -197,23 +197,19 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   other: {
-    // Custom meta tags for better SEO and social sharing
     'theme-color': '#ff6b35',
     'msapplication-TileColor': '#ff6b35',
     'msapplication-TileImage': '/mstile-144x144.png',
     'msapplication-config': '/browserconfig.xml',
     
-    // Crypto-specific meta tags
     'crypto:symbol': 'CFOX',
     'crypto:network': 'BSC',
     'crypto:contract': '0x742d35Cc7cF66f5e8f20A4C1b8c4A6b8b4E6F5d1C2',
     
-    // Social media meta tags
     'fb:app_id': '1234567890',
     'telegram:channel': '@CrazyFoxBSC',
     'discord:server': 'CrazyFox Community',
     
-    // Additional SEO tags
     'rating': 'general',
     'distribution': 'global',
     'revisit-after': '1 days',

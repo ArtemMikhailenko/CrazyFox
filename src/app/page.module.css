@@ -1,716 +1,10 @@
-/* styles/Home.module.css */
+/* styles/page.module.css - оптимизированная версия */
 
 .container {
   min-height: 100vh;
   background: linear-gradient(135deg, #0a0e1e 0%, #1a1f3a 25%, #2d1b3d 50%, #1a1f3a 75%, #0a0e1e 100%);
   color: white;
   overflow-x: hidden;
-}
-
-/* Navigation Styles */
-.nav {
-  position: fixed;
-  top: 0;
-  width: 100%;
-  background: rgba(10, 14, 30, 0.95);
-  backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 107, 53, 0.1);
-  z-index: 1000;
-  transform: translateY(-100%);
-  transition: all 0.5s ease;
-}
-
-.navVisible {
-  transform: translateY(0);
-}
-
-.navContainer {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 1rem 2rem;
-}
-
-.logo img {
-  max-width: 50px;
-}
-
-.logoText {
-  background: linear-gradient(45deg, #FF6B35, #4ECDC4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.navLinks {
-  display: flex;
-  list-style: none;
-  gap: 2rem;
-  margin: 0;
-  padding: 0;
-}
-
-.navLink {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1rem;
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 25px;
-  transition: all 0.3s ease;
-  position: relative;
-}
-
-.navLink:hover,
-.navLink.active {
-  background: linear-gradient(45deg, #FF6B35, #4ECDC4);
-  color: white;
-  transform: translateY(-2px);
-}
-
-/* Navigation Actions Container */
-.navActions {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-}
-
-/* Wallet Button Styles */
-.walletButton {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border: none;
-  border-radius: 12px;
-  color: white;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  font-size: 0.9rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-  position: relative;
-  overflow: hidden;
-  min-width: 140px;
-  justify-content: center;
-}
-
-.walletButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
-}
-
-.walletButton:disabled {
-  opacity: 0.7;
-  cursor: not-allowed;
-  transform: none;
-}
-
-.walletButton.connected {
-  background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
-  box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
-}
-
-.walletButton.connected:hover {
-  box-shadow: 0 8px 25px rgba(34, 197, 94, 0.4);
-}
-
-.walletIcon {
-  font-size: 1.1rem;
-}
-
-.walletAddress,
-.walletText {
-  font-size: 0.85rem;
-}
-
-.buyButton {
-  background: linear-gradient(45deg, #FF6B35, #F7931E);
-  border: none;
-  color: white;
-  padding: 0.8rem 1.5rem;
-  border-radius: 25px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-}
-
-.buyButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.5);
-}
-
-.buyButton.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-  box-shadow: none;
-}
-
-.buyButton.disabled:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-/* Wallet Modal Styles */
-.modalOverlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(8px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 2000;
-}
-
-.walletModal {
-  background: linear-gradient(135deg, #1a1f3a 0%, #2d1b3d 100%);
-  border: 1px solid rgba(255, 107, 53, 0.2);
-  border-radius: 20px;
-  padding: 2rem;
-  max-width: 400px;
-  width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
-}
-
-.modalHeader {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 2rem;
-}
-
-.modalHeader h3 {
-  margin: 0;
-  color: #FF6B35;
-  font-size: 1.5rem;
-}
-
-.closeButton {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  padding: 0.5rem;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-}
-
-.closeButton:hover {
-  background: rgba(255, 107, 53, 0.1);
-}
-
-.walletOptions {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.walletOption {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  padding: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: left;
-}
-
-.walletOption:hover {
-  border-color: rgba(255, 107, 53, 0.3);
-  background: rgba(255, 107, 53, 0.1);
-}
-
-.walletOption:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.walletOption .walletIcon {
-  font-size: 2rem;
-  min-width: 40px;
-}
-
-.walletInfo h4 {
-  margin: 0 0 0.25rem 0;
-  color: white;
-  font-size: 1.1rem;
-}
-
-.walletInfo p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.9rem;
-}
-
-.modalFooter {
-  margin-top: 1.5rem;
-  text-align: center;
-}
-
-.modalFooter p {
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.9rem;
-  margin: 0;
-}
-
-.modalFooter a {
-  color: #4ECDC4;
-  text-decoration: none;
-}
-
-.modalFooter a:hover {
-  text-decoration: underline;
-}
-
-/* Music Player */
-.musicPlayer {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 100;
-}
-
-.playButton {
-  background: linear-gradient(135deg, #FF6B35, #F7931E);
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
-  transition: all 0.3s ease;
-}
-
-.playButton:hover {
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.5);
-}
-
-.canvasContainer img {
-  max-height: 600px;
-  width: 100%;
-  object-fit: contain;
-}
-
-/* Hero Section */
-.hero {
-  position: relative;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  padding: 8rem 2rem 4rem;
-  opacity: 0;
-  transition: all 1s ease;
-}
-
-.fadeIn {
-  opacity: 1;
-}
-
-.heroBackground {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-}
-
-.particles {
-  position: absolute;
-  width: 100%;
-  height: 100%;
-  background-image: 
-    radial-gradient(2px 2px at 20px 30px, #FF6B35, transparent),
-    radial-gradient(2px 2px at 40px 70px, #4ECDC4, transparent),
-    radial-gradient(1px 1px at 90px 40px, #45B7D1, transparent),
-    radial-gradient(1px 1px at 130px 80px, #96CEB4, transparent);
-  background-repeat: repeat;
-  background-size: 200px 200px;
-  animation: sparkle 20s linear infinite;
-}
-
-@keyframes sparkle {
-  0% { transform: translateY(0); }
-  100% { transform: translateY(-200px); }
-}
-
-.glowEffect {
-  position: absolute;
-  top: 50%;
-  right: 10%;
-  width: 400px;
-  height: 400px;
-  background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: pulse 4s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { transform: scale(1); opacity: 0.5; }
-  50% { transform: scale(1.2); opacity: 0.8; }
-}
-/* Token Price Badge в Hero секции */
-.tokenPriceBadge {
-  display: flex;
-  justify-content: center;
-}
-
-.priceContainer {
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(78, 205, 196, 0.2) 100%);
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(78, 205, 196, 0.4);
-  border-radius: 25px;
-  padding: 1rem 2rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 8px 32px rgba(78, 205, 196, 0.3),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.priceContainer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: priceShimmer 3s infinite;
-}
-
-@keyframes priceShimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-.priceIcon,
-.priceEmoji {
-  font-size: 1.5rem;
-  animation: bounce 2s infinite;
-}
-
-.priceInfo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 0.2rem;
-}
-
-.priceLabel {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  font-weight: 500;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.priceAmount {
-  font-size: 1.8rem;
-  font-weight: 900;
-  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradientShift 3s ease-in-out infinite;
-  text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
-}
-
-/* Live Price Ticker в Navigation */
-.livePriceTicker {
-  display: flex;
-  align-items: center;
-  gap: 0.8rem;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(78, 205, 196, 0.3);
-  border-radius: 20px;
-  padding: 0.6rem 1.2rem;
-  position: relative;
-  overflow: hidden;
-}
-
-.livePriceTicker::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, transparent 30%, rgba(78, 205, 196, 0.1) 50%, transparent 70%);
-  animation: tickerGlow 4s infinite;
-}
-
-@keyframes tickerGlow {
-  0%, 100% { opacity: 0; }
-  50% { opacity: 1; }
-}
-
-.tickerLabel {
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #4ECDC4;
-  text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-}
-
-.tickerPrice {
-  font-size: 1.1rem;
-  font-weight: 800;
-  color: #FF6B35;
-  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
-  font-family: 'Courier New', monospace;
-}
-
-.tickerChange {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #4CAF50;
-  background: rgba(76, 175, 80, 0.2);
-  padding: 0.2rem 0.5rem;
-  border-radius: 10px;
-  border: 1px solid rgba(76, 175, 80, 0.3);
-}
-
-/* Responsive для мобильных */
-@media (max-width: 768px) {
-  .livePriceTicker {
-    order: 1;
-    margin-bottom: 0.5rem;
-  }
-  
-  .priceContainer {
-    padding: 0.8rem 1.5rem;
-    gap: 0.8rem;
-  }
-  
-  .priceAmount {
-    font-size: 1.5rem;
-  }
-  
-  .priceIcon,
-  .priceEmoji {
-    font-size: 1.2rem;
-  }
-}
-
-@media (max-width: 480px) {
-  .livePriceTicker {
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-  }
-  
-  .tickerLabel,
-  .tickerPrice {
-    font-size: 0.9rem;
-  }
-  
-  .priceContainer {
-    padding: 0.6rem 1.2rem;
-  }
-  
-  .priceAmount {
-    font-size: 1.3rem;
-  }
-}
-.heroContent {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 4rem;
-  align-items: center;
-  position: relative;
-  z-index: 10;
-}
-
-.heroText {
-  animation: slideInLeft 1s ease-out;
-}
-
-@keyframes slideInLeft {
-  from { transform: translateX(-50px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.heroTitle {
-  font-size: 3.5rem;
-  font-weight: 900;
-  line-height: 1.1;
-  margin-bottom: 1.5rem;
-}
-
-.cursor {
-  animation: blink 1s infinite;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-.gradientText {
-  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: textGlow 2s ease-in-out infinite alternate;
-}
-
-@keyframes textGlow {
-  from { filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.5)); }
-  to { filter: drop-shadow(0 0 20px rgba(78, 205, 196, 0.8)); }
-}
-
-.heroSubtitle {
-  font-size: 1.25rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.heroButtons {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 3rem;
-  flex-wrap: wrap;
-}
-
-.primaryButton {
-  background: linear-gradient(45deg, #FF6B35, #F7931E);
-  border: none;
-  color: white;
-  padding: 1rem 2rem;
-  max-height: 70px;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-}
-
-.primaryButton:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 15px 35px rgba(255, 107, 53, 0.5);
-}
-
-.primaryButton.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-  box-shadow: none;
-}
-
-.primaryButton.disabled:hover {
-  transform: none;
-  box-shadow: none;
-}
-
-.secondaryButton {
-  background: transparent;
-  border: 2px solid #4ECDC4;
-  color: #4ECDC4;
-  padding: 1rem 2rem;
-  border-radius: 50px;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.secondaryButton:hover {
-  background: #4ECDC4;
-  color: white;
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
-}
-
-.stats {
-  display: flex;
-  gap: 2rem;
-  flex-wrap: wrap;
-}
-
-.stat {
-  text-align: center;
-  min-width: 120px;
-}
-
-.statNumber {
-  display: block;
-  font-size: 2rem;
-  font-weight: bold;
-  color: #FF6B35;
-}
-
-.statLabel {
-  display: block;
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.heroImage {
-  display: flex;
-  justify-content: center;
-  animation: slideInRight 1s ease-out;
-}
-
-@keyframes slideInRight {
-  from { transform: translateX(50px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.foxContainer {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.foxGlow {
-  position: absolute;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(255, 107, 53, 0.3) 0%, transparent 70%);
-  border-radius: 50%;
-  animation: rotate 10s linear infinite;
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.fox {
-  font-size: 8rem;
-  z-index: 10;
-  position: relative;
-  animation: float 3s ease-in-out infinite;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
 }
 
 /* Progress Bar */
@@ -723,336 +17,6 @@
   background: linear-gradient(90deg, #FF6B35, #4ECDC4);
   transform-origin: 0%;
   z-index: 1001;
-}
-
-/* Raised Amount Styles - Улучшенная версия */
-.raisedAmount {
-  margin: 2rem 0;
-  padding: 0;
-  width: 100%;
-}
-
-.raisedContainer {
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(78, 205, 196, 0.15) 100%);
-  backdrop-filter: blur(20px);
-  border: 2px solid rgba(255, 107, 53, 0.3);
-  border-radius: 20px;
-  padding: 2rem;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 
-    0 8px 32px rgba(255, 107, 53, 0.2),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
-}
-
-.raisedContainer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  animation: shimmer 3s infinite;
-}
-
-.raisedContainer::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(255, 107, 53, 0.1) 0%, transparent 70%);
-  animation: rotate 20s linear infinite;
-  z-index: -1;
-}
-
-@keyframes shimmer {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-@keyframes rotate {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-.raisedIcon {
-  font-size: 3rem;
-  animation: bounce 2s infinite;
-  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
-}
-
-@keyframes bounce {
-  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-  40% { transform: translateY(-10px); }
-  60% { transform: translateY(-5px); }
-}
-
-.raisedContent {
-  flex: 1;
-  min-width: 0; /* Для правильного overflow */
-}
-
-.raisedLabel {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.9);
-  margin-bottom: 0.5rem;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 600;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-}
-
-.raisedNumber {
-  font-size: 2.5rem;
-  font-weight: 900;
-  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1, #FF6B35);
-  background-size: 300% 300%;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 1rem;
-  text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
-  animation: gradientShift 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
-  line-height: 1;
-  word-break: break-all; /* Для длинных чисел на мобильных */
-}
-
-@keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
-
-@keyframes glow {
-  from { filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.5)); }
-  to { filter: drop-shadow(0 0 15px rgba(78, 205, 196, 0.8)); }
-}
-
-.raisedProgress {
-  width: 100%;
-}
-
-.progressBar {
-  width: 100%;
-  height: 10px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  overflow: hidden;
-  position: relative;
-  margin-bottom: 0.5rem;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.progressFill {
-  height: 100%;
-  background: linear-gradient(90deg, #FF6B35, #4ECDC4, #45B7D1);
-  border-radius: 10px;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-}
-
-.progressFill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-  animation: progressShine 2s infinite;
-}
-/* Contract Warning Styles */
-.contractWarning {
-  background: rgba(255, 193, 7, 0.1);
-  border: 1px solid rgba(255, 193, 7, 0.3);
-  border-radius: 10px;
-  padding: 1rem;
-  margin: 1rem 0;
-}
-
-.contractWarning h4 {
-  margin: 0 0 0.5rem 0;
-  color: #FFC107;
-  font-size: 1rem;
-}
-
-.contractWarning p {
-  margin: 0.3rem 0;
-  color: rgba(255, 255, 255, 0.9);
-  font-size: 0.85rem;
-  line-height: 1.4;
-}
-
-/* Support Button - заменяет музыкальную кнопку */
-.supportButton {
-  position: fixed;
-  bottom: 2rem;
-  right: 2rem;
-  z-index: 100;
-}
-
-.supportButtonInner {
-  background: linear-gradient(135deg, #0088cc, #229ED9);
-  border: none;
-  border-radius: 50%;
-  width: 60px;
-  height: 60px;
-  font-size: 1.5rem;
-  cursor: pointer;
-  box-shadow: 0 4px 15px rgba(0, 136, 204, 0.3);
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  position: relative;
-  overflow: hidden;
-}
-
-.supportButtonInner:hover {
-  box-shadow: 0 8px 25px rgba(0, 136, 204, 0.5);
-  background: linear-gradient(135deg, #229ED9, #0088cc);
-}
-
-.supportButtonInner::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-  animation: supportButtonShine 3s infinite;
-}
-
-@keyframes supportButtonShine {
-  0% { left: -100%; }
-  100% { left: 100%; }
-}
-
-/* Telegram brand colors и анимации */
-.supportButtonInner {
-  background: linear-gradient(135deg, #0088cc 0%, #229ED9 100%);
-}
-
-.supportButtonInner:hover {
-  background: linear-gradient(135deg, #229ED9 0%, #54A9EB 100%);
-  transform: translateY(-2px);
-}
-
-.supportButtonInner:active {
-  transform: translateY(0);
-  box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
-}
-
-/* Анимация пульсации для привлечения внимания */
-.supportButton::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 70px;
-  height: 70px;
-  border: 2px solid rgba(0, 136, 204, 0.6);
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: supportPulse 2s infinite;
-}
-
-@keyframes supportPulse {
-  0% {
-    transform: translate(-50%, -50%) scale(1);
-    opacity: 1;
-  }
-  70% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 0;
-  }
-  100% {
-    transform: translate(-50%, -50%) scale(1.2);
-    opacity: 0;
-  }
-}
-
-/* Responsive для мобильных устройств */
-@media (max-width: 768px) {
-  .supportButton {
-    bottom: 1.5rem;
-    right: 1.5rem;
-  }
-  
-  .supportButtonInner {
-    width: 55px;
-    height: 55px;
-    font-size: 1.3rem;
-  }
-  
-  .supportButton::after {
-    width: 65px;
-    height: 65px;
-  }
-}
-
-@media (max-width: 480px) {
-  .supportButton {
-    bottom: 1rem;
-    right: 1rem;
-  }
-  
-  .supportButtonInner {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
-  }
-  
-  .supportButton::after {
-    width: 60px;
-    height: 60px;
-  }
-}
-
-/* Accessibility */
-.supportButtonInner:focus {
-  outline: 2px solid #54A9EB;
-  outline-offset: 2px;
-}
-
-/* Touch устройства */
-@media (hover: none) and (pointer: coarse) {
-  .supportButtonInner {
-    min-width: 50px;
-    min-height: 50px;
-  }
-}
-
-/* Темная тема */
-@media (prefers-color-scheme: dark) {
-  .supportButtonInner {
-    box-shadow: 0 4px 15px rgba(0, 136, 204, 0.4);
-  }
-  
-  .supportButtonInner:hover {
-    box-shadow: 0 8px 25px rgba(0, 136, 204, 0.6);
-  }
-}
-@keyframes progressShine {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-.progressText {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.8);
-  text-align: center;
-  font-weight: 500;
-  text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
 }
 
 /* Section Styles */
@@ -1073,49 +37,14 @@
   background-clip: text;
 }
 
-
-
-.features {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
-}
-
-.feature {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 107, 53, 0.1);
-  border-radius: 20px;
-  padding: 2rem;
-  text-align: center;
-  transition: all 0.3s ease;
-}
-
-.feature:hover {
-  transform: translateY(-10px);
-  border-color: rgba(255, 107, 53, 0.3);
-  box-shadow: 0 20px 40px rgba(255, 107, 53, 0.1);
-}
-
-.featureIcon {
-  font-size: 3rem;
-  margin-bottom: 1rem;
-}
-
-.feature h3 {
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
-  color: #4ECDC4;
-}
-
-.feature p {
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
+/* About Section */
+.about {
+  /* background можно добавить в компоненте */
 }
 
 /* Tokenomics Section */
 .tokenomics {
-  /* background: linear-gradient(135deg, #0a0e1e 0%, #1a1f3a 100%); */
+  /* background можно добавить в компоненте */
 }
 
 .tokenomicsContent {
@@ -1198,7 +127,7 @@
 
 /* Roadmap Section */
 .roadmap {
-  /* background: linear-gradient(135deg, #2d1b3d 0%, #1a1f3a 100%); */
+  /* background можно добавить в компоненте */
 }
 
 .roadmapTimeline {
@@ -1263,7 +192,6 @@
 
 /* Community Section */
 .community {
-  /* background: linear-gradient(135deg, #1a1f3a 0%, #0a0e1e 100%); */
   text-align: center;
 }
 
@@ -1283,322 +211,116 @@
   margin-bottom: 4rem;
   flex-wrap: wrap;
 }
-/* Добавьте эти стили к вашему page.module.css */
 
-/* Buy Modal Styles */
-.buyModal {
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border-radius: 20px;
-  padding: 30px;
-  width: 90%;
-  max-width: 500px;
-  border: 2px solid #4ECDC4;
-  box-shadow: 0 20px 60px rgba(78, 205, 196, 0.3);
-  position: relative;
-  overflow: hidden;
-}
-
-.buyModal::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(45deg, transparent 30%, rgba(78, 205, 196, 0.1) 50%, transparent 70%);
-  pointer-events: none;
-}
-
-.buyContent {
-  position: relative;
-  z-index: 1;
-}
-
-.priceInfo {
-  background: rgba(78, 205, 196, 0.1);
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 25px;
-  border: 1px solid rgba(78, 205, 196, 0.3);
-}
-
-.tokenPrice {
+.socialLink {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.priceLabel {
-  color: #B0B0C4;
-  font-size: 16px;
-}
-
-.priceValue {
-  color: #4ECDC4;
-  font-size: 24px;
-  font-weight: bold;
-  text-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-}
-
-.buyForm {
-  margin: 25px 0;
-}
-
-.inputGroup {
-  margin-bottom: 20px;
-}
-
-.inputGroup label {
-  display: block;
-  color: #E0E0E6;
-  font-size: 14px;
-  margin-bottom: 8px;
-  font-weight: 500;
-}
-
-.inputGroup input {
-  width: 100%;
-  padding: 15px 20px;
+  gap: 0.5rem;
   background: rgba(255, 255, 255, 0.05);
-  border: 2px solid rgba(78, 205, 196, 0.3);
-  border-radius: 12px;
-  color: #E0E0E6;
-  font-size: 16px;
-  transition: all 0.3s ease;
-}
-
-.inputGroup input:focus {
-  outline: none;
-  border-color: #4ECDC4;
-  box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.conversionInfo {
-  background: rgba(255, 107, 53, 0.1);
-  border-radius: 12px;
-  padding: 15px 20px;
-  margin: 20px 0;
-  border: 1px solid rgba(255, 107, 53, 0.3);
-}
-
-.conversion {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.conversion span:first-child {
-  color: #B0B0C4;
-  font-size: 14px;
-}
-
-.tokenAmount {
-  color: #FF6B35;
-  font-size: 18px;
-  font-weight: bold;
-  text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
-}
-
-.buyActions {
-  display: flex;
-  gap: 15px;
-  margin-top: 30px;
-}
-
-.cancelButton {
-  flex: 1;
-  padding: 15px 25px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-radius: 12px;
-  color: #E0E0E6;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.cancelButton:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
-}
-
-.confirmBuyButton {
-  flex: 2;
-  padding: 15px 25px;
-  background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-  border: none;
-  border-radius: 12px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 107, 53, 0.1);
+  border-radius: 25px;
+  padding: 1rem 1.5rem;
   color: white;
-  font-size: 16px;
-  font-weight: 700;
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.socialLink:hover {
+  transform: translateY(-5px);
+  border-color: rgba(255, 107, 53, 0.3);
+  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
+}
+
+.socialIcon {
+  font-size: 1.5rem;
+}
+
+/* Features Grid */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 2rem;
+}
+
+.feature {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 107, 53, 0.1);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.feature:hover {
+  transform: translateY(-10px);
+  border-color: rgba(255, 107, 53, 0.3);
+  box-shadow: 0 20px 40px rgba(255, 107, 53, 0.1);
+}
+
+.featureIcon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.feature h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #4ECDC4;
+}
+
+.feature p {
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.6;
+}
+
+/* Utilities */
+.gradientText {
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.primaryButton {
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  border: none;
+  color: white;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
 }
 
-.confirmBuyButton:hover:not(:disabled) {
+.primaryButton:hover {
   transform: translateY(-3px);
-  box-shadow: 0 12px 35px rgba(255, 107, 53, 0.4);
-  background: linear-gradient(135deg, #F7931E 0%, #FF6B35 100%);
+  box-shadow: 0 15px 35px rgba(255, 107, 53, 0.5);
 }
 
-.confirmBuyButton:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
-}
-
-.buyFooter {
-  margin-top: 25px;
-  text-align: center;
-}
-
-.disclaimer {
-  color: #B0B0C4;
-  font-size: 12px;
-  margin: 0;
-  padding: 10px;
-  background: rgba(255, 193, 7, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 193, 7, 0.3);
-}
-
-/* Connected Wallet Styles */
-.connectedWallet {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  background: rgba(78, 205, 196, 0.1);
-  border: 2px solid rgba(78, 205, 196, 0.3);
-  border-radius: 12px;
-  padding: 8px 15px;
-  transition: all 0.3s ease;
-}
-
-.connectedWallet:hover {
-  background: rgba(78, 205, 196, 0.15);
-  border-color: rgba(78, 205, 196, 0.5);
-  box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
-}
-
-.walletInfo {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.walletIcon {
-  font-size: 18px;
-}
-
-.walletAddress {
-  color: #E0E0E6;
-  font-size: 14px;
-  font-weight: 600;
-  font-family: 'Courier New', monospace;
-}
-
-.disconnectButton {
-  background: rgba(255, 107, 53, 0.2);
-  border: 1px solid rgba(255, 107, 53, 0.4);
-  border-radius: 8px;
-  color: #FF6B35;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 600;
+.secondaryButton {
+  background: transparent;
+  border: 2px solid #4ECDC4;
+  color: #4ECDC4;
+  padding: 1rem 2rem;
+  border-radius: 50px;
+  font-size: 1.1rem;
+  font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
-.disconnectButton:hover {
-  background: rgba(255, 107, 53, 0.3);
-  border-color: rgba(255, 107, 53, 0.6);
-  transform: translateY(-1px);
+.secondaryButton:hover {
+  background: #4ECDC4;
+  color: white;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.3);
 }
 
-/* Navigation Actions Update */
-.navActions {
-  display: flex;
-  align-items: center;
-  gap: 15px;
-}
-
-/* ThirdWeb Connect Wallet Button Override */
-.navActions [data-theme="dark"] {
-  background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%) !important;
-  border: none !important;
-  border-radius: 12px !important;
-  padding: 12px 20px !important;
-  font-weight: 600 !important;
-  transition: all 0.3s ease !important;
-  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3) !important;
-}
-
-.navActions [data-theme="dark"]:hover {
-  transform: translateY(-2px) !important;
-  box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4) !important;
-}
-
-/* Responsive Design for Buy Modal */
-@media (max-width: 768px) {
-  .buyModal {
-    width: 95%;
-    padding: 20px;
-    margin: 20px;
-  }
-  
-  .buyActions {
-    flex-direction: column;
-  }
-  
-  .buyActions button {
-    width: 100%;
-  }
-  
-  .conversion {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
-  }
-  
-  .priceInfo {
-    padding: 15px;
-  }
-  
-  .tokenPrice {
-    flex-direction: column;
-    gap: 10px;
-    text-align: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .connectedWallet {
-    flex-direction: column;
-    gap: 10px;
-    padding: 12px;
-  }
-  
-  .navActions {
-    flex-direction: column;
-    gap: 10px;
-  }
-  
-  .walletInfo {
-    justify-content: center;
-  }
-  
-  .disconnectButton {
-    width: 100%;
-    padding: 8px 16px;
-  }
-}
-
-/* Animation Classes */
+/* Animation classes */
 .slideInFromBottom {
   animation: slideInFromBottom 0.5s ease-out;
 }
@@ -1653,7 +375,7 @@
   }
 }
 
-/* Success States */
+/* Success and Error States */
 .success {
   border-color: #4CAF50 !important;
   box-shadow: 0 0 20px rgba(76, 175, 80, 0.3) !important;
@@ -1664,270 +386,27 @@
   box-shadow: 0 0 20px rgba(244, 67, 54, 0.3) !important;
 }
 
-/* Token Amount Display */
-.tokenAmountLarge {
-  font-size: 28px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  text-align: center;
-  margin: 15px 0;
-  text-shadow: 0 0 30px rgba(78, 205, 196, 0.5);
-}
-
-/* Buy Button States */
-.primaryButton.disabled {
+/* Disabled States */
+.disabled {
   opacity: 0.6;
   cursor: not-allowed;
-  transform: none !important;
+  background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
+  box-shadow: none;
 }
 
-.primaryButton.disabled:hover {
-  transform: none !important;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2) !important;
-}
-.socialLink {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 107, 53, 0.1);
-  border-radius: 25px;
-  padding: 1rem 1.5rem;
-  color: white;
-  text-decoration: none;
-  transition: all 0.3s ease;
+.disabled:hover {
+  transform: none;
+  box-shadow: none;
 }
 
-.socialLink:hover {
-  transform: translateY(-5px);
-  border-color: rgba(255, 107, 53, 0.3);
-  box-shadow: 0 10px 30px rgba(255, 107, 53, 0.2);
-}
-
-.socialIcon {
-  font-size: 1.5rem;
-}
-
-/* Mobile Responsiveness - Улучшенная адаптивность */
-
-/* Экстра большие экраны */
-@media (min-width: 1400px) {
-  .heroTitle {
-    font-size: 4rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 700px;
-  }
-  
-  .raisedNumber {
-    font-size: 3rem;
-  }
-}
-
-/* Большие экраны - ноутбуки */
-@media (max-width: 1200px) {
-  .navContainer {
-    padding: 1rem 1.5rem;
-  }
-  
-  .heroContent {
-    gap: 3rem;
-    max-width: 1000px;
-  }
-  
-  .heroTitle {
-    font-size: 3.2rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 550px;
-  }
-  
-  .raisedContainer {
-    padding: 1.8rem;
-  }
-  
-  .raisedNumber {
-    font-size: 2.3rem;
-  }
-}
-
-/* Средние экраны - планшеты */
+/* Mobile Responsiveness */
 @media (max-width: 1024px) {
-  .navContainer {
-    padding: 1rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1rem;
+  .sectionContainer {
+    padding: 4rem 1.5rem;
   }
   
-  .navLinks {
-    order: 3;
-    width: 100%;
-    justify-content: center;
-    gap: 1rem;
-    margin-top: 1rem;
-  }
-  
-  .logo {
-    order: 1;
-  }
-  
-  .navActions {
-    order: 2;
-    gap: 0.8rem;
-  }
-  
-  .heroContent {
-    grid-template-columns: 1fr;
-    gap: 3rem;
-    text-align: center;
-  }
-  
-  .heroTitle {
-    font-size: 3rem;
-  }
-  
-  .heroSubtitle {
-    font-size: 1.2rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 450px;
-  }
-  
-  .raisedContainer {
-    flex-direction: column;
-    text-align: center;
-    padding: 2rem;
-    gap: 1.5rem;
-  }
-  
-  .raisedNumber {
-    font-size: 2.8rem;
-  }
-  
-  .stats {
-    justify-content: center;
-    gap: 2rem;
-  }
-}
-
-/* Маленькие планшеты и большие телефоны */
-@media (max-width: 768px) {
-  .navContainer {
-    padding: 0.8rem;
-    flex-direction: column;
-    gap: 1rem;
-  }
-  
-  .navLinks {
-    display: none; /* Скрываем на мобильных, можно добавить гамбургер меню */
-  }
-  
-  .navActions {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    justify-content: center;
-  }
-  
-  .walletButton {
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-    min-width: 120px;
-    flex: 1;
-    max-width: 150px;
-  }
-  
-  .walletAddress,
-  .walletText {
-    font-size: 0.75rem;
-  }
-  
-  .buyButton {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    flex: 1;
-    max-width: 150px;
-  }
-  
-  .hero {
-    padding: 7rem 1rem 3rem;
-    min-height: auto;
-  }
-  
-  .heroContent {
-    gap: 2rem;
-  }
-  
-  .heroTitle {
+  .sectionTitle {
     font-size: 2.5rem;
-    line-height: 1.2;
-    margin-top: 1rem;
-    margin-bottom: 1rem;
-  }
-  
-  .heroSubtitle {
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-  }
-  
-  .heroButtons {
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    margin-bottom: 2rem;
-  }
-  
-  .primaryButton,
-  .secondaryButton {
-    width: 100%;
-    max-width: 300px;
-    padding: 1rem 2rem;
-  }
-  
-  .raisedContainer {
-    padding: 1.5rem;
-    gap: 1rem;
-  }
-  
-  .raisedNumber {
-    font-size: 2.2rem;
-  }
-  
-  .raisedIcon {
-    font-size: 2.5rem;
-  }
-  
-  .stats {
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 1.5rem;
-  }
-  
-  .stat {
-    min-width: 100px;
-    flex: 1;
-    max-width: 120px;
-  }
-  
-  .statNumber {
-    font-size: 1.8rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 350px;
-  }
-  
-  .features {
-    grid-template-columns: 1fr;
-    gap: 1.5rem;
   }
   
   .tokenomicsContent {
@@ -1939,6 +418,29 @@
   .pieChart {
     width: 250px;
     height: 250px;
+  }
+  
+  .features {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .sectionContainer {
+    padding: 3rem 1rem;
+  }
+  
+  .sectionTitle {
+    font-size: 2rem;
+  }
+  
+  .features {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+  
+  .feature {
+    padding: 1.5rem;
   }
   
   .roadmapTimeline {
@@ -1957,306 +459,92 @@
     justify-content: center;
   }
   
-  .walletModal {
-    margin: 1rem;
+  .tokenomicsInfo {
     padding: 1.5rem;
-    width: calc(100% - 2rem);
   }
   
-  .modalHeader h3 {
-    font-size: 1.3rem;
-  }
-  
-  .musicPlayer {
-    bottom: 1rem;
-    right: 1rem;
-  }
-  
-  .playButton {
-    width: 50px;
-    height: 50px;
-    font-size: 1.2rem;
+  .roadmapItem {
+    padding: 1.5rem;
   }
 }
 
-/* Мобильные телефоны */
 @media (max-width: 480px) {
-  .navContainer {
-    padding: 0.5rem;
+  .sectionContainer {
+    padding: 2rem 0.5rem;
   }
   
-  .navActions {
-    width: 100%;
+  .sectionTitle {
+    font-size: 1.8rem;
   }
   
-  .walletButton,
-  .buyButton {
-    font-size: 0.75rem;
-    padding: 0.5rem 0.8rem;
-    min-width: auto;
-    flex: 1;
+  .feature {
+    padding: 1.2rem;
   }
   
-  .hero {
-    padding: 6rem 0.5rem 2rem;
+  .tokenomicsInfo,
+  .roadmapItem {
+    padding: 1.2rem;
   }
   
-  .heroTitle {
-    font-size: 2rem;
-    margin-bottom: 0.8rem;
+  .pieChart {
+    width: 200px;
+    height: 200px;
   }
   
-  .heroSubtitle {
-    font-size: 1rem;
-    margin-bottom: 1.2rem;
-    padding: 0 1rem;
-  }
-  
-  .heroButtons {
-    padding: 0 1rem;
+  .socialLink {
+    padding: 0.8rem 1.2rem;
   }
   
   .primaryButton,
   .secondaryButton {
     padding: 0.9rem 1.5rem;
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
-  
-  .raisedContainer {
-    margin: 0 1rem;
-    padding: 1.2rem;
-  }
-  
-  .raisedNumber {
-    font-size: 1.8rem;
-  }
-  
-  .raisedIcon {
-    font-size: 2rem;
-  }
-  
-  .raisedLabel {
-    font-size: 0.9rem;
-  }
-  
-  .stats {
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    padding: 0 1rem;
-  }
-  
-  .stat {
-    width: 100%;
-    max-width: 150px;
-  }
-  
-  .statNumber {
-    font-size: 1.6rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 250px;
-  }
-  
-  .sectionContainer {
-    padding: 3rem 1rem;
-  }
-  
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .gradientText,
   .sectionTitle {
-    font-size: 2rem;
-  }
-  
-  .feature {
-    padding: 1.5rem;
-  }
-  
-  .walletModal {
-    margin: 0.5rem;
-    padding: 1rem;
-  }
-  
-  .walletOption {
-    padding: 0.8rem;
-    gap: 0.8rem;
-  }
-  
-  .walletOption .walletIcon {
-    font-size: 1.8rem;
-    min-width: 35px;
-  }
-  
-  .walletInfo h4 {
-    font-size: 1rem;
-  }
-  
-  .walletInfo p {
-    font-size: 0.8rem;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
-/* Очень маленькие экраны */
-@media (max-width: 360px) {
-  .heroTitle {
-    font-size: 1.8rem;
-  }
-  
-  .heroSubtitle {
-    font-size: 0.9rem;
-  }
-  
-  .raisedNumber {
-    font-size: 1.6rem;
-  }
-  
-  .primaryButton,
-  .secondaryButton {
-    padding: 0.8rem 1.2rem;
-    font-size: 0.9rem;
-  }
-  
-  .statNumber {
-    font-size: 1.4rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 200px;
-  }
-}
-
-/* Альбомная ориентация для мобильных */
-@media (max-width: 768px) and (orientation: landscape) {
-  .hero {
-    min-height: auto;
-    padding: 5rem 1rem 2rem;
-  }
-  
-  .heroContent {
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-    align-items: center;
-  }
-  
-  .heroText {
-    text-align: left;
-  }
-  
-  .heroTitle {
-    font-size: 2.2rem;
-  }
-  
-  .heroSubtitle {
-    font-size: 1rem;
-  }
-  
-  .heroButtons {
-    flex-direction: row;
-    gap: 1rem;
-  }
-  
-  .primaryButton,
-  .secondaryButton {
-    width: auto;
-    padding: 0.8rem 1.5rem;
-  }
-  
-  .raisedContainer {
-    margin: 1rem 0;
-  }
-  
-  .stats {
-    flex-direction: row;
-    justify-content: center;
-  }
-  
-  .canvasContainer img {
-    max-height: 300px;
-  }
-}
-
-/* Высокие экраны - улучшение для современных телефонов */
-@media (max-height: 600px) and (max-width: 768px) {
-  .hero {
-    padding: 4rem 1rem 2rem;
-  }
-  
-  .heroTitle {
-    font-size: 2rem;
-  }
-  
-  .raisedContainer {
-    padding: 1rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 200px;
-  }
-}
-
-/* Планшеты в портретной ориентации */
-@media (max-width: 1024px) and (orientation: portrait) {
-  .heroContent {
-    gap: 2rem;
-  }
-  
-  .heroTitle {
-    font-size: 2.8rem;
-  }
-  
-  .canvasContainer img {
-    max-height: 400px;
-  }
-  
-  .raisedNumber {
-    font-size: 2.5rem;
-  }
-}
-
-/* Улучшения для touch устройств */
-@media (hover: none) and (pointer: coarse) {
-  .navLink,
-  .walletButton,
-  .buyButton,
-  .primaryButton,
-  .secondaryButton {
-    min-height: 44px; /* Минимальная высота для удобного нажатия */
-  }
-  
-  .walletOption {
-    min-height: 60px;
-  }
-  
-  .playButton {
-    min-width: 50px;
-    min-height: 50px;
-  }
-}
-
-/* Accessibility улучшения */
+/* Accessibility improvements */
 @media (prefers-reduced-motion: reduce) {
-  .heroTitle,
-  .heroImage,
-  .raisedNumber,
-  .progressFill,
-  .particles,
-  .shimmer,
-  .bounce,
-  .glow,
-  .progressShine {
+  .slideInFromBottom,
+  .pulseGlow,
+  .loading {
     animation: none;
   }
   
   .primaryButton:hover,
   .secondaryButton:hover,
-  .walletButton:hover,
-  .buyButton:hover {
+  .feature:hover,
+  .roadmapItem:hover,
+  .socialLink:hover {
     transform: none;
   }
 }
 
-/* Темная тема для устройств с поддержкой */
+/* Focus states for accessibility */
+.primaryButton:focus,
+.secondaryButton:focus,
+.contractButton:focus {
+  outline: 2px solid #4ECDC4;
+  outline-offset: 2px;
+}
+
+/* Dark mode optimizations */
 @media (prefers-color-scheme: dark) {
   .container {
     background: linear-gradient(135deg, #000000 0%, #1a1f3a 25%, #2d1b3d 50%, #1a1f3a 75%, #000000 100%);
+  }
+  
+  .feature,
+  .roadmapItem,
+  .tokenomicsInfo {
+    background: rgba(255, 255, 255, 0.03);
   }
 }

@@ -1,4 +1,4 @@
-/* Header.module.css */
+/* Header.module.css - Optimized */
 
 .header {
   position: fixed;
@@ -152,10 +152,6 @@
   font-size: 14px;
 }
 
-.connectWallet {
-  /* Стили для кнопки подключения кошелька будут применены через ThirdWeb */
-}
-
 /* Mobile Menu Button */
 .mobileMenuButton {
   display: none;
@@ -182,9 +178,9 @@
 .hamburger {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: 4px;
   width: 20px;
-  height: 20px;
+  height: 16px;
   justify-content: center;
   align-items: center;
 }
@@ -213,7 +209,7 @@
   background: #FF6B35;
 }
 
-/* Mobile Menu - ИСПРАВЛЕНО */
+/* Mobile Menu - IMPROVED ANIMATIONS */
 .mobileMenu {
   position: fixed;
   top: 80px;
@@ -226,12 +222,16 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
   z-index: 1001;
   max-height: calc(100vh - 80px);
+  /* Smoother animations */
+  will-change: height, opacity;
 }
 
 .mobileMenuContent {
   padding: 24px 20px;
   max-width: 1400px;
   margin: 0 auto;
+  /* Smooth container for animations */
+  will-change: transform;
 }
 
 .mobileNavLink {
@@ -245,7 +245,7 @@
   color: #ffffff;
   cursor: pointer;
   border-radius: 16px;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother easing */
   font-size: 18px;
   font-weight: 600;
   margin-bottom: 12px;
@@ -253,6 +253,10 @@
   backdrop-filter: blur(10px);
   text-decoration: none;
   -webkit-tap-highlight-color: transparent;
+  min-height: 60px;
+  /* Improve animation performance */
+  will-change: transform, background-color, border-color;
+  transform: translateZ(0); /* Force hardware acceleration */
 }
 
 .mobileNavLink:hover,
@@ -261,15 +265,19 @@
   background: rgba(255, 107, 53, 0.15);
   border-color: rgba(255, 107, 53, 0.3);
   color: #FF6B35;
-  transform: translateX(8px);
+  transform: translateX(8px) translateZ(0);
   outline: none;
 }
 
+/* FIXED: Active state with smooth transitions */
 .mobileNavLink.active {
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(78, 205, 196, 0.2));
-  border-color: rgba(255, 107, 53, 0.4);
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.3), rgba(78, 205, 196, 0.2));
+  border: 2px solid rgba(255, 107, 53, 0.5);
   color: #FF6B35;
-  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.2);
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
+  transform: translateX(8px) translateZ(0);
+  /* Ensure active state is preserved */
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 .mobileNavLink .navIcon {
@@ -287,6 +295,8 @@
   margin-top: 24px;
   padding-top: 24px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  /* Smooth animations */
+  will-change: transform, opacity;
 }
 
 .mobileWhitePaperButton {
@@ -299,10 +309,14 @@
   font-weight: 700;
   font-size: 18px;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
   backdrop-filter: blur(10px);
   -webkit-tap-highlight-color: transparent;
+  min-height: 60px;
+  /* Performance optimization */
+  will-change: transform, box-shadow;
+  transform: translateZ(0);
 }
 
 .mobileWhitePaperButton:hover,
@@ -572,7 +586,6 @@
   
   .logoText {
     font-size: 22px;
-    display: block;
   }
   
   .mobileMenu {
@@ -687,6 +700,7 @@
     padding: 18px 20px;
     font-size: 16px;
     margin-bottom: 10px;
+    min-height: 56px;
   }
   
   .mobileNavLink .navIcon {
@@ -700,6 +714,7 @@
   .mobileWhitePaperButton {
     padding: 18px;
     font-size: 16px;
+    min-height: 56px;
   }
   
   .whitePaperModal {
@@ -797,11 +812,13 @@
   .mobileNavLink {
     padding: 16px 18px;
     font-size: 15px;
+    min-height: 52px;
   }
   
   .mobileWhitePaperButton {
     padding: 16px;
     font-size: 15px;
+    min-height: 52px;
   }
   
   .modalContent {
@@ -815,7 +832,34 @@
   }
 }
 
-/* Touch and Click Improvements for Mobile */
+/* Performance optimizations */
+@media (prefers-reduced-motion: reduce) {
+  .header,
+  .navLink,
+  .mobileNavLink,
+  .mobileMenuButton,
+  .whitePaperButton,
+  .mobileWhitePaperButton,
+  .closeButton,
+  .downloadButton,
+  .viewOnlineButton,
+  .shareButton {
+    transition: none;
+  }
+  
+  .navLink::before,
+  .hamburger span {
+    transition: none;
+  }
+  
+  .navLink:hover,
+  .mobileNavLink:hover,
+  .closeButton:hover {
+    transform: none;
+  }
+}
+
+/* Touch-friendly improvements */
 @media (hover: none) and (pointer: coarse) {
   .mobileNavLink,
   .mobileWhitePaperButton,
@@ -829,31 +873,33 @@
   
   .mobileNavLink:active {
     background: rgba(255, 107, 53, 0.2);
-    transform: scale(0.98);
+    transform: scale(0.98) translateZ(0);
+  }
+  
+  .mobileNavLink.active:active {
+    transform: scale(0.98) translateX(8px) translateZ(0);
   }
   
   .mobileWhitePaperButton:active {
-    transform: scale(0.98);
+    transform: scale(0.98) translateZ(0);
+  }
+  
+  .logo:active {
+    transform: scale(0.95) translateZ(0);
+  }
+  
+  /* Better mobile touch feedback */
+  .mobileNavLink {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
   }
 }
 
-/* Animation Classes */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.fadeInUp {
-  animation: fadeInUp 0.6s ease-out;
-}
-
-/* Custom Scrollbar for Modal */
+/* Custom scrollbar for modal */
 .modalContent::-webkit-scrollbar {
   width: 6px;
 }
@@ -872,9 +918,23 @@
   background: rgba(255, 107, 53, 0.7);
 }
 
-/* Prevent body scroll when mobile menu is open */
-.mobileMenuOpen {
-  overflow: hidden;
-  position: fixed;
-  width: 100%;
+
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .header {
+    background: rgba(0, 0, 0, 0.95);
+    border-bottom-color: #FF6B35;
+  }
+  
+  .navLink.active {
+    background: #FF6B35;
+    color: #000;
+  }
+  
+  .mobileNavLink.active {
+    background: #FF6B35;
+    color: #000;
+    border-color: #FF6B35;
+  }
 }
