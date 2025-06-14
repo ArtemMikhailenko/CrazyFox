@@ -155,14 +155,7 @@
     z-index: 1;
   }
   
-  .divider::after {
-    content: 'OR';
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    padding: 0 1rem;
-    position: relative;
-    z-index: 2;
-  }
-  
+
   /* Упрощенная форма */
   .supportForm {
     /* Базовые стили */
