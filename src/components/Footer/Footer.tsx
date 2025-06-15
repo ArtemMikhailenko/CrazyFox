@@ -96,7 +96,7 @@ const Footer = () => {
               
               <motion.button
                 className={styles.socialLink}
-                onClick={() => handleSocialClick('Twitter', 'https://twitter.com/CrazyFoxBSC')}
+                onClick={() => handleSocialClick('Twitter', 'https://x.com/crazyfoxmeme?s=21')}
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -239,21 +239,7 @@ const Footer = () => {
         </div>
       </div>
 
-      {/* Floating Fox Animation */}
-      <motion.div 
-        className={styles.floatingFox}
-        animate={{ 
-          y: [0, -10, 0],
-          rotate: [0, 5, -5, 0]
-        }}
-        transition={{ 
-          duration: 4,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      >
-        🦊
-      </motion.div>
+      
     </footer>
   );
 };

@@ -1,17 +1,14 @@
-// pages/index.tsx или app/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { motion, useScroll, useSpring } from 'framer-motion';
-import { toast, ToastContainer } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-// ThirdWeb v5 imports
 import { ThirdwebProvider } from "thirdweb/react";
 import { createThirdwebClient } from "thirdweb";
 
-// Components
 import Header from '@/components/Header/Header';
 import HeroSection from '@/components/HeroSection/HeroSection';
 import CrazyTokenomics from '@/components/CrazyTokenomics/CrazyTokenomics';
@@ -24,19 +21,16 @@ import Footer from '@/components/Footer/Footer';
 
 import styles from './page.module.css';
 
-// ThirdWeb client configuration
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
 });
 
-// Main Home Component
 const HomeContent = () => {
   const [activeSection, setActiveSection] = useState('hero');
   const [isLoaded, setIsLoaded] = useState(false);
   const { scrollYProgress } = useScroll();
   const scaleX = useSpring(scrollYProgress, { stiffness: 100, damping: 30, restDelta: 0.001 });
 
-  // Intersection Observer for section tracking
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -55,7 +49,6 @@ const HomeContent = () => {
     return () => observer.disconnect();
   }, []);
 
-  // Scroll to section function
   const scrollToSection = (sectionId: string) => {
     document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -66,25 +59,19 @@ const HomeContent = () => {
 
   return (
     <div className={styles.container}>
-      {/* Progress Bar */}
       <motion.div className={styles.progressBar} style={{ scaleX }} />
 
-      {/* Header Component */}
       <Header 
         activeSection={activeSection}
         scrollToSection={scrollToSection}
       />
 
-      {/* Support Button */}
       <SupportButton />
 
-      {/* Hero Section */}
       <HeroSection isLoaded={isLoaded} />
 
-      {/* Token Price Progression */}
       <TokenPriceProgression currentStage={1} />
 
-      {/* Other Sections */}
       <motion.section 
         id="about" 
         className={styles.about}
@@ -129,10 +116,8 @@ const HomeContent = () => {
         <CrazyCommunity />
       </motion.section>
 
-      {/* Footer */}
       <Footer />
 
-      {/* Toast Container */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -149,7 +134,6 @@ const HomeContent = () => {
   );
 };
 
-// Main Export with ThirdWeb Provider
 export default function Home() {
   return (
     <>
