@@ -104,25 +104,7 @@ const Footer = () => {
                 <span>Twitter</span>
               </motion.button>
               
-              <motion.button
-                className={styles.socialLink}
-                onClick={() => handleSocialClick('Discord', 'https://discord.gg/crazyfox')}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <span className={styles.socialIcon}>💬</span>
-                <span>Discord</span>
-              </motion.button>
               
-              <motion.button
-                className={styles.socialLink}
-                onClick={() => handleSocialClick('Reddit', 'https://reddit.com/r/CrazyFox')}
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
-              >
-                <span className={styles.socialIcon}>🔴</span>
-                <span>Reddit</span>
-              </motion.button>
             </div>
           </motion.div>
 
@@ -145,24 +127,7 @@ const Footer = () => {
             </ul>
           </motion.div>
 
-          {/* Trading & Info */}
-          <motion.div 
-            className={styles.tradingSection}
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            viewport={{ once: true }}
-          >
-            <h4 className={styles.sectionTitle}>Trading & Info</h4>
-            <ul className={styles.linksList}>
-              <li><a href="https://pancakeswap.finance" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>PancakeSwap</a></li>
-              <li><a href="https://poocoin.app" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>PooCoin Chart</a></li>
-              <li><a href="https://dextools.io" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>DexTools</a></li>
-              <li><a href="https://coinmarketcap.com" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>CoinMarketCap</a></li>
-              <li><a href="https://coingecko.com" target="_blank" rel="noopener noreferrer" className={styles.footerLink}>CoinGecko</a></li>
-              <li><a href="/how-to-buy" className={styles.footerLink}>How to Buy</a></li>
-            </ul>
-          </motion.div>
+          
 
           {/* Contract Info */}
           <motion.div 
@@ -229,27 +194,7 @@ const Footer = () => {
               Get the latest updates, announcements, and exclusive content!
             </p>
             
-            <form onSubmit={handleNewsletterSubmit} className={styles.newsletterForm}>
-              <div className={styles.inputContainer}>
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Enter your email"
-                  className={styles.emailInput}
-                  disabled={isSubscribing}
-                />
-                <motion.button
-                  type="submit"
-                  className={styles.subscribeButton}
-                  disabled={isSubscribing}
-                  whileHover={!isSubscribing ? { scale: 1.05 } : {}}
-                  whileTap={!isSubscribing ? { scale: 0.95 } : {}}
-                >
-                  {isSubscribing ? '🔄' : '🚀'}
-                </motion.button>
-              </div>
-            </form>
+           
 
             {/* Quick Stats */}
             <div className={styles.quickStats}>
@@ -273,15 +218,14 @@ const Footer = () => {
         <div className={styles.bottomBar}>
           <div className={styles.bottomContent}>
             <div className={styles.copyright}>
-              <p>© 2024 CrazyFox. All rights reserved. Built with 🦊 by the CrazyFox team.</p>
+              <p>© 2025 CrazyFox. All rights reserved. Built with 🦊 by the CrazyFox team.</p>
               <p className={styles.disclaimer}>
                 Disclaimer: Cryptocurrency investments carry risk. Always DYOR (Do Your Own Research).
               </p>
             </div>
             
             <div className={styles.footerActions}>
-              <a href="/privacy" className={styles.legalLink}>Privacy Policy</a>
-              <a href="/terms" className={styles.legalLink}>Terms of Service</a>
+             
               <button 
                 onClick={handleScrollToTop}
                 className={styles.scrollTopButton}

@@ -433,7 +433,18 @@
   .socialGrid {
     grid-template-columns: 1fr;
   }
-  
+  .highlightBadge{
+    position: absolute;
+  top: 8px;
+  right: 8px;
+  background: linear-gradient(45deg, #FF6B35, #F7931E);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: 0.6rem;
+  font-weight: 600;
+  z-index: 10;
+  }
   .socialCard {
     margin: 0 auto;
     max-width: 320px;

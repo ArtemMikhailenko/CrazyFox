@@ -129,7 +129,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   
   instructionHint: {
     position: 'absolute' as const,
-    top: '20%',
+    top: '22%',
     left: '22%',
     transform: 'translateX(-50%)',
     background: 'rgba(0, 0, 0, 0.7)',
@@ -345,7 +345,6 @@ const styles: { [key: string]: React.CSSProperties } = {
   }
 };
 
-// Обновленные данные планет с более краткой информацией
 const PLANETS_DATA = [
   {
     id: 1,

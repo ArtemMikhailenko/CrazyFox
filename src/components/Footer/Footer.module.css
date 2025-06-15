@@ -1,0 +1,672 @@
+/* components/Footer/Footer.module.css */
+
+.footer {
+    background: linear-gradient(135deg, #0a0e1e 0%, #1a1f3a 50%, #2d1b3d 100%);
+    position: relative;
+    overflow: hidden;
+    margin-top: 4rem;
+  }
+  
+  .footerBackground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  
+  .gradientOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(45deg, 
+      rgba(255, 107, 53, 0.1) 0%, 
+      transparent 30%, 
+      rgba(78, 205, 196, 0.1) 70%, 
+      transparent 100%);
+    animation: gradientFlow 20s ease-in-out infinite;
+  }
+  
+  @keyframes gradientFlow {
+    0%, 100% { opacity: 0.3; transform: translateX(-50px); }
+    50% { opacity: 0.6; transform: translateX(50px); }
+  }
+  
+  .particles {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-image: 
+      radial-gradient(2px 2px at 20px 30px, rgba(255, 107, 53, 0.4), transparent),
+      radial-gradient(2px 2px at 40px 70px, rgba(78, 205, 196, 0.4), transparent),
+      radial-gradient(1px 1px at 90px 40px, rgba(69, 183, 209, 0.4), transparent);
+    background-repeat: repeat;
+    background-size: 150px 150px;
+    animation: sparkle 15s linear infinite;
+  }
+  
+  @keyframes sparkle {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-150px); }
+  }
+  
+  .footerContainer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 4rem 2rem 0;
+    position: relative;
+    z-index: 10;
+  }
+  
+  .footerContent {
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1.5fr 1.5fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+  
+  /* Brand Section */
+  .brandSection {
+    max-width: 400px;
+  }
+  
+  .logoContainer {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  .logoIcon {
+    font-size: 3rem;
+    animation: bounce 3s infinite;
+  }
+  
+  @keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-10px); }
+    60% { transform: translateY(-5px); }
+  }
+  
+  .brandName {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin: 0;
+  }
+  
+  .brandDescription {
+    color: rgba(255, 255, 255, 0.8);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+  }
+  
+  .socialLinks {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+  
+  .socialLink {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    border-radius: 15px;
+    padding: 0.7rem 1rem;
+    color: white;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+  
+  .socialLink:hover {
+    background: rgba(255, 107, 53, 0.2);
+    border-color: rgba(255, 107, 53, 0.4);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .socialIcon {
+    font-size: 1.2rem;
+  }
+  
+  /* Sections */
+  .linksSection,
+  .tradingSection,
+  .contractSection,
+  .newsletterSection {
+    /* Common section styles */
+  }
+  
+  .sectionTitle {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #4ECDC4;
+    margin: 0 0 1.5rem 0;
+    position: relative;
+  }
+  
+  .sectionTitle::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 0;
+    width: 30px;
+    height: 2px;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+    border-radius: 2px;
+  }
+  
+  .linksList {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .linksList li {
+    margin-bottom: 0.8rem;
+  }
+  
+  .footerLink {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    position: relative;
+  }
+  
+  .footerLink:hover {
+    color: #4ECDC4;
+    padding-left: 0.5rem;
+  }
+  
+  .footerLink::before {
+    content: '';
+    position: absolute;
+    left: -0.5rem;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 0;
+    height: 2px;
+    background: #4ECDC4;
+    transition: width 0.3s ease;
+  }
+  
+  .footerLink:hover::before {
+    width: 0.3rem;
+  }
+  
+  /* Contract Section */
+  .contractInfo {
+    margin-bottom: 2rem;
+  }
+  
+  .contractItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.8rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .contractLabel {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    font-weight: 500;
+  }
+  
+  .contractValue {
+    color: #4ECDC4;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .contractAddress {
+    background: rgba(78, 205, 196, 0.1);
+    border: 1px solid rgba(78, 205, 196, 0.3);
+    border-radius: 8px;
+    color: #4ECDC4;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: 'Courier New', monospace;
+  }
+  
+  .contractAddress:hover {
+    background: rgba(78, 205, 196, 0.2);
+    border-color: rgba(78, 205, 196, 0.5);
+    transform: translateY(-1px);
+  }
+  
+  .copyIcon {
+    font-size: 0.8rem;
+  }
+  
+  .securityBadges {
+    display: flex;
+    flex-direction: column;
+    gap: 0.8rem;
+  }
+  
+  .badge {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+    border-radius: 10px;
+    padding: 0.6rem;
+    color: #4CAF50;
+    font-size: 0.85rem;
+    font-weight: 600;
+  }
+  
+  .badgeIcon {
+    font-size: 1rem;
+  }
+  
+  /* Newsletter Section */
+  .newsletterDescription {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+  }
+  
+  .newsletterForm {
+    margin-bottom: 2rem;
+  }
+  
+  .inputContainer {
+    display: flex;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 0.3rem;
+    border: 2px solid rgba(78, 205, 196, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .inputContainer:focus-within {
+    border-color: rgba(78, 205, 196, 0.5);
+    box-shadow: 0 0 20px rgba(78, 205, 196, 0.1);
+  }
+  
+  .emailInput {
+    flex: 1;
+    background: transparent;
+    border: none;
+    padding: 0.8rem 1rem;
+    color: white;
+    font-size: 0.9rem;
+    outline: none;
+  }
+  
+  .emailInput::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+  
+  .subscribeButton {
+    background: linear-gradient(45deg, #FF6B35, #F7931E);
+    border: none;
+    border-radius: 12px;
+    color: white;
+    padding: 0.8rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  }
+  
+  .subscribeButton:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.4);
+  }
+  
+  .subscribeButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+  }
+  
+  .quickStats {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .statItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+  
+  .statValue {
+    color: #FF6B35;
+    font-weight: 700;
+    font-size: 0.9rem;
+  }
+  
+  .statLabel {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+  }
+  
+  /* Bottom Bar */
+  .bottomBar {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 2rem 0;
+    background: rgba(0, 0, 0, 0.2);
+  }
+  
+  .bottomContent {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 2rem;
+  }
+  
+  .copyright {
+    flex: 1;
+  }
+  
+  .copyright p {
+    margin: 0.3rem 0;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+    line-height: 1.4;
+  }
+  
+  .disclaimer {
+    font-size: 0.75rem !important;
+    color: rgba(255, 255, 255, 0.4) !important;
+  }
+  
+  .footerActions {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+  }
+  
+  .legalLink {
+    color: rgba(255, 255, 255, 0.6);
+    text-decoration: none;
+    font-size: 0.85rem;
+    transition: color 0.3s ease;
+  }
+  
+  .legalLink:hover {
+    color: #4ECDC4;
+  }
+  
+  .scrollTopButton {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: linear-gradient(45deg, #4ECDC4, #45B7D1);
+    border: none;
+    border-radius: 25px;
+    color: white;
+    padding: 0.6rem 1.2rem;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(78, 205, 196, 0.3);
+  }
+  
+  .scrollTopButton:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(78, 205, 196, 0.4);
+  }
+  
+  .scrollIcon {
+    font-size: 1rem;
+  }
+  
+  /* Floating Fox */
+  .floatingFox {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    font-size: 4rem;
+    z-index: 20;
+    filter: drop-shadow(0 0 20px rgba(255, 107, 53, 0.5));
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1200px) {
+    .footerContent {
+      grid-template-columns: 2fr 1fr 1fr 1.5fr;
+      gap: 2rem;
+    }
+    
+    .contractSection {
+      grid-column: span 2;
+    }
+  }
+  
+  @media (max-width: 968px) {
+    .footerContent {
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+    
+    .brandSection {
+      grid-column: span 2;
+      max-width: none;
+    }
+    
+    .newsletterSection {
+      grid-column: span 2;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .footerContainer {
+      padding: 3rem 1rem 0;
+    }
+    
+    .footerContent {
+      grid-template-columns: 1fr;
+      gap: 2.5rem;
+    }
+    
+    .brandSection,
+    .linksSection,
+    .tradingSection,
+    .contractSection,
+    .newsletterSection {
+      grid-column: span 1;
+    }
+    
+    .logoContainer {
+      justify-content: center;
+      text-align: center;
+    }
+    
+    .brandDescription {
+      text-align: center;
+    }
+    
+    .socialLinks {
+      justify-content: center;
+    }
+    
+    .bottomContent {
+      flex-direction: column;
+      text-align: center;
+      gap: 1.5rem;
+    }
+    
+    .footerActions {
+      justify-content: center;
+      gap: 1rem;
+    }
+    
+    .floatingFox {
+      top: 1rem;
+      right: 1rem;
+      font-size: 3rem;
+    }
+    
+    .quickStats {
+      flex-direction: row;
+      justify-content: space-around;
+    }
+    
+    .statItem {
+      flex-direction: column;
+      text-align: center;
+      border: none;
+      gap: 0.3rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .footerContainer {
+      padding: 2rem 0.5rem 0;
+    }
+    
+    .socialLinks {
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    .socialLink {
+      width: 100%;
+      max-width: 200px;
+      justify-content: center;
+    }
+    
+    .inputContainer {
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    
+    .subscribeButton {
+      width: 100%;
+    }
+    
+    .quickStats {
+      flex-direction: column;
+    }
+    
+    .securityBadges {
+      gap: 0.5rem;
+    }
+    
+    .badge {
+      padding: 0.5rem;
+      font-size: 0.8rem;
+    }
+    
+    .contractAddress {
+      font-size: 0.75rem;
+      padding: 0.25rem 0.6rem;
+    }
+    
+    .floatingFox {
+      font-size: 2.5rem;
+    }
+    
+    .logoIcon {
+      font-size: 2.5rem;
+    }
+    
+    .brandName {
+      font-size: 1.5rem;
+    }
+  }
+  
+  /* Dark mode enhancements */
+  @media (prefers-color-scheme: dark) {
+    .footer {
+      background: linear-gradient(135deg, #000000 0%, #1a1f3a 50%, #2d1b3d 100%);
+    }
+    
+    .socialLink,
+    .inputContainer {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    
+    .badge {
+      background: rgba(76, 175, 80, 0.05);
+    }
+  }
+  
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .footerLink,
+    .contractAddress,
+    .socialLink {
+      border-width: 2px;
+    }
+    
+    .sectionTitle::after {
+      height: 3px;
+    }
+  }
+  
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .gradientFlow,
+    .sparkle,
+    .bounce {
+      animation: none;
+    }
+    
+    .floatingFox {
+      animation: none;
+    }
+    
+    .socialLink:hover,
+    .scrollTopButton:hover,
+    .subscribeButton:hover {
+      transform: none;
+    }
+  }
+  
+  /* Print styles */
+  @media print {
+    .footer {
+      background: white !important;
+      color: black !important;
+    }
+    
+    .footerBackground,
+    .particles,
+    .gradientOverlay,
+    .floatingFox {
+      display: none;
+    }
+    
+    .socialLink,
+    .subscribeButton,
+    .scrollTopButton {
+      display: none;
+    }
+  }

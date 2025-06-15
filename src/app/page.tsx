@@ -20,6 +20,7 @@ import CrazyCommunity from '@/components/CrazyCommunity/CrazyCommunity';
 import CrazyRoadmapMap from '@/components/CrazyRoadmap/CrazyRoadmap';
 import TokenPriceProgression from '@/components/TokenPriceProgression/TokenPriceProgression';
 import SupportButton from '@/components/SupportButton/SupportButton';
+import Footer from '@/components/Footer/Footer';
 
 import styles from './page.module.css';
 
@@ -127,6 +128,9 @@ const HomeContent = () => {
       >
         <CrazyCommunity />
       </motion.section>
+
+      {/* Footer */}
+      <Footer />
 
       {/* Toast Container */}
       <ToastContainer
