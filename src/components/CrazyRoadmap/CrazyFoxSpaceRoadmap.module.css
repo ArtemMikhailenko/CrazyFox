@@ -1,37 +1,12 @@
-/* CrazyFoxSpaceRoadmap.module.css */
+/* CrazyFox Space Roadmap CSS Modules */
 
-/* Keyframe animations */
-@keyframes twinkle {
-  0%, 100% { opacity: 0.3; }
-  50% { opacity: 1; }
-}
+/* Импорт шрифта */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&display=swap');
 
-@keyframes shootingStar {
-  0% { 
-    transform: translateX(-100px) translateY(100px) rotate(45deg); 
-    opacity: 0; 
-  }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { 
-    transform: translateX(1000px) translateY(-100px) rotate(45deg); 
-    opacity: 0; 
-  }
-}
-
-@keyframes nebula {
-  0% { 
-    transform: translateX(0) scale(1); 
-    opacity: 0.6; 
-  }
-  50% { 
-    transform: translateX(50px) scale(1.2); 
-    opacity: 0.8; 
-  }
-  100% { 
-    transform: translateX(0) scale(1); 
-    opacity: 0.6; 
-  }
+/* Анимации и эффекты */
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-20px) rotate(5deg); }
 }
 
 @keyframes orbit {
@@ -39,52 +14,54 @@
   100% { transform: rotate(360deg); }
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+@keyframes rocketFly {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(50px, -30px) rotate(15deg); }
+  50% { transform: translate(100px, -10px) rotate(-5deg); }
+  75% { transform: translate(150px, -40px) rotate(10deg); }
+  100% { transform: translate(200px, 0px) rotate(0deg); }
+}
+
 @keyframes planetGlow {
-  0%, 100% { 
-    box-shadow: 0 0 20px currentColor; 
-  }
-  50% { 
-    box-shadow: 0 0 40px currentColor, 0 0 60px currentColor; 
-  }
+  0%, 100% { box-shadow: 0 0 20px currentColor; }
+  50% { box-shadow: 0 0 40px currentColor, 0 0 60px currentColor; }
 }
 
-@keyframes progressGlow {
-  0% { left: -100%; }
-  100% { left: 100%; }
+@keyframes shootingStar {
+  0% { transform: translateX(-100px) translateY(100px) rotate(45deg); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { transform: translateX(1000px) translateY(-100px) rotate(45deg); opacity: 0; }
 }
 
-@keyframes clickPulse {
-  0%, 100% { 
-    transform: scale(1); 
-    opacity: 1; 
-  }
-  50% { 
-    transform: scale(1.3); 
-    opacity: 0.7; 
-  }
+@keyframes clickHint {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
 }
 
-@keyframes clickRing {
-  0% { 
-    transform: scale(0.8); 
-    opacity: 1; 
-  }
-  100% { 
-    transform: scale(2); 
-    opacity: 0; 
-  }
+@keyframes tapIndicator {
+  0% { opacity: 0; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(1.4); }
 }
 
-/* Main container */
+/* Основные стили */
 .galaxy {
   min-height: 100vh;
   position: relative;
   font-family: 'Orbitron', monospace;
-  background: linear-gradient(135deg, #0a0e1e 0%, #1a1f3a 50%, #2d1b3d 100%);
-  overflow: hidden;
 }
 
-/* Background elements */
 .stars {
   position: absolute;
   top: 0;
@@ -120,28 +97,6 @@
   animation: shootingStar 8s ease-in-out infinite;
 }
 
-.nebula {
-  position: absolute;
-  width: 300px;
-  height: 200px;
-  background: radial-gradient(ellipse, rgba(255, 107, 53, 0.3), rgba(78, 205, 196, 0.2), transparent);
-  border-radius: 50%;
-  filter: blur(40px);
-  animation: nebula 15s ease-in-out infinite;
-}
-
-.nebula1 {
-  top: 10%;
-  left: 10%;
-}
-
-.nebula2 {
-  top: 60%;
-  right: 10%;
-  animation-delay: 7s;
-}
-
-/* Header */
 .spaceTitle {
   position: absolute;
   top: 5%;
@@ -153,7 +108,7 @@
 }
 
 .mainTitle {
-  font-size: clamp(2.5rem, 8vw, 4rem);
+  font-size: clamp(2rem, 6vw, 3.5rem);
   font-weight: 900;
   background: linear-gradient(45deg, #4ECDC4, #FF6B35, #FFD700);
   background-clip: text;
@@ -165,21 +120,27 @@
 }
 
 .subtitle {
-  font-size: clamp(1rem, 3vw, 1.5rem);
+  font-size: clamp(0.8rem, 2.5vw, 1.2rem);
   color: rgba(255, 255, 255, 0.9);
   font-weight: 300;
-  letter-spacing: 2px;
-  margin-bottom: 10px;
+  letter-spacing: 1px;
 }
 
-.mobileHint {
-  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
-  color: rgba(255, 255, 255, 0.7);
-  font-weight: 400;
-  margin-top: 15px;
+.instructionHint {
+  position: absolute;
+  top: 26%;
+  left: 40%;
+  /* transform: translateX(-50%); */
+  background: rgba(0, 0, 0, 0.7);
+  color: #4ECDC4;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: clamp(0.7rem, 2vw, 0.9rem);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  animation: clickHint 2s ease-in-out infinite;
+  z-index: 90;
 }
 
-/* Galaxy map */
 .galaxyMap {
   position: relative;
   width: 100%;
@@ -193,10 +154,10 @@
 
 .solarSystem {
   position: relative;
-  width: min(90vw, 90vh);
-  height: min(90vw, 90vh);
-  max-width: 800px;
-  max-height: 800px;
+  width: min(85vw, 85vh);
+  height: min(85vw, 85vh);
+  max-width: 700px;
+  max-height: 700px;
 }
 
 .orbitRing {
@@ -209,33 +170,6 @@
   pointer-events: none;
 }
 
-.centralSun {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 60px;
-  height: 60px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #FFD700, #FF6B35);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
-  box-shadow: 0 0 30px #FFD700;
-  z-index: 10;
-}
-
-.planetOrbit {
-  position: absolute;
-  border-radius: 50%;
-  animation: orbit 60s linear infinite;
-  pointer-events: none;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
-
 .planet {
   position: absolute;
   border-radius: 50%;
@@ -245,92 +179,78 @@
   align-items: center;
   justify-content: center;
   font-weight: bold;
-  font-size: clamp(1.5rem, 4vw, 2.2rem);
+  font-size: clamp(1.2rem, 3.5vw, 2rem);
   animation: planetGlow 3s ease-in-out infinite;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 2px solid rgba(255, 255, 255, 0.4);
   backdrop-filter: blur(10px);
   pointer-events: auto;
   z-index: 20;
-  top: 0;
-  left: 50%;
-  position: relative;
 }
 
-.planet:hover,
-.planetHover {
+.planet:hover {
   transform: scale(1.2);
   z-index: 100;
-  box-shadow: 0 0 40px currentColor, 0 0 80px currentColor;
+  box-shadow: 0 0 30px currentColor, 0 0 50px currentColor;
 }
 
-/* Click indicators */
-.clickIndicator {
+.planetOrbit {
   position: absolute;
-  top: -15px;
-  right: -15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 50%;
+  animation: orbit 60s linear infinite;
   pointer-events: none;
 }
 
-.clickRing {
+.centralSun {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  border: 2px solid rgba(255, 255, 255, 0.8);
+  top: 45%;
+  left: 45%;
+  transform: translate(-50%, -50%);
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
-  animation: clickRing 2s ease-out infinite;
-}
-
-.clickText {
-  font-size: 12px;
-  animation: clickPulse 2s ease-in-out infinite;
-  z-index: 10;
-}
-
-.statusBadge {
-  position: absolute;
-  bottom: -8px;
-  right: -8px;
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+  background: radial-gradient(circle, #FFD700, #FF6B35);
+  animation: pulse 2s ease-in-out infinite;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 10px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(10px);
+  font-size: 20px;
+  box-shadow: 0 0 20px #FFD700;
 }
 
-/* Progress bar */
+.tapIndicator {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #4ECDC4;
+  animation: tapIndicator 2s ease-in-out infinite;
+  pointer-events: none;
+}
+
 .progressRocket {
   position: absolute;
-  top: 85%;
+  bottom: 10%;
   left: 5%;
   width: 90%;
-  height: 60px;
+  height: 50px;
   background: rgba(0, 0, 0, 0.3);
-  border-radius: 30px;
+  border-radius: 25px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(20px);
   display: flex;
   align-items: center;
-  padding: 0 20px;
+  padding: 0 15px;
   z-index: 100;
-}
-
-.rocketIcon {
-  font-size: 24px;
 }
 
 .progressTrack {
   flex: 1;
-  height: 20px;
+  height: 16px;
   background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
-  margin-left: 15px;
+  border-radius: 8px;
+  margin-left: 10px;
   position: relative;
   overflow: hidden;
 }
@@ -338,7 +258,7 @@
 .progressBar {
   height: 100%;
   background: linear-gradient(90deg, #4ECDC4, #FF6B35, #FFD700);
-  border-radius: 10px;
+  border-radius: 8px;
   position: relative;
   transition: width 2s ease-out;
 }
@@ -350,74 +270,16 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
-  animation: progressGlow 3s ease-in-out infinite;
+  animation: rocketFly 3s ease-in-out infinite;
 }
 
 .progressText {
   color: #4ECDC4;
   font-weight: bold;
-  margin-left: 15px;
-  font-size: clamp(0.9rem, 2vw, 1.1rem);
+  margin-left: 10px;
+  font-size: clamp(0.8rem, 2vw, 1rem);
 }
 
-/* Tooltip */
-.planetInfo {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.9);
-  color: white;
-  padding: 15px;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  backdrop-filter: blur(20px);
-  min-width: 250px;
-  z-index: 1000;
-  font-size: 14px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-}
-
-.planetTitle {
-  font-size: 1.2rem;
-  font-weight: bold;
-  margin-bottom: 8px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-  padding-bottom: 8px;
-}
-
-.planetMeta {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.8);
-  margin-bottom: 8px;
-}
-
-.planetDescription {
-  font-size: 0.9rem;
-  line-height: 1.4;
-  color: rgba(255, 255, 255, 0.9);
-}
-
-.planetStats {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-top: 12px;
-  font-size: 0.8rem;
-}
-
-.statItem {
-  padding: 5px 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  text-align: center;
-}
-
-.clickHint {
-  margin-top: 8px;
-  font-size: 0.7rem;
-  color: rgba(255, 255, 255, 0.6);
-  text-align: center;
-}
-
-/* Modal */
 .modal {
   position: fixed;
   top: 0;
@@ -429,16 +291,16 @@
   align-items: center;
   justify-content: center;
   z-index: 2000;
-  padding: 20px;
+  padding: 15px;
   backdrop-filter: blur(20px);
 }
 
 .modalContent {
   background: linear-gradient(135deg, rgba(26, 26, 46, 0.95), rgba(22, 33, 62, 0.95));
-  border-radius: 25px;
-  padding: clamp(20px, 4vw, 40px);
-  max-width: 90vw;
-  max-height: 90vh;
+  border-radius: 20px;
+  padding: clamp(15px, 4vw, 25px);
+  max-width: 95vw;
+  max-height: 85vh;
   overflow-y: auto;
   border: 2px solid rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(30px);
@@ -449,330 +311,178 @@
 
 .modalClose {
   position: absolute;
-  top: 15px;
-  right: 15px;
+  top: 10px;
+  right: 10px;
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  width: 40px;
-  height: 40px;
+  width: 35px;
+  height: 35px;
   border-radius: 50%;
   cursor: pointer;
-  font-size: 20px;
+  font-size: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.3s ease;
+  transition: all 0.3s ease;
 }
 
 .modalClose:hover {
   background: rgba(255, 255, 255, 0.2);
+  transform: scale(1.1);
 }
 
 .modalHeader {
   text-align: center;
-  margin-bottom: 30px;
+  margin-bottom: 20px;
 }
 
 .modalEmoji {
-  font-size: 4rem;
-  margin-bottom: 10px;
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  margin-bottom: 8px;
 }
 
 .modalTitle {
-  font-size: clamp(1.5rem, 4vw, 2.5rem);
+  font-size: clamp(1.3rem, 4vw, 1.8rem);
   margin: 0;
 }
 
-.modalMeta {
+.modalPhase {
   color: rgba(255, 255, 255, 0.7);
-  margin: 10px 0;
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  margin: 8px 0;
+  font-size: clamp(0.8rem, 2.2vw, 1rem);
+}
+
+.quickStats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.statCard {
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px;
+  border-radius: 10px;
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.statValue {
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  font-size: clamp(0.65rem, 1.8vw, 0.75rem);
+  opacity: 0.7;
 }
 
 .missionBrief {
   background: rgba(255, 107, 53, 0.1);
   border: 1px solid rgba(255, 107, 53, 0.3);
-  border-radius: 15px;
-  padding: 20px;
-  margin: 20px 0;
-}
-
-.sectionTitle {
-  color: #FF6B35;
-  margin-bottom: 15px;
-  font-size: clamp(1.1rem, 3vw, 1.4rem);
-}
-
-.briefingText {
-  line-height: 1.6;
-  font-size: clamp(0.9rem, 2.2vw, 1.1rem);
-}
-
-/* Stats grid */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 15px;
-  margin-bottom: 25px;
-}
-
-.statCard {
-  background: rgba(255, 255, 255, 0.1);
-  padding: 15px;
   border-radius: 12px;
-  text-align: center;
+  padding: 15px;
+  margin: 15px 0;
 }
 
-.statIcon {
-  font-size: clamp(1.5rem, 4vw, 2rem);
+.missionBriefTitle {
+  color: #FF6B35;
+  margin-bottom: 10px;
+  font-size: clamp(1rem, 3vw, 1.2rem);
 }
 
-.statValue {
-  font-weight: bold;
-  font-size: clamp(1rem, 2.5vw, 1.3rem);
+.missionBriefText {
+  line-height: 1.5;
+  font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+  margin: 0;
 }
 
-.statLabel {
-  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-  color: rgba(255, 255, 255, 0.7);
-}
-
-/* Objectives */
-.objectivesSection {
-  margin-bottom: 25px;
+.objectivesTitle {
+  margin-bottom: 10px;
+  font-size: clamp(1rem, 3vw, 1.2rem);
 }
 
 .objectivesList {
   list-style: none;
   padding: 0;
+  margin: 15px 0;
 }
 
 .objective {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  align-items: flex-start;
+  gap: 8px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
 }
 
 .objectiveIcon {
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-size: clamp(0.8rem, 2vw, 1rem);
+  min-width: 16px;
 }
 
-.objectiveText {
-  font-size: clamp(0.85rem, 2.1vw, 0.95rem);
-}
-
-/* Timeline */
-.timelineSection {
-  margin-bottom: 25px;
-}
-
-.timelineGrid {
-  display: grid;
-  gap: 12px;
-}
-
-.timelineItem {
-  display: flex;
-  gap: clamp(10px, 2.5vw, 15px);
-  padding: clamp(12px, 2.5vw, 15px);
-  background: rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  flex-wrap: wrap;
-}
-
-.weekBadge {
-  padding: 4px 12px;
-  border-radius: 15px;
-  font-size: clamp(0.7rem, 1.8vw, 0.8rem);
-  font-weight: 600;
-  white-space: nowrap;
-  flex-shrink: 0;
-}
-
-.taskDescription {
-  font-size: clamp(0.85rem, 2vw, 0.95rem);
-  line-height: 1.5;
-  color: rgba(255, 255, 255, 0.8);
-  flex: 1;
-}
-
-/* Distribution */
-.distributionSection {
-  margin-bottom: 20px;
-}
-
-.distributionText {
-  background: rgba(255, 255, 255, 0.04);
-  padding: clamp(15px, 3vw, 20px);
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: clamp(0.85rem, 2.1vw, 0.95rem);
-  line-height: 1.6;
-  color: rgba(255, 255, 255, 0.8);
-}
-
-/* Moon message */
-.moonMessage {
-  background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 107, 53, 0.2));
-  border: 2px solid rgba(255, 215, 0, 0.4);
-  border-radius: 15px;
-  padding: 20px;
-  margin-bottom: 20px;
+.missionStatus {
   text-align: center;
+  padding: 12px;
+  border-radius: 10px;
+  margin-top: 15px;
 }
 
-.moonEmojis {
-  font-size: clamp(2rem, 5vw, 3rem);
-  margin-bottom: 10px;
+.missionStatus.completed {
+  background: rgba(46, 204, 113, 0.2);
+  border: 1px solid rgba(46, 204, 113, 0.3);
 }
 
-.moonTitle {
-  color: #FFD700;
-  font-size: clamp(1.2rem, 3.5vw, 1.6rem);
-  margin-bottom: 10px;
+.missionStatus.inProgress {
+  background: rgba(243, 156, 18, 0.2);
+  border: 1px solid rgba(243, 156, 18, 0.3);
 }
 
-.moonText {
-  font-size: clamp(0.9rem, 2.2vw, 1rem);
-  color: rgba(255, 255, 255, 0.9);
-}
-
-/* Status section */
-.statusSection {
-  text-align: center;
-  padding: 15px;
-  border-radius: 12px;
-  border: 1px solid;
+.missionStatus.planned {
+  background: rgba(149, 165, 166, 0.2);
+  border: 1px solid rgba(149, 165, 166, 0.3);
 }
 
 .statusText {
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
-  margin-bottom: 5px;
+  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  margin-bottom: 4px;
 }
 
-.statusSubtext {
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
-  color: rgba(255, 255, 255, 0.8);
-}
-
-.nextMissionText {
-  margin-top: 10px;
-  font-size: clamp(0.8rem, 2vw, 0.9rem);
+.marsMissionText {
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
   color: #FFD700;
   font-weight: bold;
 }
-
-/* Responsive design */
-@media (max-width: 768px) {
-  .galaxy {
-    font-size: 14px;
-  }
-  
-  .spaceTitle {
-    top: 3%;
-  }
-  
-  .galaxyMap {
-    height: 80vh;
-  }
-  
-  .solarSystem {
-    width: 95vw;
-    height: 95vw;
-    max-width: 400px;
-    max-height: 400px;
-  }
-  
-  .planet {
-    font-size: clamp(1.2rem, 5vw, 1.8rem);
-  }
-  
-  .progressRocket {
-    top: 88%;
-    height: 50px;
-    padding: 0 15px;
-  }
-  
-  .modalContent {
-    padding: 20px;
-    max-height: 85vh;
-  }
-  
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .timelineItem {
-    flex-direction: column;
-    text-align: center;
+@media (max-width: 1100px) {
+  .instructionHint {
+    top: 27%;
+    left: 32%;
   }
 }
-
-@media (max-width: 480px) {
-  .spaceTitle {
-    top: 2%;
+/* Адаптивные стили */
+@media (max-width: 768px) {
+  .instructionHint {
+    top: 23%;
+    left: 30%;
   }
   
-  .solarSystem {
-    max-width: 300px;
-    max-height: 300px;
-  }
-  
-  .statsGrid {
+  .quickStats {
     grid-template-columns: 1fr;
   }
   
   .progressRocket {
+    bottom: 5%;
+    left: 2.5%;
+    width: 95%;
     height: 45px;
-    padding: 0 10px;
-  }
-  
-  .rocketIcon {
-    font-size: 20px;
-  }
-  
-  .progressText {
-    font-size: 0.8rem;
-    margin-left: 10px;
   }
 }
-
-/* Performance optimizations */
-@media (prefers-reduced-motion: reduce) {
-  .stars,
-  .shootingStar,
-  .nebula,
-  .planetOrbit,
-  .planetGlow,
-  .progressGlow,
-  .clickPulse,
-  .clickRing {
-    animation: none;
-  }
-  
-  .planet:hover,
-  .planetHover {
-    transform: none;
-  }
-}
-
-/* High contrast mode */
-@media (prefers-contrast: high) {
-  .galaxy {
-    background: #000;
-  }
-  
-  .planet {
-    border-width: 4px;
-    border-color: #fff;
-  }
-  
-  .modalContent {
-    background: #000;
-    border-color: #fff;
+@media (max-width: 450px) {
+  .instructionHint {
+    top: 27%;
+    left: 20%;
   }
 }
