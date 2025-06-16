@@ -1,823 +1,246 @@
-/* components/HeroSection/HeroSection.module.css */
 
-/* Hero Section */
 .hero {
-    position: relative;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    padding: 8rem 2rem 4rem;
-    overflow: hidden;
-  }
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  padding: 8rem 2rem 4rem;
+  overflow: hidden;
+}
+
+/* Updated Hero Layout */
+.heroContent {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 400px;
+  gap: 4rem;
+  align-items: flex-start;
+  position: relative;
+  z-index: 10;
+}
+
+.heroText {
+  animation: slideInLeft 1s ease-out;
+}
+
+@keyframes slideInLeft {
+  from { transform: translateX(-50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.heroTitle {
+  font-size: 3.5rem;
+  font-weight: 900;
+  line-height: 1.1;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.cursor {
+  animation: blink 1s infinite;
+  color: #4ECDC4;
+}
+
+@keyframes blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+
+
+
+.heroRight {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.heroImage {
+  display: flex;
+  /* justify-content: center; */
+  max-width: 300px;
+  animation: slideInRight 1s ease-out;
   
+}
+
+@keyframes slideInRight {
+  from { transform: translateX(50px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+.heroImage img {
+  max-height: 280px;
+  width: 100%;
+  object-fit: contain;
+}
+
+/* Stats */
+.stats {
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
+  margin-top: 2rem;
+}
+
+.stat {
+  text-align: center;
+  min-width: 120px;
+}
+
+.statNumber {
+  display: block;
+  font-size: 2rem;
+  font-weight: bold;
+  color: #FF6B35;
+}
+
+.statLabel {
+  display: block;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Background Effects */
+.particles {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.cursorFollower {
+  position: fixed;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(78, 205, 196, 0.4) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 9999;
+  filter: blur(1px);
+}
+
+.heroImageLeft img {
+  max-width: 480px;
+}
+/* Mobile Responsiveness */
+@media (max-width: 1024px) {
   .heroContent {
-    max-width: 1200px;
-    margin: 0 auto;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4rem;
-    align-items: center;
-    position: relative;
-    z-index: 10;
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
   }
   
-  .heroText {
-    animation: slideInLeft 1s ease-out;
+  .heroRight {
+    order: -1;
+    position: static;
   }
   
-  @keyframes slideInLeft {
-    from { transform: translateX(-50px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+  .heroImageLeft {
+    justify-content: center;
+    max-width: 280px;
+    margin: 1rem auto 2rem auto;
   }
   
   .heroTitle {
-    font-size: 3.5rem;
-    font-weight: 900;
-    line-height: 1.1;
-    margin-bottom: 1.5rem;
-    background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    font-size: 3rem;
   }
   
-  .cursor {
-    animation: blink 1s infinite;
-    color: #4ECDC4;
+  .heroImageLeft img {
+    max-height: 250px;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 7rem 1rem 3rem;
+    min-height: auto;
   }
   
-  @keyframes blink {
-    0%, 50% { opacity: 1; }
-    51%, 100% { opacity: 0; }
+  .heroContent {
+    gap: 1.5rem;
+  }
+  
+  .heroTitle {
+    font-size: 2.5rem;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  
+  .heroImageLeft {
+    max-width: 240px;
+    margin: 1rem auto 1.5rem auto;
+  }
+  
+  .heroImageLeft img {
+    max-height: 200px;
   }
   
   .heroSubtitle {
-    font-size: 1.25rem;
-    line-height: 1.6;
-    margin-bottom: 2rem;
-    color: rgba(255, 255, 255, 0.8);
-  }
-  
-  .heroButtons {
-    display: flex;
-    gap: 1rem;
-    margin-bottom: 3rem;
-    flex-wrap: wrap;
-  }
-  
-  .primaryButton {
-    background: linear-gradient(45deg, #FF6B35, #F7931E);
-    border: none;
-    color: white;
-    padding: 1rem 2rem;
-    max-height: 70px;
-    border-radius: 50px;
     font-size: 1.1rem;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+    margin-bottom: 1.5rem;
   }
   
-  .primaryButton:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 15px 35px rgba(255, 107, 53, 0.5);
-  }
-  
-  .primaryButton.disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    background: linear-gradient(135deg, #9ca3af 0%, #6b7280 100%);
-    box-shadow: none;
-  }
-  
-  .primaryButton.disabled:hover {
-    transform: none;
-    box-shadow: none;
-  }
-  
-  /* Token Price Badge */
-  .tokenPriceBadge {
-    display: flex;
-    justify-content: center;
-  }
-  
-  .priceInfo {
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.2) 0%, rgba(78, 205, 196, 0.2) 100%);
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(78, 205, 196, 0.4);
-    border-radius: 25px;
-    padding: 1rem 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 0.2rem;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-      0 8px 32px rgba(78, 205, 196, 0.3),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-  
-  .priceInfo::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    animation: priceShimmer 3s infinite;
-  }
-  
-  @keyframes priceShimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
-  }
-  
-  .priceIcon {
-    font-size: 1.5rem;
-    animation: bounce 2s infinite;
-  }
-  
-  @keyframes bounce {
-    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
-    40% { transform: translateY(-10px); }
-    60% { transform: translateY(-5px); }
-  }
-  
-  .priceLabel {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.8);
-    font-weight: 500;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-  }
-  
-  .priceAmount {
-    font-size: 1.8rem;
-    font-weight: 900;
-    background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
-    background-size: 200% 200%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    animation: gradientShift 3s ease-in-out infinite;
-    text-shadow: 0 0 20px rgba(78, 205, 196, 0.5);
-  }
-  
-  @keyframes gradientShift {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
-  }
-  
-  /* Raised Amount Styles */
-  .raisedAmount {
-    margin: 2rem 0;
-    padding: 0;
-    width: 100%;
-  }
-  
-  .raisedContainer {
-    background: linear-gradient(135deg, rgba(255, 107, 53, 0.15) 0%, rgba(78, 205, 196, 0.15) 100%);
-    backdrop-filter: blur(20px);
-    border: 2px solid rgba(255, 107, 53, 0.3);
-    border-radius: 20px;
-    padding: 2rem;
-    display: flex;
-    align-items: center;
-    gap: 1.5rem;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 
-      0 8px 32px rgba(255, 107, 53, 0.2),
-      inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  }
-  
-  .raisedContainer::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-    animation: shimmer 3s infinite;
-  }
-  
-  @keyframes shimmer {
-    0% { left: -100%; }
-    100% { left: 100%; }
-  }
-  
-  .raisedIcon {
-    font-size: 3rem;
-    animation: bounce 2s infinite;
-    text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
-  }
-  
-  .raisedContent {
-    flex: 1;
-    min-width: 0;
-  }
-  
-  .raisedLabel {
-    font-size: 1rem;
-    color: rgba(255, 255, 255, 0.9);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    font-weight: 600;
-    text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
-  }
-  
-  .raisedNumber {
-    font-size: 2.5rem;
-    font-weight: 900;
-    background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1, #FF6B35);
-    background-size: 300% 300%;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    margin-bottom: 1rem;
-    text-shadow: 0 0 30px rgba(255, 107, 53, 0.5);
-    animation: gradientShift 3s ease-in-out infinite, glow 2s ease-in-out infinite alternate;
-    line-height: 1;
-    word-break: break-all;
-  }
-  
-  @keyframes glow {
-    from { filter: drop-shadow(0 0 5px rgba(255, 107, 53, 0.5)); }
-    to { filter: drop-shadow(0 0 15px rgba(78, 205, 196, 0.8)); }
-  }
-  
-  .raisedProgress {
-    width: 100%;
-  }
-  
-  .progressBarContainer {
-    width: 100%;
-    height: 10px;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-    position: relative;
-    margin-bottom: 0.5rem;
-    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
-  }
-  
-  .progressFill {
-    height: 100%;
-    background: linear-gradient(90deg, #FF6B35, #4ECDC4, #45B7D1);
-    border-radius: 10px;
-    position: relative;
-    overflow: hidden;
-    box-shadow: 0 0 10px rgba(78, 205, 196, 0.5);
-  }
-  
-  .progressFill::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
-    animation: progressShine 2s infinite;
-  }
-  
-  @keyframes progressShine {
-    0% { transform: translateX(-100%); }
-    100% { transform: translateX(100%); }
-  }
-  
-  .progressText {
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.8);
-    text-align: center;
-    font-weight: 500;
-    text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-  }
-  
-  /* Stats */
   .stats {
-    display: flex;
-    gap: 2rem;
     flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 0 1rem;
   }
   
   .stat {
-    text-align: center;
-    min-width: 120px;
+    min-width: 100px;
+    flex: 1;
+    max-width: 120px;
   }
   
   .statNumber {
-    display: block;
+    font-size: 1.8rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 6rem 0.5rem 2rem;
+  }
+  
+  .heroTitle {
     font-size: 2rem;
-    font-weight: bold;
-    color: #FF6B35;
+    margin-bottom: 0.8rem;
   }
   
-  .statLabel {
-    display: block;
-    font-size: 0.9rem;
-    color: rgba(255, 255, 255, 0.6);
+  .heroImageLeft {
+    max-width: 200px;
+    margin: 0.8rem auto 1.2rem auto;
   }
   
-  /* Hero Image */
-  .heroImage {
-    display: flex;
-    justify-content: center;
-    animation: slideInRight 1s ease-out;
+  .heroImageLeft img {
+    max-height: 160px;
   }
   
-  @keyframes slideInRight {
-    from { transform: translateX(50px); opacity: 0; }
-    to { transform: translateX(0); opacity: 1; }
+  .heroSubtitle {
+    font-size: 1rem;
+    margin-bottom: 1.2rem;
+    padding: 0 1rem;
   }
   
-  .canvasContainer img {
-    max-height: 600px;
-    width: 100%;
-    object-fit: contain;
-  }
-  
-  /* Background Effects */
-  .particles {
-    position: absolute;
-    width: 100%;
-    height: 100%;
-    top: 0;
-    left: 0;
-    z-index: 1;
-  }
-  
-  .cursorFollower {
-    position: fixed;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(78, 205, 196, 0.3) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 9999;
-  }
-  
-  /* Buy Modal Styles */
-  .modalOverlay {
-    position: fixed;
-    top: 50px;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.8);
-    backdrop-filter: blur(8px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 2000;
-    overflow:scroll
-  }
-  
-  .buyModal {
-    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    border-radius: 20px;
-    margin-top: 100px;
-    padding: 30px;
-    width: 90%;
-    max-width: 500px;
-    border: 2px solid #4ECDC4;
-    box-shadow: 0 20px 60px rgba(78, 205, 196, 0.3);
-    position: relative;
-    overflow:scroll
-  }
-  
-  .buyModal::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(45deg, transparent 30%, rgba(78, 205, 196, 0.1) 50%, transparent 70%);
-    pointer-events: none;
-  }
-  
-  .modalHeader {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-    position: relative;
-    z-index: 1;
-  }
-  
-  .modalHeader h3 {
-    margin: 0;
-    color: #FF6B35;
-    font-size: 1.5rem;
-  }
-  
-  .closeButton {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 1.5rem;
-    cursor: pointer;
-    padding: 0.5rem;
-    border-radius: 50%;
-    transition: all 0.3s ease;
-  }
-  
-  .closeButton:hover {
-    background: rgba(255, 107, 53, 0.1);
-  }
-  
-  .buyContent {
-    position: relative;
-    z-index: 1;
-  }
-  
-  .presaleStats {
-    background: rgba(78, 205, 196, 0.1);
-    border-radius: 15px;
-    padding: 20px;
-    margin-bottom: 25px;
-    border: 1px solid rgba(78, 205, 196, 0.3);
-  }
-  
-  .presaleStats h4 {
-    margin: 0 0 15px 0;
-    color: #4ECDC4;
-    font-size: 1.1rem;
-  }
-  
-  .statGrid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 15px;
-  }
-  
-  .statItem {
-    display: flex;
+  .stats {
     flex-direction: column;
-    gap: 5px;
-  }
-  
-  .statLabel {
-    font-size: 0.85rem;
-    color: #B0B0C4;
-  }
-  
-  .statValue {
-    font-size: 1rem;
-    color: #4ECDC4;
-    font-weight: 600;
-  }
-  
-  .buyForm {
-    margin: 25px 0;
-  }
-  
-  .inputGroup {
-    margin-bottom: 20px;
-  }
-  
-  .inputGroup label {
-    display: block;
-    color: #E0E0E6;
-    font-size: 14px;
-    margin-bottom: 8px;
-    font-weight: 500;
-  }
-  
-  .inputGroup input {
-    width: 100%;
-    padding: 15px 20px;
-    background: rgba(255, 255, 255, 0.05);
-    border: 2px solid rgba(78, 205, 196, 0.3);
-    border-radius: 12px;
-    color: #E0E0E6;
-    font-size: 16px;
-    transition: all 0.3s ease;
-    box-sizing: border-box;
-  }
-  
-  .inputGroup input:focus {
-    outline: none;
-    border-color: #4ECDC4;
-    box-shadow: 0 0 20px rgba(78, 205, 196, 0.2);
-    background: rgba(255, 255, 255, 0.08);
-  }
-  
-  .conversionInfo {
-    background: rgba(255, 107, 53, 0.1);
-    border-radius: 12px;
-    padding: 15px 20px;
-    margin: 20px 0;
-    border: 1px solid rgba(255, 107, 53, 0.3);
-  }
-  
-  .conversion {
-    display: flex;
-    justify-content: space-between;
     align-items: center;
-    margin-bottom: 10px;
+    gap: 1rem;
+    padding: 0 1rem;
   }
   
-  .conversion span:first-child {
-    color: #B0B0C4;
-    font-size: 14px;
+  .stat {
+    width: 100%;
+    max-width: 150px;
   }
   
-  .tokenAmount {
-    color: #FF6B35;
-    font-size: 18px;
-    font-weight: bold;
-    text-shadow: 0 0 10px rgba(255, 107, 53, 0.5);
+  .statNumber {
+    font-size: 1.6rem;
   }
-  
-  .usdValue {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 0.9rem;
-    text-align: center;
-  }
-  
-  .buyActions {
-    display: flex;
-    gap: 15px;
-    margin-top: 30px;
-  }
-  
-  .cancelButton {
-    flex: 1;
-    padding: 15px 25px;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: #E0E0E6;
-    font-size: 16px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-  }
-  
-  .cancelButton:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.3);
-    transform: translateY(-2px);
-  }
-  
-  .confirmBuyButton {
-    flex: 2;
-    padding: 15px 25px;
-    background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
-    border: none;
-    border-radius: 12px;
-    color: white;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
-  }
-  
-  .confirmBuyButton:hover:not(:disabled) {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 35px rgba(255, 107, 53, 0.4);
-    background: linear-gradient(135deg, #F7931E 0%, #FF6B35 100%);
-  }
-  
-  .confirmBuyButton:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: 0 4px 15px rgba(255, 107, 53, 0.2);
-  }
-  
-  .contractWarning {
-    background: rgba(255, 193, 7, 0.1);
-    border: 1px solid rgba(255, 193, 7, 0.3);
-    border-radius: 10px;
-    padding: 1rem;
-    margin: 1rem 0;
-  }
-  
-  .contractWarning h4 {
-    margin: 0 0 0.5rem 0;
-    color: #FFC107;
-    font-size: 1rem;
-  }
-  
-  .contractWarning p {
-    margin: 0.3rem 0;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 0.85rem;
-    line-height: 1.4;
-  }
-  
-  .buyFooter {
-    margin-top: 25px;
-    text-align: center;
-  }
-  
-  .disclaimer {
-    color: #B0B0C4;
-    font-size: 12px;
-    margin: 0;
-    padding: 10px;
-    background: rgba(255, 193, 7, 0.1);
-    border-radius: 8px;
-    border: 1px solid rgba(255, 193, 7, 0.3);
-  }
-  
-  /* Mobile Responsiveness */
-  @media (max-width: 1024px) {
-    .heroContent {
-      grid-template-columns: 1fr;
-      gap: 3rem;
-      text-align: center;
-    }
-    
-    .heroTitle {
-      font-size: 3rem;
-    }
-    
-    .canvasContainer img {
-      max-height: 450px;
-    }
-    
-    .raisedContainer {
-      flex-direction: column;
-      text-align: center;
-      padding: 2rem;
-      gap: 1.5rem;
-    }
-    
-    .stats {
-      justify-content: center;
-      gap: 2rem;
-    }
-  }
-  
-  @media (max-width: 768px) {
-    .hero {
-      padding: 7rem 1rem 3rem;
-      min-height: auto;
-    }
-    
-    .heroContent {
-      gap: 2rem;
-    }
-    
-    .heroTitle {
-      font-size: 2.5rem;
-      line-height: 1.2;
-      margin-top: 1rem;
-      margin-bottom: 1rem;
-    }
-    
-    .heroSubtitle {
-      font-size: 1.1rem;
-      margin-bottom: 1.5rem;
-    }
-    
-    .heroButtons {
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-    
-    .primaryButton {
-      width: 100%;
-      max-width: 300px;
-      padding: 1rem 2rem;
-    }
-    
-    .raisedContainer {
-      padding: 1.5rem;
-      gap: 1rem;
-      margin: 0 1rem;
-    }
-    
-    .raisedNumber {
-      font-size: 2.2rem;
-    }
-    
-    .raisedIcon {
-      font-size: 2.5rem;
-    }
-    
-    .stats {
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1.5rem;
-      padding: 0 1rem;
-    }
-    
-    .stat {
-      min-width: 100px;
-      flex: 1;
-      max-width: 120px;
-    }
-    
-    .statNumber {
-      font-size: 1.8rem;
-    }
-    
-    .canvasContainer img {
-      max-height: 350px;
-    }
-    
-    .buyModal {
-      margin: 1rem;
-      padding: 1.5rem;
-      width: calc(100% - 2rem);
-    }
-    
-    .modalHeader h3 {
-      font-size: 1.3rem;
-    }
-    
-    .statGrid {
-      grid-template-columns: 1fr;
-      gap: 10px;
-    }
-    
-    .buyActions {
-      flex-direction: column;
-    }
-    
-    .buyActions button {
-      width: 100%;
-    }
-  }
-  
-  @media (max-width: 480px) {
-    .hero {
-      padding: 6rem 0.5rem 2rem;
-    }
-    
-    .heroTitle {
-      font-size: 2rem;
-      margin-bottom: 0.8rem;
-    }
-    
-    .heroSubtitle {
-      font-size: 1rem;
-      margin-bottom: 1.2rem;
-      padding: 0 1rem;
-    }
-    
-    .heroButtons {
-      padding: 0 1rem;
-    }
-    
-    .primaryButton {
-      padding: 0.9rem 1.5rem;
-      font-size: 0.95rem;
-    }
-    
-    .raisedContainer {
-      margin: 0 1rem;
-      padding: 1.2rem;
-    }
-    
-    .raisedNumber {
-      font-size: 1.8rem;
-    }
-    
-    .raisedIcon {
-      font-size: 2rem;
-    }
-    
-    .stats {
-      flex-direction: column;
-      align-items: center;
-      gap: 1rem;
-      padding: 0 1rem;
-    }
-    
-    .stat {
-      width: 100%;
-      max-width: 150px;
-    }
-    
-    .statNumber {
-      font-size: 1.6rem;
-    }
-    
-    .canvasContainer img {
-      max-height: 250px;
-    }
-    
-    .buyModal {
-      margin: 0.5rem;
-      padding: 1rem;
-    }
-  }
+}

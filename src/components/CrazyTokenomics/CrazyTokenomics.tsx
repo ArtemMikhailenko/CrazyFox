@@ -58,7 +58,7 @@ const CrazyTokenomics = () => {
   ], []);
 
   const contractDetails = useMemo(() => ({
-    address: "0x874641647B9d8a8d991c541BBD48bD597b85aE33",
+    address: "0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556",
     totalSupply: "1,000,000,000",
     network: "Binance Smart Chain",
     symbol: "$CRFX",

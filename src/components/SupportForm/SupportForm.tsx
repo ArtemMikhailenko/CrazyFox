@@ -72,7 +72,7 @@ Sent from CrazyFox website`);
         toast.success('Opening Telegram chat... 📱');
         break;
       case 'contract':
-        navigator.clipboard.writeText('0x874641647B9d8a8d991c541BBD48bD597b85aE33');
+        navigator.clipboard.writeText('0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556');
         toast.success('Contract address copied! 📋');
         break;
       case 'whitepaper':
