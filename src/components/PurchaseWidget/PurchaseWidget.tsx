@@ -203,8 +203,10 @@ const PurchaseWidget = () => {
   const calculateTokens = () => {
     const amount = parseFloat(buyAmount.replace(',', '.'));
     if (isNaN(amount) || amount <= 0 || tokenPrice <= 0) return '0';
-    const tokens = amount / tokenPrice;
-    return tokens.toLocaleString(undefined, { maximumFractionDigits: 0 });
+    const tokens = amount * tokenPrice;
+
+    // 6 знаков после запятой, можно уменьшить или увеличить по вашему вкусу
+    return tokens.toFixed(2);
   };
 
   // Enhanced wallet connection
