@@ -1,14 +1,16 @@
+// components/Header/TrulyUnifiedHeader.tsx
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ConnectButton } from "thirdweb/react";
+import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { createThirdwebClient } from "thirdweb";
+import { bsc } from "thirdweb/chains";
 import styles from './Header.module.css';
 
-// ThirdWeb client configuration
+// ThirdWeb client configuration - ОДИН клиент для всего приложения
 const client = createThirdwebClient({
-  clientId: "d28d89a66e8eb5e73d6a9c8eeaa0645a" // Замените на ваш Client ID
+  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
 });
 
 interface HeaderProps {
@@ -21,10 +23,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [showWhitePaper, setShowWhitePaper] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const scrollPositionRef = useRef<number>(0);
+  
+  // Получаем состояние подключения из ThirdWeb
+  const account = useActiveAccount();
 
-  // Оптимизированная проверка мобильного устройства
+  // Проверка мобильного устройства
   useEffect(() => {
     const checkIsMobile = () => {
       const isSmallScreen = window.innerWidth <= 768;
@@ -33,7 +37,6 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
 
     checkIsMobile();
     
-    // Добавляем debounce для resize
     let resizeTimeout: NodeJS.Timeout;
     const handleResize = () => {
       clearTimeout(resizeTimeout);
@@ -47,7 +50,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
     };
   }, []);
 
-  // Оптимизированная обработка скролла
+  // Обработка скролла
   useEffect(() => {
     let ticking = false;
 
@@ -66,28 +69,22 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // ИСПРАВЛЕНО: Предотвращение скролла при открытии меню
+  // Блокировка скролла при открытом меню
   useEffect(() => {
     if (isMenuOpen) {
-      // Сохраняем текущую позицию скролла
       scrollPositionRef.current = window.pageYOffset;
-      
-      // Блокируем скролл
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollPositionRef.current}px`;
       document.body.style.left = '0';
       document.body.style.right = '0';
     } else {
-      // Восстанавливаем скролл без изменения позиции
       const scrollY = scrollPositionRef.current;
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.left = '';
       document.body.style.right = '';
-      
-      // Восстанавливаем позицию без анимации
       window.scrollTo(0, scrollY);
     }
 
@@ -141,14 +138,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
     { id: 'community', label: 'Community', icon: '👥' }
   ];
 
-  // ИСПРАВЛЕНО: Навигация без автоматического скролла
   const handleNavClick = useCallback((sectionId: string) => {
-    console.log('Navigation clicked:', sectionId);
-    
-    // Закрываем меню
     setIsMenuOpen(false);
 
-    // Небольшая задержка для завершения анимации закрытия меню
     setTimeout(() => {
       const element = document.getElementById(sectionId);
       
@@ -156,23 +148,21 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
         const headerHeight = isMobile ? 75 : 80;
         const elementPosition = element.offsetTop - headerHeight;
         
-        // Плавный скролл к секции
         window.scrollTo({
           top: elementPosition,
           behavior: 'smooth'
         });
       } else {
-        // Fallback к оригинальной функции
         scrollToSection(sectionId);
       }
-    }, isMenuOpen ? 150 : 0); // Уменьшенная задержка
+    }, isMenuOpen ? 150 : 0);
   }, [isMobile, isMenuOpen, scrollToSection]);
 
   const toggleMobileMenu = useCallback(() => {
     setIsMenuOpen(prev => !prev);
   }, []);
 
-  // Упрощенные анимации для мобильных устройств
+  // Анимации для мобильного меню
   const mobileMenuVariants = {
     hidden: { 
       height: 0, 
@@ -246,29 +236,68 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
 
           {/* Action Buttons */}
           <div className={styles.actions}>
-            {/* White Paper Button */}
-            <motion.button
-              className={styles.whitePaperButton}
-              onClick={() => setShowWhitePaper(true)}
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span className={styles.buttonIcon}>📄</span>
-              <span className={styles.buttonText}>White Paper</span>
-            </motion.button>
+            {/* White Paper Button - только на десктопе */}
+            {!isMobile && (
+              <motion.button
+                className={styles.whitePaperButton}
+                onClick={() => setShowWhitePaper(true)}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <span className={styles.buttonIcon}>📄</span>
+                <span className={styles.buttonText}>White Paper</span>
+              </motion.button>
+            )}
 
-            {/* Connect Wallet */}
-            <div className={styles.connectWallet}>
+            {/* 🔥 ГЛАВНЫЙ ConnectButton - ОДИН для всего приложения */}
+            <div 
+              className={styles.connectWallet}
+              style={{
+                ...(isMobile && {
+                  fontSize: '14px',
+                  maxWidth: '140px'
+                })
+              }}
+            >
               <ConnectButton 
                 client={client}
                 theme="dark"
+                chains={[bsc]} // Только BSC для упрощения
                 connectModal={{
-                  size: "wide",
+                  size: isMobile ? "compact" : "wide",
                   title: "Connect to CrazyFox",
-                  welcomeScreen: {
+                  welcomeScreen: !isMobile ? {
                     title: "Welcome to CrazyFox",
                     subtitle: "Connect your wallet to start buying CRFX tokens",
-                  },
+                  } : undefined,
+                  showThirdwebBranding: false,
+                }}
+                connectButton={{
+                  style: {
+                    fontSize: isMobile ? '14px' : '16px',
+                    padding: isMobile ? '8px 12px' : '12px 16px',
+                    minWidth: isMobile ? '120px' : '150px',
+                    backgroundColor: account ? '#4ECDC4' : '#FF6B35',
+                    borderRadius: '12px',
+                    border: 'none',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                  }
+                }}
+                detailsButton={{
+                  style: {
+                    fontSize: isMobile ? '12px' : '14px',
+                    padding: isMobile ? '6px 10px' : '10px 14px',
+                    backgroundColor: '#4ECDC4',
+                    borderRadius: '8px',
+                  }
+                }}
+                switchButton={{
+                  style: {
+                    fontSize: isMobile ? '12px' : '14px',
+                    backgroundColor: '#FF6B35',
+                    borderRadius: '8px',
+                  }
                 }}
               />
             </div>
@@ -290,7 +319,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
           </div>
         </div>
 
-        {/* ОПТИМИЗИРОВАННОЕ Мобильное меню */}
+        {/* Мобильное меню */}
         <AnimatePresence>
           {isMenuOpen && (
             <motion.div
@@ -301,6 +330,29 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               exit="hidden"
             >
               <div className={styles.mobileMenuContent}>
+                {/* Статус подключения кошелька в мобильном меню */}
+                {account && (
+                  <motion.div
+                    style={{
+                      background: 'rgba(78, 205, 196, 0.1)',
+                      border: '1px solid rgba(78, 205, 196, 0.3)',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      margin: '0 0 16px 0',
+                      textAlign: 'center',
+                      color: '#4ECDC4',
+                      fontSize: '0.9rem'
+                    }}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <span style={{ marginRight: '8px' }}>🟢</span>
+                    Wallet Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
+                  </motion.div>
+                )}
+
+                {/* Навигация */}
                 {navigationItems.map((item, index) => (
                   <motion.button
                     key={item.id}
@@ -318,6 +370,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                   </motion.button>
                 ))}
                 
+                {/* White Paper в мобильном меню */}
                 <motion.div 
                   className={styles.mobileActions}
                   initial={{ y: 20, opacity: 0 }}
@@ -325,8 +378,8 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                     y: 0, 
                     opacity: 1,
                     transition: {
-                      delay: isMobile ? 0.25 : 0.4,
-                      duration: isMobile ? 0.2 : 0.4,
+                      delay: 0.25,
+                      duration: 0.2,
                       ease: "easeOut"
                     }
                   }}
@@ -408,7 +461,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                       Discover the future of meme coins with CrazyFox. Our white paper covers:
                     </p>
                     <ul>
-                      <li>🚀 Revolutionary tokenomics with 65% liquidity lock</li>
+                      <li>🚀 Revolutionary tokenomics with presale structure</li>
                       <li>💰 Aggressive marketing strategy (150M tokens)</li>
                       <li>🛡️ Maximum security features</li>
                       <li>🎮 Complete ecosystem roadmap</li>
