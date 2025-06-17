@@ -19,6 +19,7 @@ const nextConfig = {
     config.resolve.alias = {
       ...config.resolve.alias,
       'magic-sdk/dist/es/core': 'magic-sdk/dist/cjs/core.js',
+      
     };
     
     return config;
