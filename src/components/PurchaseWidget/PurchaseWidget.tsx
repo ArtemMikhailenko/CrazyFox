@@ -29,6 +29,22 @@ const API_ENDPOINTS = {
   verifyAndDistribute: `${API_BASE_URL}/verifyAndDistributeTokens`
 };
 
+// Утилиты для мобильных устройств
+const isMobileDevice = (): boolean => {
+  if (typeof window === 'undefined') return false;
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+};
+
+const hasMetaMaskInstalled = (): boolean => {
+  return typeof window !== 'undefined' && !!window.ethereum;
+};
+
+const redirectToMetaMaskMobile = (dappUrl?: string): void => {
+  const currentUrl = dappUrl || window.location.href;
+  const encodedUrl = encodeURIComponent(currentUrl);
+  window.location.href = `https://metamask.app.link/dapp/${encodedUrl}`;
+};
+
 const PurchaseWidget = () => {
   const account = useActiveAccount();
   const activeChain = useActiveWalletChain();
@@ -37,22 +53,26 @@ const PurchaseWidget = () => {
   const [selectedToken, setSelectedToken] = useState<'BNB' | 'USDT' | 'ETH'>('BNB');
   const [isProcessing, setIsProcessing] = useState(false);
   const [transactionStep, setTransactionStep] = useState('');
-  const [isMobileDevice, setIsMobileDevice] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   const [contractAddress, setContractAddress] = useState<string>('');
   const [tokenPrice, setTokenPrice] = useState<number>(0.005);
   const [bnbPrice, setBnbPrice] = useState<number>(300);
+  const [showMetaMaskHelper, setShowMetaMaskHelper] = useState(false);
 
   // Проверяем мобильное устройство и загружаем данные API
   useEffect(() => {
     const checkMobile = () => {
-      setIsMobileDevice(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+      const mobile = isMobileDevice();
+      setIsMobile(mobile);
+      
+      // Показываем помощник MetaMask если на мобильном и нет window.ethereum
+      if (mobile && !hasMetaMaskInstalled()) {
+        setShowMetaMaskHelper(true);
+      }
     };
-    checkMobile();
-
-    // Загружаем адрес контракта
-    fetchContractAddress();
     
-    // Загружаем цену токена
+    checkMobile();
+    fetchContractAddress();
     fetchTokenPrice();
   }, []);
 
@@ -62,18 +82,15 @@ const PurchaseWidget = () => {
       const response = await fetch(API_ENDPOINTS.getTransferAddress);
       if (response.ok) {
         const data = await response.text();
-        // Убираем кавычки и пробелы
         const cleanAddress = data.replace(/['"]/g, '').trim();
         setContractAddress(cleanAddress);
         console.log('Contract address loaded:', cleanAddress);
       } else {
         console.error('Failed to fetch contract address');
-        // Fallback адрес
         setContractAddress("0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556");
       }
     } catch (error) {
       console.error('Error fetching contract address:', error);
-      // Fallback адрес
       setContractAddress("0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556");
     }
   };
@@ -84,19 +101,18 @@ const PurchaseWidget = () => {
       const response = await fetch(`${API_ENDPOINTS.getPrice}?token=BNB`);
       if (response.ok) {
         const data = await response.text();
-        // Парсим число из текстового ответа
         const price = parseFloat(data.trim());
         if (!isNaN(price) && price > 0) {
           setBnbPrice(price);
           console.log('BNB price loaded:', price);
         } else {
           console.error('Invalid price received:', data);
-          setBnbPrice(300); // Fallback цена
+          setBnbPrice(300);
         }
       }
     } catch (error) {
       console.error('Error fetching token price:', error);
-      setBnbPrice(300); // Fallback цена
+      setBnbPrice(300);
     }
   };
 
@@ -106,7 +122,7 @@ const PurchaseWidget = () => {
       const payload = {
         txHash: txHash,
         userAddress: account?.address || '',
-        amountSent: amount.replace(',', '.'), // Заменяем запятую на точку
+        amountSent: amount.replace(',', '.'),
         symbol: selectedToken
       };
 
@@ -143,10 +159,17 @@ const PurchaseWidget = () => {
     return address && /^0x[a-fA-F0-9]{40}$/.test(address);
   };
 
-  // Упрощенная функция покупки - используем только fallback метод
+  // Основная функция покупки с проверкой мобильного устройства
   const handleBuy = async () => {
     if (!account) {
       toast.warning('Please connect your wallet first! 🦊');
+      return;
+    }
+
+    // КРИТИЧЕСКИ ВАЖНО: Проверка мобильного устройства
+    if (isMobile && !hasMetaMaskInstalled()) {
+      toast.info('Redirecting to MetaMask app...', { autoClose: 2000 });
+      redirectToMetaMaskMobile();
       return;
     }
 
@@ -167,15 +190,25 @@ const PurchaseWidget = () => {
       return;
     }
 
-   
-
-    // Используем прямой метод через MetaMask как основной
+    // Основной метод покупки
     await handleBuyDirect();
   };
 
   // Прямой метод отправки через MetaMask/кошелек
   const handleBuyDirect = async () => {
-    if (!account || !window.ethereum) {
+    if (!account) {
+      toast.error('Wallet not connected');
+      return;
+    }
+
+    // Еще одна проверка для мобильных устройств
+    if (isMobile && !window.ethereum) {
+      toast.info('Opening MetaMask app...', { autoClose: 2000 });
+      redirectToMetaMaskMobile();
+      return;
+    }
+
+    if (!window.ethereum) {
       toast.error('Wallet not available');
       return;
     }
@@ -190,7 +223,7 @@ const PurchaseWidget = () => {
       console.log('Sending to address:', contractAddress);
       console.log('Amount in BNB:', amount);
       
-      // Конвертируем в wei (18 decimals) - более точно
+      // Конвертируем в wei (18 decimals)
       const amountWei = BigInt(Math.round(amount * 1e18));
       const hexValue = '0x' + amountWei.toString(16);
       
@@ -199,12 +232,12 @@ const PurchaseWidget = () => {
 
       setTransactionStep('Sending transaction...');
 
-      // Прямое обращение к кошельку с дополнительными проверками
+      // Прямое обращение к кошельку
       const transactionParams = {
         from: account.address,
         to: contractAddress,
         value: hexValue,
-        gas: '0x5208', // 21000 gas limit для простого перевода
+        gas: '0x5208', // 21000 gas limit
       };
       
       console.log('Transaction params:', transactionParams);
@@ -266,78 +299,17 @@ const PurchaseWidget = () => {
     }
   };
 
-  // Альтернативный метод с thirdweb (если понадобится)
-  const handleBuyWithThirdweb = async () => {
-    if (!account || !window.ethereum) {
-      toast.error('Wallet not available');
-      return;
-    }
-
-    if (!contractAddress || !isValidAddress(contractAddress)) {
-      toast.error('Contract address not loaded');
-      return;
-    }
-
-    const amount = parseFloat(buyAmount.replace(',', '.'));
-    if (isNaN(amount) || amount <= 0) return;
-
-    setIsProcessing(true);
-    setTransactionStep('Using alternative method...');
-
-    try {
-      // Простой способ через web3
-      const provider = window.ethereum;
-      const valueInWei = BigInt(Math.floor(amount * 1e18));
-      const hexValue = '0x' + valueInWei.toString(16);
-
-      const txHash = await provider.request({
-        method: 'eth_sendTransaction',
-        params: [{
-          from: account.address,
-          to: contractAddress,
-          value: hexValue,
-          gasLimit: '0x5208', // 21000
-        }],
-      });
-
-      setTransactionStep('Alternative transaction sent! Verifying...');
-      
-      // Верифицируем транзакцию
-      const verificationSuccess = await verifyTransaction(txHash, amount.toString());
-      
-      if (verificationSuccess) {
-        toast.success("🎉 Purchase successful! 🦊");
-        confetti({
-          particleCount: 50,
-          spread: 60,
-          origin: { y: 0.6 }
-        });
-      } else {
-        toast.warning("🔄 Transaction sent! Verification in progress...");
-      }
-      
-      setTimeout(() => {
-        setBuyAmount('0.1');
-        setIsProcessing(false);
-        setTransactionStep('');
-      }, 2000);
-
-      console.log('Alternative transaction:', txHash);
-
-    } catch (error: any) {
-      console.error('Alternative method error:', error);
-      toast.error('Alternative transaction failed. Please try again.');
-      setIsProcessing(false);
-      setTransactionStep('');
-    }
+  // Функция для открытия MetaMask app
+  const handleOpenMetaMaskApp = () => {
+    toast.info('Opening MetaMask app...', { autoClose: 2000 });
+    redirectToMetaMaskMobile();
   };
 
-  // Расчет токенов - исправленная формула
+  // Расчет токенов
   const calculateTokens = () => {
     const amount = parseFloat(buyAmount.replace(',', '.'));
     if (isNaN(amount) || amount <= 0) return '0';
     
-    // Используем актуальную цену BNB из API
     const amountUSD = amount * bnbPrice;
     const tokensReceived = amountUSD / tokenPrice;
     
@@ -357,7 +329,7 @@ const PurchaseWidget = () => {
       {/* Widget Header */}
       <div className={styles.widgetHeader}>
         <h3>🦊 CRFX PRESALE</h3>
-        {isMobileDevice && (
+        {isMobile && (
           <div style={{ fontSize: '0.8rem', color: '#4ECDC4', marginTop: '0.5rem' }}>
             📱 Mobile Optimized
           </div>
@@ -384,6 +356,84 @@ const PurchaseWidget = () => {
         </div>
       </div>
 
+      {/* Мобильный помощник MetaMask - показываем если кошелек недоступен */}
+      {isMobile && showMetaMaskHelper && !account && (
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%)',
+          border: '1px solid rgba(255, 107, 53, 0.3)',
+          borderRadius: '16px',
+          padding: '20px',
+          margin: '16px 0',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '2rem', marginBottom: '12px' }}>📱</div>
+          <h4 style={{ 
+            color: '#FF6B35', 
+            margin: '0 0 8px 0',
+            fontSize: '1.1rem',
+            fontWeight: '600'
+          }}>
+            Mobile Wallet Required
+          </h4>
+          <p style={{ 
+            color: 'rgba(255, 255, 255, 0.8)', 
+            margin: '0 0 16px 0',
+            fontSize: '0.9rem',
+            lineHeight: '1.4'
+          }}>
+            For the best mobile experience, please use MetaMask mobile app or any wallet with WalletConnect support.
+          </p>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <button
+              onClick={handleOpenMetaMaskApp}
+              style={{
+                background: 'linear-gradient(135deg, #FF6B35 0%, #FF8A65 100%)',
+                border: 'none',
+                borderRadius: '12px',
+                padding: '14px 20px',
+                color: 'white',
+                fontSize: '0.95rem',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'transform 0.2s',
+                width: '100%'
+              }}
+              onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
+              onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              🦊 Open in MetaMask App
+            </button>
+            
+            <button
+              onClick={() => setShowMetaMaskHelper(false)}
+              style={{
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                borderRadius: '12px',
+                padding: '12px 20px',
+                color: 'rgba(255, 255, 255, 0.8)',
+                fontSize: '0.9rem',
+                cursor: 'pointer',
+                width: '100%'
+              }}
+            >
+              💰 Try WalletConnect Instead
+            </button>
+          </div>
+          
+          <p style={{
+            fontSize: '0.75rem',
+            color: 'rgba(255, 255, 255, 0.6)',
+            marginTop: '12px',
+            margin: '12px 0 0 0'
+          }}>
+            💡 You can also use Trust Wallet, SafePal, or any mobile wallet that supports WalletConnect
+          </p>
+        </div>
+      )}
+
       {/* Connection Status */}
       {account && (
         <div className={styles.connectionStatus}>
@@ -393,8 +443,8 @@ const PurchaseWidget = () => {
         </div>
       )}
 
-      {/* Если кошелек не подключен */}
-      {!account && (
+      {/* Если кошелек не подключен и не мобильное устройство или скрыт помощник */}
+      {!account && (!isMobile || !showMetaMaskHelper) && (
         <div style={{
           background: 'rgba(78, 205, 196, 0.1)',
           border: '1px solid rgba(78, 205, 196, 0.3)',
@@ -408,7 +458,7 @@ const PurchaseWidget = () => {
             margin: '0 0 12px 0',
             fontSize: '0.9rem'
           }}>
-            {isMobileDevice ? '📱 Connect your mobile wallet:' : '🦊 Connect your wallet to continue:'}
+            {isMobile ? '📱 Connect your mobile wallet:' : '🦊 Connect your wallet to continue:'}
           </p>
           
           <ConnectButton 
@@ -416,9 +466,9 @@ const PurchaseWidget = () => {
             theme="dark"
             chains={[bsc]}
             connectModal={{
-              size: isMobileDevice ? "compact" : "wide",
+              size: isMobile ? "compact" : "wide",
               title: "Connect to CrazyFox",
-              welcomeScreen: !isMobileDevice ? {
+              welcomeScreen: !isMobile ? {
                 title: "Welcome to CrazyFox",
                 subtitle: "Connect your wallet to start buying CRFX tokens",
               } : undefined,
@@ -444,7 +494,7 @@ const PurchaseWidget = () => {
       {/* Основная форма - показываем только если кошелек подключен */}
       {account && (
         <>
-          {/* Token Selection - только BNB для упрощения */}
+          {/* Token Selection - только BNB */}
           <div className={styles.paymentMethod}>
             <label>💰 Pay with BNB only</label>
             <div className={styles.tokenSelector}>
@@ -531,72 +581,13 @@ const PurchaseWidget = () => {
               <span>🔄 Processing...</span>
             ) : !isOnBSC ? (
               <span>⚠️ Switch to BSC Network</span>
+            ) : isMobile && !hasMetaMaskInstalled() ? (
+              <span>📱 Open MetaMask App</span>
             ) : (
               <span>🚀 Buy {calculateTokens()} CRFX</span>
             )}
           </motion.button>
-
-          {/* Fallback button для проблемных случаев */}
-          {/* {!isProcessing && !isPending && isOnBSC && (
-            <motion.button
-              onClick={handleBuyFallback}
-              style={{
-                width: '100%',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '12px',
-                padding: '12px',
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                marginTop: '8px'
-              }}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              🔄 Try Alternative Method
-            </button>
-          )} */}
         </>
-      )}
-
-      {/* Mobile deeplink helper */}
-      {isMobileDevice && !account && (
-        <div style={{
-          marginTop: '1rem',
-          textAlign: 'center'
-        }}>
-          <button
-            onClick={() => {
-              const deepLink = `https://metamask.app.link/dapp/${encodeURIComponent(window.location.href)}`;
-              window.open(deepLink, '_blank');
-              toast.info('Opening MetaMask app...', { autoClose: 2000 });
-            }}
-            style={{
-              background: 'rgba(255, 107, 53, 0.1)',
-              border: '1px solid rgba(255, 107, 53, 0.3)',
-              borderRadius: '12px',
-              padding: '12px 16px',
-              color: '#FF6B35',
-              fontSize: '0.9rem',
-              fontWeight: '600',
-              cursor: 'pointer',
-              width: '100%',
-              maxWidth: '250px'
-            }}
-          >
-            📱 Open in MetaMask App
-          </button>
-          
-          <p style={{
-            fontSize: '0.75rem',
-            color: 'rgba(255, 255, 255, 0.6)',
-            marginTop: '8px',
-            margin: '8px 0 0 0'
-          }}>
-            💡 Or use any wallet with WalletConnect
-          </p>
-        </div>
       )}
 
       {/* Debug info в dev режиме */}
@@ -611,6 +602,8 @@ const PurchaseWidget = () => {
         }}>
           <div>Chain ID: {activeChain?.id}</div>
           <div>Is BSC: {isOnBSC ? 'Yes' : 'No'}</div>
+          <div>Is Mobile: {isMobile ? 'Yes' : 'No'}</div>
+          <div>Has MetaMask: {hasMetaMaskInstalled() ? 'Yes' : 'No'}</div>
           <div>Account: {account.address.slice(0, 10)}...</div>
           <div>Contract: {contractAddress ? `${contractAddress.slice(0, 10)}...` : 'Loading...'}</div>
           <div>Contract Valid: {contractAddress ? isValidAddress(contractAddress) ? 'Yes' : 'No' : 'Unknown'}</div>
