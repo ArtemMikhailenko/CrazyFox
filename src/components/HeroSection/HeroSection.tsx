@@ -6,6 +6,7 @@ import { Particles } from 'react-tsparticles';
 import { loadSlim } from 'tsparticles-slim';
 import PurchaseWidget from '../PurchaseWidget/PurchaseWidget';
 import styles from './HeroSection.module.css';
+import MobileMetaMaskPurchase from '../PurchaseWidget/PurchaseWidget';
 
 // Animation variants
 const containerVariants = {
@@ -224,7 +225,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isLoaded }) => {
           variants={itemVariants}
         >
           {/* Purchase Widget */}
-          <PurchaseWidget />
+          <MobileMetaMaskPurchase />
         </motion.div>
       </div>
     </motion.section>
