@@ -29,7 +29,7 @@ const API_ENDPOINTS = {
   verifyAndDistribute: `${API_BASE_URL}/verifyAndDistributeTokens`
 };
 
-const WorkingPurchaseWidget = () => {
+const PurchaseWidget = () => {
   const account = useActiveAccount();
   const activeChain = useActiveWalletChain();
   
@@ -621,4 +621,4 @@ const WorkingPurchaseWidget = () => {
   );
 };
 
-export default WorkingPurchaseWidget;
+export default PurchaseWidget;
