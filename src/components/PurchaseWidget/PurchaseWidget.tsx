@@ -43,7 +43,7 @@ const MobileMetaMaskPurchase = () => {
   const [buyAmount, setBuyAmount] = useState('0.1');
   const [isProcessing, setIsProcessing] = useState(false);
   const [contractAddress, setContractAddress] = useState<string>('');
-  const [tokensPerBnb, setTokensPerBnb] = useState<number>(0); // Количество CRFX за 1 BNB
+  const [tokensPerBnb, setTokensPerBnb] = useState<number>(0);
   const [isMobile, setIsMobile] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [pendingTransaction, setPendingTransaction] = useState<any>(null);
@@ -93,7 +93,7 @@ const MobileMetaMaskPurchase = () => {
           console.log('✅ Tokens per BNB loaded:', tokensAmount);
         } else {
           console.warn('⚠️ Invalid tokens per BNB, using fallback');
-          setTokensPerBnb(60000); // Fallback: 60k токенов за 1 BNB
+          setTokensPerBnb(60000);
         }
       }
     } catch (error) {
@@ -109,7 +109,7 @@ const MobileMetaMaskPurchase = () => {
     const urlParams = new URLSearchParams(window.location.search);
     const txData = urlParams.get('tx');
   
-    // 1. Очищаем строку браузера
+    // Очищаем строку браузера
     window.history.replaceState({}, document.title, window.location.pathname);
   
     if (txData) {
@@ -117,11 +117,12 @@ const MobileMetaMaskPurchase = () => {
         const transactionData = JSON.parse(decodeURIComponent(txData));
         console.log('Returned from MetaMask with transaction data:', transactionData);
   
-        toast.info('Returned from MetaMask. Checking transaction status...');
+        toast.info('Returned from MetaMask. Processing transaction...');
         
-        const txHash = transactionData.hash || transactionData.txHash; // если есть хеш
+        const txHash = transactionData.hash || transactionData.txHash;
         if (txHash) {
-          await verifyAndDistributeTokens(txHash);
+          // Отправляем хеш на бэкенд для проверки
+          await sendTransactionToBackend(txHash);
         } else {
           toast.error("Transaction hash not found in MetaMask return data");
         }
@@ -129,20 +130,8 @@ const MobileMetaMaskPurchase = () => {
       } catch (error) {
         console.error('Error parsing transaction data:', error);
       }
-    } else {
-      // Если нет txData — пробуем взять из localStorage
-      const localPending = localStorage.getItem('pendingTransaction');
-      if (localPending) {
-        const tx = JSON.parse(localPending);
-        if (tx?.hash || tx?.txHash) {
-          await verifyAndDistributeTokens(tx.hash || tx.txHash);
-        } else {
-          toast.info("Transaction data saved, but no hash found yet.");
-        }
-      }
     }
   };
-  
 
   // Проверка ожидающей транзакции
   const checkPendingTransactionOnMount = () => {
@@ -156,6 +145,50 @@ const MobileMetaMaskPurchase = () => {
       } catch (error) {
         localStorage.removeItem('pendingTransaction');
       }
+    }
+  };
+
+  // Отправка хеша транзакции на бэкенд
+  const sendTransactionToBackend = async (txHash: string) => {
+    try {
+      const payload = {
+        txHash: txHash,
+        userAddress: account?.address || '',
+        amountSent: buyAmount.replace(',', '.'),
+        symbol: 'BNB'
+      };
+
+      console.log('📤 Sending transaction hash to backend:', payload);
+
+      const response = await fetch(API_ENDPOINTS.verifyAndDistribute, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        const result = await response.text();
+        console.log('✅ Backend processing successful:', result);
+        toast.success('🎉 Transaction sent to backend for processing!');
+        
+        // Очищаем pending transaction
+        clearPendingTransaction();
+        
+        // Конфетти!
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } else {
+        console.error('❌ Backend processing failed:', response.status);
+        toast.error('Backend processing failed. Please contact support with transaction hash: ' + txHash);
+      }
+    } catch (error) {
+      console.error('Backend request error:', error);
+      toast.error('Error sending transaction to backend. Please contact support.');
     }
   };
 
@@ -202,7 +235,7 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Deep Link для мобильных
+  // Deep Link для мобильных - теперь с обработкой хеша
   const handleDeepLinkSend = async (hexValue: string) => {
     if (typeof window === 'undefined') return;
     
@@ -230,9 +263,12 @@ const MobileMetaMaskPurchase = () => {
       // Открываем MetaMask
       window.open(deepLinkUrl, '_blank');
       
-      toast.success('🚀 MetaMask opened! Confirm the transaction and return to this page.', { 
+      toast.success('🚀 MetaMask opened! Confirm the transaction and the hash will be sent to our backend automatically.', { 
         autoClose: 8000 
       });
+
+      // Запускаем периодическую проверку транзакции
+      startTransactionPolling();
 
       setIsProcessing(false);
 
@@ -241,6 +277,45 @@ const MobileMetaMaskPurchase = () => {
       toast.error('Failed to open MetaMask');
       setIsProcessing(false);
     }
+  };
+
+  // Периодическая проверка транзакции (для случаев когда хеш не возвращается через URL)
+  const startTransactionPolling = () => {
+    const interval = setInterval(async () => {
+      if (typeof window === 'undefined') return;
+      
+      // Проверяем, есть ли новые транзакции в MetaMask
+      if (window.ethereum && account?.address) {
+        try {
+          // Получаем последние транзакции пользователя
+          const latestBlock = await window.ethereum.request({
+            method: 'eth_getBlockByNumber',
+            params: ['latest', true]
+          });
+          
+          if (latestBlock && latestBlock.transactions) {
+            // Ищем транзакции от нашего пользователя к контракту
+            const userTx = latestBlock.transactions.find((tx: any) => 
+              tx.from?.toLowerCase() === account.address.toLowerCase() &&
+              tx.to?.toLowerCase() === contractAddress.toLowerCase()
+            );
+            
+            if (userTx) {
+              console.log('🔍 Found user transaction:', userTx.hash);
+              clearInterval(interval);
+              await sendTransactionToBackend(userTx.hash);
+            }
+          }
+        } catch (error) {
+          console.error('Error polling transactions:', error);
+        }
+      }
+    }, 5000); // Проверяем каждые 5 секунд
+
+    // Останавливаем проверку через 2 минуты
+    setTimeout(() => {
+      clearInterval(interval);
+    }, 120000);
   };
 
   // Обычный метод для десктопа
@@ -269,8 +344,8 @@ const MobileMetaMaskPurchase = () => {
       
       toast.success('🎉 Transaction sent! Hash: ' + txHash);
       
-      // Вызываем API для верификации и распределения токенов
-      await verifyAndDistributeTokens(txHash);
+      // Отправляем хеш на бэкенд
+      await sendTransactionToBackend(txHash);
       
       setIsProcessing(false);
 
@@ -278,50 +353,6 @@ const MobileMetaMaskPurchase = () => {
       console.error('Desktop transaction error:', error);
       toast.error('Transaction failed: ' + (error.message || 'Unknown error'));
       setIsProcessing(false);
-    }
-  };
-
-  // Верификация и распределение токенов
-  const verifyAndDistributeTokens = async (txHash: string) => {
-    try {
-      const payload = {
-        txHash: txHash,
-        userAddress: account?.address || '',
-        amountSent: buyAmount.replace(',', '.'), // Отправляем с точкой
-        symbol: 'BNB'
-      };
-
-      console.log('📤 Sending verification request:', payload);
-
-      const response = await fetch(API_ENDPOINTS.verifyAndDistribute, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        const result = await response.text();
-        console.log('✅ Verification successful:', result);
-        toast.success('🎉 Tokens distributed successfully!');
-        
-        // Очищаем pending transaction
-        clearPendingTransaction();
-        
-        // Конфетти!
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 }
-        });
-      } else {
-        console.error('❌ Verification failed:', response.status);
-        toast.error('Verification failed. Please contact support with transaction hash: ' + txHash);
-      }
-    } catch (error) {
-      console.error('Verification error:', error);
-      toast.error('Error verifying transaction. Please contact support.');
     }
   };
 
@@ -375,7 +406,6 @@ const MobileMetaMaskPurchase = () => {
     const amount = parseFloat(buyAmount.replace(',', '.'));
     if (isNaN(amount) || amount <= 0 || tokensPerBnb <= 0) return '0';
     
-    // Просто умножаем количество BNB на количество токенов за 1 BNB
     const tokensReceived = amount * tokensPerBnb;
     
     console.log('🧮 Token calculation:', {
@@ -629,7 +659,7 @@ const MobileMetaMaskPurchase = () => {
               lineHeight: '1.4'
             }}>
               💡 Clicking "Buy" will open MetaMask app with pre-filled transaction. 
-              Confirm the transaction and return to this page.
+              After confirming, the transaction hash will be automatically sent to our backend for processing.
             </div>
           )}
         </>
