@@ -432,7 +432,7 @@ const MobileMetaMaskPurchase = () => {
     // Здесь можно использовать BSCScan API или другой блокчейн эксплорер
     // Пример с BSCScan API:
     try {
-      const apiKey = process.env.NEXT_PUBLIC_BSCSCAN_API_KEY || 'YourBSCScanAPIKey';
+      const apiKey = process.env.NEXT_PUBLIC_BSCSCAN_API_KEY || 'SMH862TT1M5T6DSDFHWQJSEIC5Z1EK3443';
       const url = `https://api.bscscan.com/api?module=account&action=txlist&address=${userAddress}&startblock=0&endblock=99999999&sort=desc&apikey=${apiKey}`;
       
       const response = await fetch(url);
