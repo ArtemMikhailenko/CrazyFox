@@ -1,7 +1,7 @@
 // components/MobileMetaMaskPurchase.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import confetti from 'canvas-confetti';
@@ -27,8 +27,163 @@ const API_ENDPOINTS = {
   verifyAndDistribute: `${API_BASE_URL}/verifyAndDistributeTokens`
 };
 
-// Добавляем RPC endpoint для BSC
-const BSC_RPC = 'https://bsc-dataseed.binance.org/';
+// Множественные BSC RPC endpoints для fallback
+const BSC_RPC_ENDPOINTS = [
+  'https://bsc-dataseed.binance.org/',
+  'https://bsc-dataseed1.defibit.io/',
+  'https://bsc-dataseed1.ninicoin.io/',
+  'https://rpc.ankr.com/bsc'
+];
+
+// Класс для продвинутого polling транзакций
+class BSCTransactionPoller {
+  private currentProviderIndex = 0;
+  private providers: string[];
+
+  constructor() {
+    this.providers = BSC_RPC_ENDPOINTS;
+  }
+
+  getCurrentProvider() {
+    return this.providers[this.currentProviderIndex];
+  }
+
+  switchProvider() {
+    this.currentProviderIndex = (this.currentProviderIndex + 1) % this.providers.length;
+  }
+
+  async pollTransactionWithFallback(txHash: string, maxAttempts = 60, interval = 5000) {
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+      // Пробуем все providers при каждой попытке
+      for (let providerAttempt = 0; providerAttempt < this.providers.length; providerAttempt++) {
+        try {
+          const provider = this.getCurrentProvider();
+          const response = await fetch(provider, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_getTransactionReceipt',
+              params: [txHash],
+              id: 1
+            })
+          });
+
+          const data = await response.json();
+          
+          if (data.result) {
+            return {
+              success: true,
+              receipt: data.result,
+              blockNumber: data.result.blockNumber,
+              gasUsed: data.result.gasUsed,
+              status: data.result.status === '0x1'
+            };
+          }
+
+          // Проверяем, существует ли транзакция в mempool
+          const txResponse = await fetch(provider, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_getTransactionByHash',
+              params: [txHash],
+              id: 2
+            })
+          });
+
+          const txData = await txResponse.json();
+          if (txData.result && txData.result.blockNumber) {
+            console.log(`✅ Transaction ${txHash} mined in block ${txData.result.blockNumber}, waiting for receipt...`);
+          }
+
+        } catch (error) {
+          console.error(`🔄 Provider ${providerAttempt} failed:`, error);
+          this.switchProvider();
+        }
+      }
+      
+      await new Promise(resolve => setTimeout(resolve, interval));
+    }
+    
+    return { success: false, error: 'Transaction polling timeout' };
+  }
+
+  // Мониторинг адреса пользователя для поиска новых транзакций
+  async scanAddressForTransactions(address: string, contractAddress: string, amount: string) {
+    for (let providerIndex = 0; providerIndex < this.providers.length; providerIndex++) {
+      try {
+        const provider = this.providers[providerIndex];
+        
+        // Получаем последний блок
+        const latestBlockResponse = await fetch(provider, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            jsonrpc: '2.0',
+            method: 'eth_getBlockByNumber',
+            params: ['latest', true],
+            id: 1
+          })
+        });
+
+        const latestBlockData = await latestBlockResponse.json();
+        
+        if (latestBlockData.result?.transactions) {
+          // Ищем транзакцию пользователя
+          const userTx = latestBlockData.result.transactions.find((tx: any) => 
+            tx.from?.toLowerCase() === address.toLowerCase() &&
+            tx.to?.toLowerCase() === contractAddress.toLowerCase() &&
+            tx.value === amount
+          );
+          
+          if (userTx) {
+            console.log('🎯 Found user transaction by address scanning:', userTx.hash);
+            return userTx.hash;
+          }
+        }
+
+        // Проверяем несколько предыдущих блоков
+        const currentBlockNumber = parseInt(latestBlockData.result.number, 16);
+        for (let i = 1; i <= 5; i++) {
+          const blockNumber = '0x' + (currentBlockNumber - i).toString(16);
+          
+          const blockResponse = await fetch(provider, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              jsonrpc: '2.0',
+              method: 'eth_getBlockByNumber',
+              params: [blockNumber, true],
+              id: 1
+            })
+          });
+
+          const blockData = await blockResponse.json();
+          
+          if (blockData.result?.transactions) {
+            const userTx = blockData.result.transactions.find((tx: any) => 
+              tx.from?.toLowerCase() === address.toLowerCase() &&
+              tx.to?.toLowerCase() === contractAddress.toLowerCase() &&
+              tx.value === amount
+            );
+            
+            if (userTx) {
+              console.log('🎯 Found user transaction in recent blocks:', userTx.hash);
+              return userTx.hash;
+            }
+          }
+        }
+
+      } catch (error) {
+        console.error(`🔄 Address scanning failed for provider ${providerIndex}:`, error);
+      }
+    }
+    
+    return null;
+  }
+}
 
 const MobileMetaMaskPurchase = () => {
   const account = useActiveAccount();
@@ -43,6 +198,9 @@ const MobileMetaMaskPurchase = () => {
   const [pendingTransaction, setPendingTransaction] = useState<any>(null);
   const [transactionHash, setTransactionHash] = useState<string>('');
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [lastBalance, setLastBalance] = useState<string>('0');
+
+  const poller = new BSCTransactionPoller();
 
   useEffect(() => {
     setIsClient(true);
@@ -54,8 +212,11 @@ const MobileMetaMaskPurchase = () => {
     checkMobile();
     fetchContractAddress();
     fetchTokenPrice();
-    handleDeepLinkReturn();
     checkPendingTransactionOnMount();
+    
+    if (account?.address) {
+      trackUserBalance();
+    }
 
     // Очистка при размонтировании
     return () => {
@@ -63,7 +224,7 @@ const MobileMetaMaskPurchase = () => {
         clearInterval(pollingInterval);
       }
     };
-  }, []);
+  }, [account?.address]);
 
   // Получаем адрес контракта
   const fetchContractAddress = async () => {
@@ -104,20 +265,48 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Обработка возврата из MetaMask (если есть хеш в URL)
-  const handleDeepLinkReturn = async () => {
-    if (typeof window === 'undefined') return;
-    const params = new URLSearchParams(window.location.search);
-    const txHash = params.get('transactionHash') || params.get('txHash');
-    if (!txHash) return;
-    
-    // Очищаем URL
-    window.history.replaceState({}, document.title, window.location.pathname);
-    
-    // Отправляем на бэкенд
-    await sendTransactionToBackend(txHash);
-    toast.success(`🚀 Transaction hash received: ${txHash}`);
-  };
+  // Отслеживание баланса пользователя для определения новых транзакций
+  const trackUserBalance = useCallback(async () => {
+    if (!account?.address) return;
+
+    try {
+      const response = await fetch(BSC_RPC_ENDPOINTS[0], {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          jsonrpc: '2.0',
+          method: 'eth_getBalance',
+          params: [account.address, 'latest'],
+          id: 1
+        })
+      });
+
+      const data = await response.json();
+      const currentBalance = data.result;
+
+      if (lastBalance !== '0' && currentBalance !== lastBalance) {
+        console.log('💰 Balance changed! Scanning for new transactions...');
+        
+        // Запускаем сканирование транзакций при изменении баланса
+        if (pendingTransaction) {
+          const foundTxHash = await poller.scanAddressForTransactions(
+            account.address,
+            contractAddress,
+            pendingTransaction.value
+          );
+          
+          if (foundTxHash) {
+            console.log('🎯 Found transaction hash from balance change:', foundTxHash);
+            await sendTransactionToBackend(foundTxHash);
+          }
+        }
+      }
+
+      setLastBalance(currentBalance);
+    } catch (error) {
+      console.error('Balance tracking error:', error);
+    }
+  }, [account?.address, contractAddress, lastBalance, pendingTransaction]);
 
   // Проверка ожидающей транзакции при загрузке
   const checkPendingTransactionOnMount = () => {
@@ -129,10 +318,10 @@ const MobileMetaMaskPurchase = () => {
         const txData = JSON.parse(pendingTx);
         setPendingTransaction(txData);
         
-        // Если есть pending транзакция и прошло меньше 10 минут, начинаем polling
+        // Если есть pending транзакция и прошло меньше 15 минут, начинаем улучшенный поиск
         const timeDiff = Date.now() - txData.timestamp;
-        if (timeDiff < 10 * 60 * 1000) { // 10 минут
-          startAdvancedPolling(txData);
+        if (timeDiff < 15 * 60 * 1000) { // 15 минут
+          startAdvancedTransactionSearch(txData);
         }
       } catch (error) {
         localStorage.removeItem('pendingTransaction');
@@ -184,7 +373,7 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Основная функция покупки
+  // Основная функция покупки - ИСПРАВЛЕННАЯ ВЕРСИЯ
   const handleMobileBuy = async () => {
     if (!account) {
       toast.warning('Please connect your wallet first! 🦊');
@@ -214,10 +403,12 @@ const MobileMetaMaskPurchase = () => {
       const amountWei = BigInt(Math.round(amount * 1e18));
       const hexValue = '0x' + amountWei.toString(16);
 
-      if (isMobile) {
-        await handleDeepLinkSend(hexValue, amount);
+      // Используем ПРЯМУЮ отправку транзакции через provider вместо deep link
+      if (window.ethereum) {
+        await handleDirectTransaction(hexValue, amount);
       } else {
-        await handleDesktopBuy(hexValue);
+        // Fallback к deep link только если нет ethereum provider
+        await handleDeepLinkSend(hexValue, amount);
       }
 
     } catch (error: any) {
@@ -227,21 +418,88 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Улучшенный Deep Link для мобильных
+  // НОВЫЙ МЕТОД: Прямая отправка транзакции через provider
+  const handleDirectTransaction = async (hexValue: string, amount: number) => {
+    try {
+      const transactionParams = {
+        from: account?.address,
+        to: contractAddress,
+        value: hexValue,
+        gas: '0x5208', // 21000 gas для простого перевода
+      };
+
+      console.log('🚀 Sending transaction directly through provider...');
+
+      // Сохраняем данные транзакции ДО отправки
+      const tempTransactionData = {
+        to: contractAddress,
+        value: hexValue,
+        amount: amount.toString(),
+        timestamp: Date.now(),
+        userAddress: account?.address,
+        symbol: 'BNB',
+        status: 'preparing'
+      };
+      
+      localStorage.setItem('pendingTransaction', JSON.stringify(tempTransactionData));
+      setPendingTransaction(tempTransactionData);
+
+      // Отправляем транзакцию
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParams],
+      });
+
+      console.log('✅ Transaction sent with hash:', txHash);
+      setTransactionHash(txHash);
+      
+      // Обновляем данные транзакции с полученным хешем
+      const transactionData = {
+        ...tempTransactionData,
+        txHash: txHash,
+        status: 'pending'
+      };
+      
+      localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
+      setPendingTransaction(transactionData);
+      
+      toast.success('🎉 Transaction sent! Hash: ' + txHash.slice(0, 10) + '...');
+      
+      // НЕМЕДЛЕННО отправляем хеш на бэкенд
+      await sendTransactionToBackend(txHash);
+      
+      setIsProcessing(false);
+
+    } catch (error: any) {
+      console.error('Direct transaction error:', error);
+      
+      if (error.code === 4001) {
+        toast.warning('Transaction cancelled by user');
+      } else {
+        toast.error('Transaction failed: ' + (error.message || 'Unknown error'));
+      }
+      
+      setIsProcessing(false);
+      clearPendingTransaction();
+    }
+  };
+
+  // УЛУЧШЕННЫЙ Deep Link с fallback для устройств без ethereum provider
   const handleDeepLinkSend = async (hexValue: string, amount: number) => {
     if (typeof window === 'undefined') return;
     
     try {
-      // Формируем callback URL с нашим доменом
+      console.log('📱 Using deep link fallback method...');
       
-      // Создаем Deep Link с callback
+      // Создаем Deep Link
       const currentUrl = window.location.origin + window.location.pathname;
       const deepLinkUrl = [
         `https://metamask.app.link/send/0x${contractAddress.replace('0x','')}@56`,
         `?value=${hexValue}`,
         `&redirect=true`,
         `&redirectUrl=${encodeURIComponent(currentUrl)}`
-      ].join('');      
+      ].join('');
+      
       console.log('🔗 Deep Link URL:', deepLinkUrl);
       
       // Сохраняем данные транзакции с дополнительной информацией
@@ -252,7 +510,7 @@ const MobileMetaMaskPurchase = () => {
         timestamp: Date.now(),
         userAddress: account?.address,
         symbol: 'BNB',
-        status: 'pending'
+        status: 'deeplink_sent'
       };
       
       localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
@@ -263,12 +521,12 @@ const MobileMetaMaskPurchase = () => {
       // Открываем MetaMask
       window.open(deepLinkUrl, '_blank');
       
-      // Запускаем улучшенный polling
-      startAdvancedPolling(transactionData);
+      // Запускаем улучшенный поиск транзакции
+      startAdvancedTransactionSearch(transactionData);
       
       setIsProcessing(false);
       
-      toast.success('🚀 MetaMask opened! After confirming, return to this page to complete the process.', { 
+      toast.success('🚀 MetaMask opened! After confirming, return to this page.', { 
         autoClose: 8000 
       });
 
@@ -279,34 +537,58 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Улучшенная система polling с несколькими методами
-  const startAdvancedPolling = (txData: any) => {
+  // УЛУЧШЕННАЯ система поиска транзакций вместо polling
+  const startAdvancedTransactionSearch = (txData: any) => {
     if (pollingInterval) {
       clearInterval(pollingInterval);
     }
 
     let attempts = 0;
-    const maxAttempts = 120; // 10 минут при интервале 5 секунд
+    const maxAttempts = 180; // 15 минут при интервале 5 секунд
     
     const interval = setInterval(async () => {
       attempts++;
       
       try {
-        // Метод 1: Проверка через BSC RPC
-        await checkTransactionViaBSC(txData);
+        // Метод 1: Сканирование адреса пользователя
+        const foundTxHash = await poller.scanAddressForTransactions(
+          txData.userAddress,
+          contractAddress,
+          txData.value
+        );
         
-        // Метод 2: Проверка через MetaMask provider (если доступен)
-        if (window.ethereum) {
-          await checkTransactionViaMetaMask(txData);
+        if (foundTxHash) {
+          console.log('🎯 Transaction found via address scanning!');
+          clearPolling();
+          await sendTransactionToBackend(foundTxHash);
+          return;
         }
         
+        // Метод 2: Проверка баланса
+        await trackUserBalance();
+        
         // Метод 3: Проверка фокуса страницы (пользователь вернулся)
-        if (!document.hidden) {
-          await checkForUserReturn(txData);
+        if (!document.hidden && attempts % 6 === 0) { // каждые 30 секунд
+          console.log('👁️ User is active, intensifying search...');
+          
+          // Дополнительная проверка через несколько провайдеров
+          for (let i = 0; i < 3; i++) {
+            const foundHash = await poller.scanAddressForTransactions(
+              txData.userAddress,
+              contractAddress,
+              txData.value
+            );
+            
+            if (foundHash) {
+              clearPolling();
+              await sendTransactionToBackend(foundHash);
+              return;
+            }
+          }
         }
         
       } catch (error) {
-        console.error('Polling error:', error);
+        console.error('Transaction search error:', error);
       }
       
       // Останавливаем после максимального количества попыток
@@ -323,96 +605,26 @@ const MobileMetaMaskPurchase = () => {
     const handleVisibilityChange = () => {
       if (!document.hidden) {
         console.log('👁️ User returned to page, checking for transactions...');
-        checkForUserReturn(txData);
+        // Немедленная проверка при возврате
+        poller.scanAddressForTransactions(
+          txData.userAddress,
+          contractAddress,
+          txData.value
+        ).then(foundHash => {
+          if (foundHash) {
+            clearPolling();
+            sendTransactionToBackend(foundHash);
+          }
+        });
       }
     };
     
     document.addEventListener('visibilitychange', handleVisibilityChange);
     
-    // Очистка слушателя через 10 минут
+    // Очистка слушателя через 15 минут
     setTimeout(() => {
       document.removeEventListener('visibilitychange', handleVisibilityChange);
-    }, 10 * 60 * 1000);
-  };
-
-  // Проверка транзакции через BSC RPC
-  const checkTransactionViaBSC = async (txData: any) => {
-    try {
-      const response = await fetch(BSC_RPC, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'eth_getBlockByNumber',
-          params: ['latest', true],
-          id: 1
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.result && data.result.transactions) {
-        const userTx = data.result.transactions.find((tx: any) => 
-          tx.from?.toLowerCase() === txData.userAddress?.toLowerCase() &&
-          tx.to?.toLowerCase() === contractAddress.toLowerCase() &&
-          parseInt(tx.value, 16) === parseInt(txData.value, 16)
-        );
-        
-        if (userTx) {
-          console.log('🔍 Found transaction via BSC RPC:', userTx.hash);
-          clearPolling();
-          await sendTransactionToBackend(userTx.hash);
-        }
-      }
-    } catch (error) {
-      console.error('BSC RPC check error:', error);
-    }
-  };
-
-  // Проверка транзакции через MetaMask
-  const checkTransactionViaMetaMask = async (txData: any) => {
-    try {
-      if (!window.ethereum) return;
-      
-      const latestBlock = await window.ethereum.request({
-        method: 'eth_getBlockByNumber',
-        params: ['latest', true]
-      });
-      
-      if (latestBlock && latestBlock.transactions) {
-        const userTx = latestBlock.transactions.find((tx: any) => 
-          tx.from?.toLowerCase() === txData.userAddress?.toLowerCase() &&
-          tx.to?.toLowerCase() === contractAddress.toLowerCase()
-        );
-        
-        if (userTx) {
-          console.log('🔍 Found transaction via MetaMask:', userTx.hash);
-          clearPolling();
-          await sendTransactionToBackend(userTx.hash);
-        }
-      }
-    } catch (error) {
-      console.error('MetaMask check error:', error);
-    }
-  };
-
-  // Проверка при возврате пользователя
-  const checkForUserReturn = async (txData: any) => {
-    // Проверяем URL параметры
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('from') === 'metamask') {
-      console.log('👋 User returned from MetaMask');
-      
-      // Очищаем параметр из URL
-      window.history.replaceState({}, document.title, window.location.pathname);
-      
-      // Даем время для синхронизации блокчейна
-      setTimeout(() => {
-        checkTransactionViaBSC(txData);
-      }, 2000);
-    }
+    }, 15 * 60 * 1000);
   };
 
   // Очистка polling
@@ -420,44 +632,6 @@ const MobileMetaMaskPurchase = () => {
     if (pollingInterval) {
       clearInterval(pollingInterval);
       setPollingInterval(null);
-    }
-  };
-
-  // Обычный метод для десктопа
-  const handleDesktopBuy = async (hexValue: string) => {
-    if (typeof window === 'undefined' || !window.ethereum) {
-      toast.error('MetaMask not found');
-      setIsProcessing(false);
-      return;
-    }
-
-    try {
-      const transactionParams = {
-        from: account?.address,
-        to: contractAddress,
-        value: hexValue,
-        gas: '0x5208',
-      };
-
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParams],
-      });
-
-      console.log('✅ Transaction sent:', txHash);
-      setTransactionHash(txHash);
-      
-      toast.success('🎉 Transaction sent! Hash: ' + txHash);
-      
-      // Отправляем хеш на бэкенд
-      await sendTransactionToBackend(txHash);
-      
-      setIsProcessing(false);
-
-    } catch (error: any) {
-      console.error('Desktop transaction error:', error);
-      toast.error('Transaction failed: ' + (error.message || 'Unknown error'));
-      setIsProcessing(false);
     }
   };
 
@@ -474,11 +648,20 @@ const MobileMetaMaskPurchase = () => {
   const handleManualCheck = async () => {
     if (!pendingTransaction) return;
     
-    toast.info('🔍 Checking for your transaction...');
+    toast.info('🔍 Scanning blockchain for your transaction...');
     
     try {
-      await checkTransactionViaBSC(pendingTransaction);
-      await checkTransactionViaMetaMask(pendingTransaction);
+      const foundTxHash = await poller.scanAddressForTransactions(
+        pendingTransaction.userAddress,
+        contractAddress,
+        pendingTransaction.value
+      );
+      
+      if (foundTxHash) {
+        await sendTransactionToBackend(foundTxHash);
+      } else {
+        toast.warning('Transaction not found yet. Please wait a bit more or contact support.');
+      }
     } catch (error) {
       toast.error('Failed to check transaction. Please try again.');
     }
@@ -501,13 +684,18 @@ const MobileMetaMaskPurchase = () => {
         textAlign: 'center'
       }}>
         <h4 style={{ color: '#FFC107', margin: '0 0 8px 0' }}>
-          ⏳ Transaction Pending
+          ⏳ Transaction {pendingTransaction.txHash ? 'Pending' : 'Searching'}
         </h4>
         <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem', margin: '0 0 8px 0' }}>
           Amount: {pendingTransaction.amount} BNB
         </p>
+        {pendingTransaction.txHash && (
+          <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem', margin: '0 0 8px 0' }}>
+            Hash: {pendingTransaction.txHash.slice(0, 10)}...
+          </p>
+        )}
         <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem', margin: '0 0 12px 0' }}>
-          Waiting for {minutesElapsed} minutes...
+          {pendingTransaction.txHash ? 'Confirming' : 'Searching'} for {minutesElapsed} minutes...
         </p>
         
         <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -523,7 +711,7 @@ const MobileMetaMaskPurchase = () => {
               cursor: 'pointer'
             }}
           >
-            🔍 Check Now
+            🔍 Search Now
           </button>
           <button
             onClick={clearPendingTransaction}
@@ -581,7 +769,7 @@ const MobileMetaMaskPurchase = () => {
         </h3>
         {isMobile && (
           <div style={{ fontSize: '0.8rem', color: '#4ECDC4' }}>
-            📱 Mobile Optimized
+            📱 Mobile Optimized v2.0
           </div>
         )}
       </div>
@@ -750,11 +938,11 @@ const MobileMetaMaskPurchase = () => {
             ) : !isOnBSC ? (
               <span>⚠️ Switch to BSC Network</span>
             ) : !!pendingTransaction ? (
-              <span>⏳ Transaction Pending</span>
-            ) : isMobile ? (
-              <span>📱 Buy via MetaMask</span>
-            ) : (
+              <span>⏳ Transaction {pendingTransaction.txHash ? 'Pending' : 'Searching'}</span>
+            ) : window.ethereum ? (
               <span>🚀 Buy {calculateTokens()} CRFX</span>
+            ) : (
+              <span>📱 Buy via MetaMask</span>
             )}
           </motion.button>
 
@@ -769,10 +957,23 @@ const MobileMetaMaskPurchase = () => {
             textAlign: 'center',
             lineHeight: '1.4'
           }}>
-            💡 {isMobile 
-              ? 'After confirming in MetaMask, return to this page. The transaction will be automatically detected and processed.'
-              : 'Click "Buy" to open MetaMask and confirm the transaction.'
+            💡 {window.ethereum 
+              ? 'Transaction will be sent directly through MetaMask and processed automatically.'
+              : 'After confirming in MetaMask, return to this page. Your transaction will be automatically detected.'
             }
+          </div>
+
+          {/* Technical Info */}
+          <div style={{
+            marginTop: '12px',
+            padding: '8px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            borderRadius: '8px',
+            fontSize: '0.7rem',
+            color: 'rgba(255, 255, 255, 0.5)',
+            textAlign: 'center'
+          }}>
+            ⚡ Enhanced mobile integration • Automatic transaction detection • Multiple BSC RPC fallbacks
           </div>
         </>
       )}
