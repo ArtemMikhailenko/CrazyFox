@@ -1,3 +1,20 @@
+
+// components/MobileMetaMaskPurchase.tsx
+'use client';
+
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { toast } from 'react-toastify';
+import confetti from 'canvas-confetti';
+import { 
+  useActiveAccount,
+  useActiveWalletChain,
+  ConnectButton
+} from "thirdweb/react";
+import { 
+  createThirdwebClient
+} from "thirdweb";
+import { bsc } from "thirdweb/chains";
 // utils/metamaskDeepLink.ts
 
 interface TransactionParams {
@@ -43,23 +60,6 @@ export const createDappDeepLinkWithTransaction = (
   
   return `https://metamask.app.link/dapp/${encodedDappUrl}`;
 };
-
-// components/MobileMetaMaskPurchase.tsx
-'use client';
-
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { toast } from 'react-toastify';
-import confetti from 'canvas-confetti';
-import { 
-  useActiveAccount,
-  useActiveWalletChain,
-  ConnectButton
-} from "thirdweb/react";
-import { 
-  createThirdwebClient
-} from "thirdweb";
-import { bsc } from "thirdweb/chains";
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
