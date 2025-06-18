@@ -233,12 +233,15 @@ const MobileMetaMaskPurchase = () => {
     
     try {
       // Формируем callback URL с нашим доменом
-      const currentUrl = window.location.origin + window.location.pathname;
-      const callbackUrl = encodeURIComponent(currentUrl + '?from=metamask');
       
       // Создаем Deep Link с callback
-      const deepLinkUrl = `https://metamask.app.link/send/0x${contractAddress.replace('0x', '')}@56?value=${hexValue}&callback=${callbackUrl}`;
-      
+      const currentUrl = window.location.origin + window.location.pathname;
+      const deepLinkUrl = [
+        `https://metamask.app.link/send/0x${contractAddress.replace('0x','')}@56`,
+        `?value=${hexValue}`,
+        `&redirect=true`,
+        `&redirectUrl=${encodeURIComponent(currentUrl)}`
+      ].join('');      
       console.log('🔗 Deep Link URL:', deepLinkUrl);
       
       // Сохраняем данные транзакции с дополнительной информацией
