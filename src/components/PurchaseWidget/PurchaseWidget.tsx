@@ -105,33 +105,16 @@ const MobileMetaMaskPurchase = () => {
   // Обработка возврата из MetaMask
   const handleDeepLinkReturn = async () => {
     if (typeof window === 'undefined') return;
-  
-    const urlParams = new URLSearchParams(window.location.search);
-    const txData = urlParams.get('tx');
-  
-    // Очищаем строку браузера
+    const params = new URLSearchParams(window.location.search);
+    const txHash = params.get('transactionHash') || params.get('txHash');
+    if (!txHash) return;
+    // Очищаем URL
     window.history.replaceState({}, document.title, window.location.pathname);
-  
-    if (txData) {
-      try {
-        const transactionData = JSON.parse(decodeURIComponent(txData));
-        console.log('Returned from MetaMask with transaction data:', transactionData);
-  
-        toast.info('Returned from MetaMask. Processing transaction...');
-        
-        const txHash = transactionData.hash || transactionData.txHash;
-        if (txHash) {
-          // Отправляем хеш на бэкенд для проверки
-          await sendTransactionToBackend(txHash);
-        } else {
-          toast.error("Transaction hash not found in MetaMask return data");
-        }
-  
-      } catch (error) {
-        console.error('Error parsing transaction data:', error);
-      }
-    }
+    // Шлём на бэкенд
+    await sendTransactionToBackend(txHash);
+    toast.success(`🚀 Hash передан на бэкенд: ${txHash}`);
   };
+  
 
   // Проверка ожидающей транзакции
   const checkPendingTransactionOnMount = () => {
