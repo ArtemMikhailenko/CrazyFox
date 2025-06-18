@@ -1,4 +1,3 @@
-
 // components/MobileMetaMaskPurchase.tsx
 'use client';
 
@@ -15,8 +14,8 @@ import {
   createThirdwebClient
 } from "thirdweb";
 import { bsc } from "thirdweb/chains";
-// utils/metamaskDeepLink.ts
 
+// utils/metamaskDeepLink.ts
 interface TransactionParams {
   to: string;
   value: string;
@@ -54,7 +53,7 @@ export const createDappDeepLinkWithTransaction = (
   };
   
   const encodedData = encodeURIComponent(JSON.stringify(transactionData));
-  const currentUrl = window.location.href;
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
   const dappUrl = `${currentUrl}?tx=${encodedData}`;
   const encodedDappUrl = encodeURIComponent(dappUrl);
   
@@ -83,8 +82,13 @@ const MobileMetaMaskPurchase = () => {
   const [tokenPrice, setTokenPrice] = useState<number>(0.005);
   const [bnbPrice, setBnbPrice] = useState<number>(300);
   const [isMobile, setIsMobile] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const [pendingTransaction, setPendingTransaction] = useState<any>(null);
 
   useEffect(() => {
+    // Устанавливаем флаг клиентской стороны
+    setIsClient(true);
+    
     // Проверяем мобильное устройство
     const checkMobile = () => {
       setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
@@ -96,6 +100,9 @@ const MobileMetaMaskPurchase = () => {
     
     // Проверяем, если пришли из MetaMask с параметрами транзакции
     handleDeepLinkReturn();
+    
+    // Проверяем ожидающую транзакцию
+    checkPendingTransactionOnMount();
   }, []);
 
   // Загружаем данные
@@ -133,6 +140,8 @@ const MobileMetaMaskPurchase = () => {
 
   // Обработка возврата из MetaMask
   const handleDeepLinkReturn = () => {
+    if (typeof window === 'undefined') return;
+    
     const urlParams = new URLSearchParams(window.location.search);
     const txData = urlParams.get('tx');
     
@@ -148,6 +157,21 @@ const MobileMetaMaskPurchase = () => {
         window.history.replaceState({}, document.title, window.location.pathname);
       } catch (error) {
         console.error('Error parsing transaction data:', error);
+      }
+    }
+  };
+
+  // Проверка ожидающей транзакции при монтировании компонента
+  const checkPendingTransactionOnMount = () => {
+    if (typeof window === 'undefined') return;
+    
+    const pendingTx = localStorage.getItem('pendingTransaction');
+    if (pendingTx) {
+      try {
+        const txData = JSON.parse(pendingTx);
+        setPendingTransaction(txData);
+      } catch (error) {
+        localStorage.removeItem('pendingTransaction');
       }
     }
   };
@@ -194,6 +218,8 @@ const MobileMetaMaskPurchase = () => {
 
   // Deep Link метод для мобильных устройств
   const handleDeepLinkSend = async (hexValue: string) => {
+    if (typeof window === 'undefined') return;
+    
     try {
       // ВАРИАНТ 1: Простой Deep Link на отправку
       const deepLinkUrl = `https://metamask.app.link/send?address=${contractAddress}&uint256=${hexValue}`;
@@ -210,6 +236,7 @@ const MobileMetaMaskPurchase = () => {
       };
       
       localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
+      setPendingTransaction(transactionData);
       
       // Открываем MetaMask
       window.open(deepLinkUrl, '_blank');
@@ -230,6 +257,8 @@ const MobileMetaMaskPurchase = () => {
 
   // Альтернативный метод через DApp Deep Link
   const handleDappDeepLink = async (hexValue: string) => {
+    if (typeof window === 'undefined') return;
+    
     try {
       // ВАРИАНТ 2: DApp Deep Link с автовызовом транзакции
       const transactionData = {
@@ -251,6 +280,7 @@ const MobileMetaMaskPurchase = () => {
       
       // Сохраняем состояние
       localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
+      setPendingTransaction(transactionData);
       
       // Открываем DApp в MetaMask
       window.location.href = deepLinkUrl;
@@ -264,7 +294,7 @@ const MobileMetaMaskPurchase = () => {
 
   // Обычный метод для десктопа
   const handleDesktopBuy = async (hexValue: string) => {
-    if (!window.ethereum) {
+    if (typeof window === 'undefined' || !window.ethereum) {
       toast.error('MetaMask not found');
       setIsProcessing(false);
       return;
@@ -296,53 +326,49 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Проверка статуса ожидающей транзакции
-  const checkPendingTransaction = () => {
-    const pendingTx = localStorage.getItem('pendingTransaction');
-    if (pendingTx) {
-      try {
-        const txData = JSON.parse(pendingTx);
-        
-        // Показываем информацию о ожидающей транзакции
-        return (
-          <div style={{
-            background: 'rgba(255, 193, 7, 0.1)',
-            border: '1px solid rgba(255, 193, 7, 0.3)',
-            borderRadius: '12px',
-            padding: '16px',
-            margin: '12px 0',
-            textAlign: 'center'
-          }}>
-            <h4 style={{ color: '#FFC107', margin: '0 0 8px 0' }}>
-              ⏳ Transaction Pending
-            </h4>
-            <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem', margin: '0 0 12px 0' }}>
-              Amount: {txData.amount} BNB
-            </p>
-            <button
-              onClick={() => {
-                localStorage.removeItem('pendingTransaction');
-                window.location.reload();
-              }}
-              style={{
-                background: 'rgba(255, 193, 7, 0.2)',
-                border: '1px solid rgba(255, 193, 7, 0.5)',
-                borderRadius: '8px',
-                padding: '8px 16px',
-                color: '#FFC107',
-                fontSize: '0.9rem',
-                cursor: 'pointer'
-              }}
-            >
-              Clear Pending
-            </button>
-          </div>
-        );
-      } catch (error) {
-        localStorage.removeItem('pendingTransaction');
-      }
+  // Очистка ожидающей транзакции
+  const clearPendingTransaction = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('pendingTransaction');
     }
-    return null;
+    setPendingTransaction(null);
+  };
+
+  // Компонент ожидающей транзакции
+  const PendingTransactionComponent = () => {
+    if (!pendingTransaction) return null;
+    
+    return (
+      <div style={{
+        background: 'rgba(255, 193, 7, 0.1)',
+        border: '1px solid rgba(255, 193, 7, 0.3)',
+        borderRadius: '12px',
+        padding: '16px',
+        margin: '12px 0',
+        textAlign: 'center'
+      }}>
+        <h4 style={{ color: '#FFC107', margin: '0 0 8px 0' }}>
+          ⏳ Transaction Pending
+        </h4>
+        <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem', margin: '0 0 12px 0' }}>
+          Amount: {pendingTransaction.amount} BNB
+        </p>
+        <button
+          onClick={clearPendingTransaction}
+          style={{
+            background: 'rgba(255, 193, 7, 0.2)',
+            border: '1px solid rgba(255, 193, 7, 0.5)',
+            borderRadius: '8px',
+            padding: '8px 16px',
+            color: '#FFC107',
+            fontSize: '0.9rem',
+            cursor: 'pointer'
+          }}
+        >
+          Clear Pending
+        </button>
+      </div>
+    );
   };
 
   // Расчет токенов
@@ -358,6 +384,11 @@ const MobileMetaMaskPurchase = () => {
 
   const quickAmounts = ['0.1', '0.5', '1.0', '2.0'];
   const isOnBSC = activeChain?.id === bsc.id;
+
+  // Не рендерим до тех пор, пока компонент не смонтирован на клиенте
+  if (!isClient) {
+    return null;
+  }
 
   return (
     <motion.div 
@@ -403,7 +434,7 @@ const MobileMetaMaskPurchase = () => {
       )}
 
       {/* Pending Transaction */}
-      {checkPendingTransaction()}
+      <PendingTransactionComponent />
 
       {/* Connect Wallet */}
       {!account && (
