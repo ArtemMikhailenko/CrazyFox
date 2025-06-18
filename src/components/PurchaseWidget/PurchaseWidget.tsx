@@ -24,42 +24,6 @@ interface TransactionParams {
   data?: string;
 }
 
-// Создаем Deep Link для MetaMask с параметрами транзакции
-export const createMetaMaskDeepLink = (params: TransactionParams): string => {
-  const baseUrl = 'https://metamask.app.link/send';
-  
-  const urlParams = new URLSearchParams({
-    address: params.to,
-    uint256: params.value, // Сумма в wei
-    ...(params.gas && { gas: params.gas }),
-    ...(params.gasPrice && { gasPrice: params.gasPrice }),
-    ...(params.data && { data: params.data })
-  });
-
-  return `${baseUrl}?${urlParams.toString()}`;
-};
-
-// Альтернативный способ через dapp URL с автовызовом транзакции
-export const createDappDeepLinkWithTransaction = (
-  contractAddress: string, 
-  amount: string, 
-  userAddress?: string
-): string => {
-  // Кодируем параметры транзакции в URL
-  const transactionData = {
-    to: contractAddress,
-    value: amount,
-    from: userAddress
-  };
-  
-  const encodedData = encodeURIComponent(JSON.stringify(transactionData));
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
-  const dappUrl = `${currentUrl}?tx=${encodedData}`;
-  const encodedDappUrl = encodeURIComponent(dappUrl);
-  
-  return `https://metamask.app.link/dapp/${encodedDappUrl}`;
-};
-
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
 });
@@ -79,17 +43,15 @@ const MobileMetaMaskPurchase = () => {
   const [buyAmount, setBuyAmount] = useState('0.1');
   const [isProcessing, setIsProcessing] = useState(false);
   const [contractAddress, setContractAddress] = useState<string>('');
-  const [tokenPrice, setTokenPrice] = useState<number>(0.005);
-  const [bnbPrice, setBnbPrice] = useState<number>(300);
+  const [tokensPerBnb, setTokensPerBnb] = useState<number>(0); // Количество CRFX за 1 BNB
   const [isMobile, setIsMobile] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [pendingTransaction, setPendingTransaction] = useState<any>(null);
+  const [transactionHash, setTransactionHash] = useState<string>('');
 
   useEffect(() => {
-    // Устанавливаем флаг клиентской стороны
     setIsClient(true);
     
-    // Проверяем мобильное устройство
     const checkMobile = () => {
       setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
     };
@@ -97,15 +59,11 @@ const MobileMetaMaskPurchase = () => {
     checkMobile();
     fetchContractAddress();
     fetchTokenPrice();
-    
-    // Проверяем, если пришли из MetaMask с параметрами транзакции
     handleDeepLinkReturn();
-    
-    // Проверяем ожидающую транзакцию
     checkPendingTransactionOnMount();
   }, []);
 
-  // Загружаем данные
+  // Получаем адрес контракта
   const fetchContractAddress = async () => {
     try {
       const response = await fetch(API_ENDPOINTS.getTransferAddress);
@@ -113,28 +71,34 @@ const MobileMetaMaskPurchase = () => {
         const data = await response.text();
         const cleanAddress = data.replace(/['"]/g, '').trim();
         setContractAddress(cleanAddress);
+        console.log('✅ Contract address loaded:', cleanAddress);
       } else {
         setContractAddress("0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556");
       }
     } catch (error) {
+      console.error('Error fetching contract address:', error);
       setContractAddress("0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556");
     }
   };
 
+  // Получаем количество токенов за 1 BNB
   const fetchTokenPrice = async () => {
     try {
       const response = await fetch(`${API_ENDPOINTS.getPrice}?token=BNB`);
       if (response.ok) {
         const data = await response.text();
-        const price = parseFloat(data.trim());
-        if (!isNaN(price) && price > 0) {
-          setBnbPrice(price);
+        const tokensAmount = parseFloat(data.trim());
+        if (!isNaN(tokensAmount) && tokensAmount > 0) {
+          setTokensPerBnb(tokensAmount);
+          console.log('✅ Tokens per BNB loaded:', tokensAmount);
         } else {
-          setBnbPrice(300);
+          console.warn('⚠️ Invalid tokens per BNB, using fallback');
+          setTokensPerBnb(60000); // Fallback: 60k токенов за 1 BNB
         }
       }
     } catch (error) {
-      setBnbPrice(300);
+      console.error('Error fetching token price:', error);
+      setTokensPerBnb(60000);
     }
   };
 
@@ -150,10 +114,7 @@ const MobileMetaMaskPurchase = () => {
         const transactionData = JSON.parse(decodeURIComponent(txData));
         console.log('Returned from MetaMask with transaction data:', transactionData);
         
-        // Здесь можно добавить логику для отслеживания статуса транзакции
         toast.info('Returned from MetaMask. Checking transaction status...');
-        
-        // Очищаем URL
         window.history.replaceState({}, document.title, window.location.pathname);
       } catch (error) {
         console.error('Error parsing transaction data:', error);
@@ -161,7 +122,7 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Проверка ожидающей транзакции при монтировании компонента
+  // Проверка ожидающей транзакции
   const checkPendingTransactionOnMount = () => {
     if (typeof window === 'undefined') return;
     
@@ -176,7 +137,7 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Основная функция покупки через Deep Link
+  // Основная функция покупки
   const handleMobileBuy = async () => {
     if (!account) {
       toast.warning('Please connect your wallet first! 🦊');
@@ -194,18 +155,21 @@ const MobileMetaMaskPurchase = () => {
       return;
     }
 
+    // Проверяем что мы на BSC
+    if (activeChain?.id !== bsc.id) {
+      toast.error('Please switch to BSC network');
+      return;
+    }
+
     setIsProcessing(true);
 
     try {
-      // Конвертируем сумму в wei
       const amountWei = BigInt(Math.round(amount * 1e18));
       const hexValue = '0x' + amountWei.toString(16);
 
       if (isMobile) {
-        // МЕТОД 1: Прямой Deep Link на отправку
         await handleDeepLinkSend(hexValue);
       } else {
-        // Для десктопа используем обычный метод
         await handleDesktopBuy(hexValue);
       }
 
@@ -216,23 +180,26 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // Deep Link метод для мобильных устройств
+  // Deep Link для мобильных
   const handleDeepLinkSend = async (hexValue: string) => {
     if (typeof window === 'undefined') return;
     
     try {
-      // ВАРИАНТ 1: Простой Deep Link на отправку
-      const deepLinkUrl = `https://metamask.app.link/send?address=${contractAddress}&uint256=${hexValue}`;
+      // Создаем правильный Deep Link для BSC
+      const deepLinkUrl = `https://metamask.app.link/send/0x${contractAddress.replace('0x', '')}@56?value=${hexValue}`;
+      
+      console.log('🔗 Deep Link URL:', deepLinkUrl);
       
       toast.info('Opening MetaMask for transaction confirmation...', { autoClose: 3000 });
       
-      // Сохраняем данные транзакции в localStorage для отслеживания
+      // Сохраняем данные транзакции
       const transactionData = {
         to: contractAddress,
         value: hexValue,
         amount: buyAmount,
         timestamp: Date.now(),
-        userAddress: account?.address
+        userAddress: account?.address,
+        symbol: 'BNB'
       };
       
       localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
@@ -241,7 +208,6 @@ const MobileMetaMaskPurchase = () => {
       // Открываем MetaMask
       window.open(deepLinkUrl, '_blank');
       
-      // Показываем инструкции пользователю
       toast.success('🚀 MetaMask opened! Confirm the transaction and return to this page.', { 
         autoClose: 8000 
       });
@@ -251,43 +217,6 @@ const MobileMetaMaskPurchase = () => {
     } catch (error) {
       console.error('Deep link error:', error);
       toast.error('Failed to open MetaMask');
-      setIsProcessing(false);
-    }
-  };
-
-  // Альтернативный метод через DApp Deep Link
-  const handleDappDeepLink = async (hexValue: string) => {
-    if (typeof window === 'undefined') return;
-    
-    try {
-      // ВАРИАНТ 2: DApp Deep Link с автовызовом транзакции
-      const transactionData = {
-        to: contractAddress,
-        value: hexValue,
-        from: account?.address,
-        action: 'purchase',
-        amount: buyAmount
-      };
-      
-      const encodedData = encodeURIComponent(JSON.stringify(transactionData));
-      const currentUrl = window.location.href.split('?')[0]; // Убираем существующие параметры
-      const dappUrl = `${currentUrl}?autoTx=${encodedData}`;
-      const encodedDappUrl = encodeURIComponent(dappUrl);
-      
-      const deepLinkUrl = `https://metamask.app.link/dapp/${encodedDappUrl}`;
-      
-      toast.info('Opening DApp in MetaMask...', { autoClose: 3000 });
-      
-      // Сохраняем состояние
-      localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
-      setPendingTransaction(transactionData);
-      
-      // Открываем DApp в MetaMask
-      window.location.href = deepLinkUrl;
-
-    } catch (error) {
-      console.error('DApp deep link error:', error);
-      toast.error('Failed to open DApp in MetaMask');
       setIsProcessing(false);
     }
   };
@@ -313,9 +242,13 @@ const MobileMetaMaskPurchase = () => {
         params: [transactionParams],
       });
 
+      console.log('✅ Transaction sent:', txHash);
+      setTransactionHash(txHash);
+      
       toast.success('🎉 Transaction sent! Hash: ' + txHash);
       
-      // Здесь можно добавить верификацию через API
+      // Вызываем API для верификации и распределения токенов
+      await verifyAndDistributeTokens(txHash);
       
       setIsProcessing(false);
 
@@ -323,6 +256,50 @@ const MobileMetaMaskPurchase = () => {
       console.error('Desktop transaction error:', error);
       toast.error('Transaction failed: ' + (error.message || 'Unknown error'));
       setIsProcessing(false);
+    }
+  };
+
+  // Верификация и распределение токенов
+  const verifyAndDistributeTokens = async (txHash: string) => {
+    try {
+      const payload = {
+        txHash: txHash,
+        userAddress: account?.address || '',
+        amountSent: buyAmount.replace(',', '.'), // Отправляем с точкой
+        symbol: 'BNB'
+      };
+
+      console.log('📤 Sending verification request:', payload);
+
+      const response = await fetch(API_ENDPOINTS.verifyAndDistribute, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (response.ok) {
+        const result = await response.text();
+        console.log('✅ Verification successful:', result);
+        toast.success('🎉 Tokens distributed successfully!');
+        
+        // Очищаем pending transaction
+        clearPendingTransaction();
+        
+        // Конфетти!
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      } else {
+        console.error('❌ Verification failed:', response.status);
+        toast.error('Verification failed. Please contact support with transaction hash: ' + txHash);
+      }
+    } catch (error) {
+      console.error('Verification error:', error);
+      toast.error('Error verifying transaction. Please contact support.');
     }
   };
 
@@ -371,21 +348,49 @@ const MobileMetaMaskPurchase = () => {
     );
   };
 
-  // Расчет токенов
+  // Правильный расчет токенов
   const calculateTokens = () => {
     const amount = parseFloat(buyAmount.replace(',', '.'));
-    if (isNaN(amount) || amount <= 0) return '0';
+    if (isNaN(amount) || amount <= 0 || tokensPerBnb <= 0) return '0';
     
-    const amountUSD = amount * bnbPrice;
-    const tokensReceived = amountUSD / tokenPrice;
+    // Просто умножаем количество BNB на количество токенов за 1 BNB
+    const tokensReceived = amount * tokensPerBnb;
+    
+    console.log('🧮 Token calculation:', {
+      amount: amount,
+      tokensPerBnb: tokensPerBnb,
+      tokensReceived: tokensReceived
+    });
     
     return Math.floor(tokensReceived).toLocaleString();
+  };
+
+  // Компонент отладки цен
+  const PriceDebugComponent = () => {
+    const amount = parseFloat(buyAmount.replace(',', '.'));
+    const tokensReceived = amount * tokensPerBnb;
+    
+    return (
+      <div style={{
+        background: 'rgba(255, 255, 0, 0.1)',
+        border: '1px solid rgba(255, 255, 0, 0.3)',
+        borderRadius: '12px',
+        padding: '12px',
+        margin: '12px 0',
+        fontSize: '0.8rem',
+        color: '#FFD700'
+      }}>
+        <div>🔍 Debug Info:</div>
+        <div>Tokens per 1 BNB: {tokensPerBnb.toLocaleString()}</div>
+        <div>Your amount: {amount} BNB</div>
+        <div>You get: {Math.floor(tokensReceived).toLocaleString()} CRFX</div>
+      </div>
+    );
   };
 
   const quickAmounts = ['0.1', '0.5', '1.0', '2.0'];
   const isOnBSC = activeChain?.id === bsc.id;
 
-  // Не рендерим до тех пор, пока компонент не смонтирован на клиенте
   if (!isClient) {
     return null;
   }
@@ -415,6 +420,9 @@ const MobileMetaMaskPurchase = () => {
           </div>
         )}
       </div>
+
+      {/* Price Debug - только в dev режиме */}
+      {process.env.NODE_ENV === 'development' && <PriceDebugComponent />}
 
       {/* Connection Status */}
       {account && (
@@ -549,6 +557,9 @@ const MobileMetaMaskPurchase = () => {
             <div style={{ color: '#4ECDC4', fontSize: '1.5rem', fontWeight: 'bold' }}>
               {calculateTokens()} CRFX 🦊
             </div>
+            <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.8rem', marginTop: '4px' }}>
+              Rate: {tokensPerBnb.toLocaleString()} CRFX per 1 BNB
+            </div>
           </div>
 
           {/* Buy Button */}
@@ -598,28 +609,6 @@ const MobileMetaMaskPurchase = () => {
               💡 Clicking "Buy" will open MetaMask app with pre-filled transaction. 
               Confirm the transaction and return to this page.
             </div>
-          )}
-
-          {/* Alternative Deep Link Method Button */}
-          {isMobile && !isProcessing && (
-            <motion.button
-              onClick={() => handleDappDeepLink('0x' + BigInt(Math.round(parseFloat(buyAmount.replace(',', '.')) * 1e18)).toString(16))}
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              style={{
-                width: '100%',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '12px',
-                padding: '12px',
-                color: 'rgba(255, 255, 255, 0.8)',
-                fontSize: '0.9rem',
-                cursor: 'pointer',
-                marginTop: '8px'
-              }}
-            >
-              🔄 Try DApp Method
-            </motion.button>
           )}
         </>
       )}
