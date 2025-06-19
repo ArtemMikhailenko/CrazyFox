@@ -14,6 +14,7 @@ import {
   createThirdwebClient
 } from "thirdweb";
 import { bsc } from "thirdweb/chains";
+import styles from './MobileMetaMaskPurchase.module.css';
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
@@ -675,56 +676,27 @@ const MobileMetaMaskPurchase = () => {
     const minutesElapsed = Math.floor(timeElapsed / 60000);
     
     return (
-      <div style={{
-        background: 'rgba(255, 193, 7, 0.1)',
-        border: '1px solid rgba(255, 193, 7, 0.3)',
-        borderRadius: '12px',
-        padding: '16px',
-        margin: '12px 0',
-        textAlign: 'center'
-      }}>
-        <h4 style={{ color: '#FFC107', margin: '0 0 8px 0' }}>
+      <div className={styles.pendingTransaction}>
+        <h4 className={styles.pendingTitle}>
           ⏳ Transaction {pendingTransaction.txHash ? 'Pending' : 'Searching'}
         </h4>
-        <p style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem', margin: '0 0 8px 0' }}>
+        <p className={styles.pendingAmount}>
           Amount: {pendingTransaction.amount} BNB
         </p>
         {pendingTransaction.txHash && (
-          <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem', margin: '0 0 8px 0' }}>
+          <p className={styles.pendingHash}>
             Hash: {pendingTransaction.txHash.slice(0, 10)}...
           </p>
         )}
-        <p style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.8rem', margin: '0 0 12px 0' }}>
+        <p className={styles.pendingTime}>
           {pendingTransaction.txHash ? 'Confirming' : 'Searching'} for {minutesElapsed} minutes...
         </p>
         
-        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <button
-            onClick={handleManualCheck}
-            style={{
-              background: 'rgba(78, 205, 196, 0.3)',
-              border: '1px solid rgba(78, 205, 196, 0.5)',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              color: '#4ECDC4',
-              fontSize: '0.8rem',
-              cursor: 'pointer'
-            }}
-          >
+        <div className={styles.pendingActions}>
+          <button onClick={handleManualCheck} className={styles.searchButton}>
             🔍 Search Now
           </button>
-          <button
-            onClick={clearPendingTransaction}
-            style={{
-              background: 'rgba(255, 107, 53, 0.3)',
-              border: '1px solid rgba(255, 107, 53, 0.5)',
-              borderRadius: '8px',
-              padding: '8px 16px',
-              color: '#FF6B35',
-              fontSize: '0.8rem',
-              cursor: 'pointer'
-            }}
-          >
+          <button onClick={clearPendingTransaction} className={styles.cancelButton}>
             ❌ Cancel
           </button>
         </div>
@@ -750,233 +722,194 @@ const MobileMetaMaskPurchase = () => {
 
   return (
     <motion.div 
-      style={{
-        background: 'linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%)',
-        borderRadius: '20px',
-        padding: '24px',
-        maxWidth: '400px',
-        margin: '0 auto',
-        border: '1px solid rgba(255, 255, 255, 0.1)'
-      }}
+      className={styles.presaleContainer}
       initial={{ scale: 0.9, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
     >
       {/* Header */}
-      <div style={{ textAlign: 'center', marginBottom: '20px' }}>
-        <h3 style={{ color: '#FF6B35', margin: '0 0 8px 0', fontSize: '1.5rem' }}>
-          🦊 CRFX PRESALE
+      <div className={styles.header}>
+        {/* <div className={styles.logo}>🦊</div> */}
+        <h3 className={styles.title}>
+          CRFX PRESALE<br />
+          MOON MISSION
         </h3>
         {isMobile && (
-          <div style={{ fontSize: '0.8rem', color: '#4ECDC4' }}>
+          <div className={styles.mobileTag}>
             📱 Mobile Optimized v2.0
           </div>
         )}
       </div>
 
-      {/* Connection Status */}
-      {account && (
-        <div style={{
-          background: 'rgba(78, 205, 196, 0.1)',
-          border: '1px solid rgba(78, 205, 196, 0.3)',
-          borderRadius: '12px',
-          padding: '12px',
-          margin: '12px 0',
-          textAlign: 'center',
-          fontSize: '0.9rem',
-          color: '#4ECDC4'
-        }}>
-          ✅ Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
-          {!isOnBSC && <div style={{ color: '#FF6B35', marginTop: '4px' }}>⚠️ Switch to BSC</div>}
+      {/* Main Content */}
+      <div className={styles.mainContent}>
+        <div className={styles.ctaText}>
+          Buy now before it hits<br />
+          major exchanges<br />
+          <span className={styles.exchange}>🚀 90-Day Moon Mission</span>
         </div>
-      )}
 
-      {/* Pending Transaction */}
-      <PendingTransactionComponent />
-
-      {/* Connect Wallet */}
-      {!account && (
-        <div style={{
-          background: 'rgba(78, 205, 196, 0.1)',
-          border: '1px solid rgba(78, 205, 196, 0.3)',
-          borderRadius: '12px',
-          padding: '16px',
-          margin: '12px 0',
-          textAlign: 'center'
-        }}>
-          <p style={{ color: '#4ECDC4', margin: '0 0 12px 0', fontSize: '0.9rem' }}>
-            Connect your wallet to continue:
-          </p>
-          
-          <ConnectButton 
-            client={client}
-            theme="dark"
-            chains={[bsc]}
-            connectModal={{
-              size: isMobile ? "compact" : "wide",
-              title: "Connect to CrazyFox",
-              showThirdwebBranding: false,
-            }}
-            connectButton={{
-              style: {
-                backgroundColor: '#FF6B35',
-                borderRadius: '12px',
-                padding: '12px 24px',
-                fontSize: '14px',
-                fontWeight: '600',
-                border: 'none',
-                cursor: 'pointer',
-                width: '100%',
-                maxWidth: '250px'
-              }
-            }}
-          />
+        <div className={styles.raised}>
+          RAISED: ${(325000).toLocaleString()}
         </div>
-      )}
 
-      {/* Main Form */}
-      {account && (
-        <>
-          {/* Quick Amounts */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>
-              Quick amounts (BNB):
-            </label>
-            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-              {quickAmounts.map((amount) => (
-                <button
-                  key={amount}
-                  onClick={() => setBuyAmount(amount)}
-                  disabled={isProcessing}
-                  style={{
-                    background: buyAmount === amount ? '#FF6B35' : 'rgba(255, 255, 255, 0.1)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
-                    borderRadius: '8px',
-                    padding: '8px 16px',
-                    color: 'white',
-                    fontSize: '0.9rem',
-                    cursor: 'pointer',
-                    flex: '1',
-                    minWidth: 'calc(25% - 6px)'
-                  }}
-                >
-                  {amount}
-                </button>
-              ))}
-            </div>
+        {/* Progress */}
+        <div className={styles.progressSection}>
+          <div className={styles.progressInfo}>
+            <span>Stage 1/6</span>
+            <span>32.5% funds raised</span>
           </div>
+          <div className={styles.progressBar}>
+            <div 
+              className={styles.progressFill} 
+              style={{ width: '32.5%' }}
+            ></div>
+            <span className={styles.progressText}>32.5%</span>
+          </div>
+        </div>
 
-          {/* Amount Input */}
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '0.9rem', marginBottom: '8px', display: 'block' }}>
-              Amount (BNB):
-            </label>
-            <input
-              type="number"
-              value={buyAmount}
-              onChange={(e) => setBuyAmount(e.target.value)}
-              disabled={isProcessing}
-              style={{
-                width: '100%',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
-                borderRadius: '12px',
-                padding: '14px',
-                color: 'white',
-                fontSize: '1.1rem',
-                textAlign: 'center'
+        {/* Price Info */}
+        <div className={styles.priceInfo}>
+          <div className={styles.priceRow}>
+            <span>Current price: $0.005</span>
+            <span>Next price: $0.006</span>
+          </div>
+         
+        </div>
+
+        {/* Connection Status */}
+        {account && (
+          <div className={styles.connectionStatus}>
+            ✅ Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
+            {!isOnBSC && <div className={styles.networkWarning}>⚠️ Switch to BSC</div>}
+          </div>
+        )}
+
+        {/* Pending Transaction */}
+        <PendingTransactionComponent />
+
+        {/* Connect Wallet */}
+        {!account && (
+          <div className={styles.connectSection}>
+            <p className={styles.connectText}>
+              Connect your wallet to continue:
+            </p>
+            
+            <ConnectButton 
+              client={client}
+              theme="dark"
+              chains={[bsc]}
+              connectModal={{
+                size: isMobile ? "compact" : "wide",
+                title: "Connect to CrazyFox",
+                showThirdwebBranding: false,
               }}
-              placeholder="0.0"
-              min="0.01"
-              max="10"
-              step="0.01"
+              connectButton={{
+                style: {
+                  backgroundColor: '#FF6B35',
+                  borderRadius: '12px',
+                  padding: '12px 24px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  border: 'none',
+                  cursor: 'pointer',
+                  width: '100%',
+                  maxWidth: '250px'
+                }
+              }}
             />
           </div>
+        )}
 
-          {/* You Receive */}
-          <div style={{
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '12px',
-            padding: '16px',
-            marginBottom: '20px',
-            textAlign: 'center'
-          }}>
-            <div style={{ color: 'rgba(255, 255, 255, 0.6)', fontSize: '0.9rem', marginBottom: '4px' }}>
-              You receive:
+        {/* Main Form */}
+        {account && (
+          <>
+            {/* Quick Amounts */}
+            <div className={styles.quickAmounts}>
+              <label className={styles.inputLabel}>
+                Quick amounts (BNB):
+              </label>
+              <div className={styles.quickButtons}>
+                {quickAmounts.map((amount) => (
+                  <button
+                    key={amount}
+                    onClick={() => setBuyAmount(amount)}
+                    disabled={isProcessing}
+                    className={`${styles.quickButton} ${buyAmount === amount ? styles.quickButtonActive : ''}`}
+                  >
+                    {amount}
+                  </button>
+                ))}
+              </div>
             </div>
-            <div style={{ color: '#4ECDC4', fontSize: '1.5rem', fontWeight: 'bold' }}>
-              {calculateTokens()} CRFX 🦊
+
+            {/* Amount Input */}
+            <div className={styles.amountInput}>
+              <label className={styles.inputLabel}>
+                Amount (BNB):
+              </label>
+              <input
+                type="number"
+                value={buyAmount}
+                onChange={(e) => setBuyAmount(e.target.value)}
+                disabled={isProcessing}
+                className={styles.input}
+                placeholder="0.0"
+                min="0.01"
+                max="10"
+                step="0.01"
+              />
             </div>
-            <div style={{ color: 'rgba(255, 255, 255, 0.5)', fontSize: '0.8rem', marginTop: '4px' }}>
-              Rate: {tokensPerBnb.toLocaleString()} CRFX per 1 BNB
+
+            {/* You Receive */}
+            <div className={styles.receiveSection}>
+              <div className={styles.receiveLabel}>
+                You receive:
+              </div>
+              <div className={styles.receiveAmount}>
+                {calculateTokens()} CRFX 🦊
+              </div>
+              <div className={styles.receiveRate}>
+                Rate: {tokensPerBnb.toLocaleString()} CRFX per 1 BNB
+              </div>
             </div>
-          </div>
 
-          {/* Buy Button */}
-          <motion.button
-            onClick={handleMobileBuy}
-            disabled={isProcessing || !isOnBSC || !!pendingTransaction}
-            whileHover={{ scale: (isProcessing || !isOnBSC || !!pendingTransaction) ? 1 : 1.02 }}
-            whileTap={{ scale: (isProcessing || !isOnBSC || !!pendingTransaction) ? 1 : 0.98 }}
-            style={{
-              width: '100%',
-              background: (isProcessing || !isOnBSC || !!pendingTransaction)
-                ? 'rgba(255, 255, 255, 0.3)' 
-                : 'linear-gradient(135deg, #FF6B35 0%, #4ECDC4 100%)',
-              border: 'none',
-              borderRadius: '16px',
-              padding: '16px',
-              color: 'white',
-              fontSize: '1.1rem',
-              fontWeight: 'bold',
-              cursor: (isProcessing || !isOnBSC || !!pendingTransaction) ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {isProcessing ? (
-              <span>🔄 Processing...</span>
-            ) : !isOnBSC ? (
-              <span>⚠️ Switch to BSC Network</span>
-            ) : !!pendingTransaction ? (
-              <span>⏳ Transaction {pendingTransaction.txHash ? 'Pending' : 'Searching'}</span>
-            ) : window.ethereum ? (
-              <span>🚀 Buy {calculateTokens()} CRFX</span>
-            ) : (
-              <span>📱 Buy via MetaMask</span>
-            )}
-          </motion.button>
+            {/* Buy Buttons */}
+            <div className={styles.buyButtons}>
+              <motion.button
+                onClick={handleMobileBuy}
+                disabled={isProcessing || !isOnBSC || !!pendingTransaction}
+                whileHover={{ scale: (isProcessing || !isOnBSC || !!pendingTransaction) ? 1 : 1.02 }}
+                whileTap={{ scale: (isProcessing || !isOnBSC || !!pendingTransaction) ? 1 : 0.98 }}
+                className={`${styles.buyButton} ${styles.cryptoButton}`}
+              >
+                {isProcessing ? (
+                  <span>🔄 Processing...</span>
+                ) : !isOnBSC ? (
+                  <span>⚠️ Switch to BSC Network</span>
+                ) : !!pendingTransaction ? (
+                  <span>⏳ Transaction {pendingTransaction.txHash ? 'Pending' : 'Searching'}</span>
+                ) : (
+                  <span>Buy with Crypto</span>
+                )}
+              </motion.button>
 
-          {/* Instructions */}
-          <div style={{
-            marginTop: '16px',
-            padding: '12px',
-            background: 'rgba(78, 205, 196, 0.1)',
-            borderRadius: '12px',
-            fontSize: '0.8rem',
-            color: 'rgba(255, 255, 255, 0.7)',
-            textAlign: 'center',
-            lineHeight: '1.4'
-          }}>
-            💡 {window.ethereum 
-              ? 'Transaction will be sent directly through MetaMask and processed automatically.'
-              : 'After confirming in MetaMask, return to this page. Your transaction will be automatically detected.'
-            }
-          </div>
+            </div>
 
-          {/* Technical Info */}
-          <div style={{
-            marginTop: '12px',
-            padding: '8px',
-            background: 'rgba(255, 255, 255, 0.05)',
-            borderRadius: '8px',
-            fontSize: '0.7rem',
-            color: 'rgba(255, 255, 255, 0.5)',
-            textAlign: 'center'
-          }}>
-            ⚡ Enhanced mobile integration • Automatic transaction detection • Multiple BSC RPC fallbacks
-          </div>
-        </>
-      )}
+            
+
+            {/* Instructions */}
+            <div className={styles.instructions}>
+              💡 {window.ethereum 
+                ? 'Transaction will be sent directly through MetaMask and processed automatically.'
+                : 'After confirming in MetaMask, return to this page. Your transaction will be automatically detected.'
+              }
+            </div>
+
+            
+          </>
+        )}
+      </div>
     </motion.div>
   );
 };

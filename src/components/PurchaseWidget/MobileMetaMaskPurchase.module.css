@@ -1,0 +1,552 @@
+/* MobileMetaMaskPurchase.module.css - Optimized for connected wallet */
+
+.presaleContainer {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1) 0%, rgba(78, 205, 196, 0.1) 100%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 20px;
+  padding: 16px; /* Reduced from 24px */
+  max-width: 420px; /* Increased width */
+  margin: 0 auto;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: relative;
+  overflow: hidden;
+  color: white;
+  backdrop-filter: blur(10px);
+  
+  display: flex;
+  flex-direction: column;
+}
+
+.presaleContainer::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(45deg, transparent, rgba(255, 107, 53, 0.1), transparent);
+  animation: shine 4s infinite;
+  pointer-events: none;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 12px; /* Reduced from 20px */
+  position: relative;
+}
+
+.logo {
+  font-size: 2.5rem; /* Reduced from 3rem */
+  margin-bottom: 4px; /* Reduced from 8px */
+  animation: bounce 3s infinite;
+  filter: drop-shadow(0 0 10px rgba(255, 107, 53, 0.5));
+}
+
+@keyframes bounce {
+  0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+  40% { transform: translateY(-8px); }
+  60% { transform: translateY(-4px); }
+}
+
+.title {
+  color: #FF6B35;
+  margin: 0;
+  font-size: 1.3rem; /* Reduced from 1.5rem */
+  font-weight: bold;
+  text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+  line-height: 1.1; /* Reduced from 1.2 */
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.mobileTag {
+  font-size: 0.7rem; /* Reduced from 0.8rem */
+  color: #4ECDC4;
+  margin-top: 2px; /* Reduced from 4px */
+  font-weight: bold;
+}
+
+.mainContent {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 16px; /* Reduced from 20px */
+  margin-top: 8px; /* Reduced from 16px */
+  backdrop-filter: blur(10px);
+  flex: 1; /* Take remaining space */
+  display: flex;
+  flex-direction: column;
+}
+
+.ctaText {
+  text-align: center;
+  font-size: 1rem; /* Reduced from 1.1rem */
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.9);
+  margin-bottom: 12px; /* Reduced from 16px */
+  line-height: 1.2; /* Reduced from 1.3 */
+}
+
+.exchange {
+  color: #4ECDC4;
+  font-size: 0.9rem; /* Reduced from 1rem */
+  font-weight: bold;
+}
+
+.raised {
+  text-align: center;
+  font-size: 18px; /* Reduced from 20px */
+  font-weight: bold;
+  color: #FF6B35;
+  margin: 8px 0; /* Reduced from 10px */
+  text-shadow: 0 0 20px rgba(255, 107, 53, 0.5);
+}
+
+.progressSection {
+  margin: 12px 0; /* Reduced from 20px */
+}
+
+.progressInfo {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 6px; /* Reduced from 8px */
+  font-weight: 600;
+}
+
+.progressBar {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 25px;
+  height: 18px; /* Reduced from 20px */
+  position: relative;
+  overflow: hidden;
+}
+
+.progressFill {
+  background: linear-gradient(90deg, #FF6B35 0%, #4ECDC4 100%);
+  height: 100%;
+  border-radius: 24px;
+  transition: width 0.3s ease;
+  position: relative;
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
+}
+
+.progressFill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.3) 50%, 
+    transparent 100%);
+  animation: progressShine 2s infinite;
+}
+
+@keyframes progressShine {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+.progressText {
+  position: absolute;
+  top: 50%;
+  right: 12px; /* Reduced from 16px */
+  transform: translateY(-50%);
+  font-weight: bold;
+  font-size: 12px; /* Reduced from 14px */
+  color: white;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.priceInfo {
+  margin: 12px 0; /* Reduced from 20px */
+  text-align: center;
+}
+
+.priceRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 6px; /* Reduced from 8px */
+  font-weight: 600;
+}
+
+.listingPrice {
+  font-size: 1.3rem; /* Reduced from 1.5rem */
+  font-weight: bold;
+  color: #4ECDC4;
+  margin: 8px 0; /* Reduced from 12px */
+  text-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+}
+
+/* Compact connection status */
+.connectionStatus {
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 8px; /* Reduced from 12px */
+  padding: 8px; /* Reduced from 12px */
+  margin: 8px 0; /* Reduced from 12px */
+  text-align: center;
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  color: #4ECDC4;
+  font-weight: 600;
+}
+
+.networkWarning {
+  color: #FF6B35;
+  margin-top: 2px; /* Reduced from 4px */
+  font-weight: bold;
+  font-size: 0.7rem;
+}
+
+.pendingTransaction {
+  background: rgba(255, 193, 7, 0.1);
+  border: 1px solid rgba(255, 193, 7, 0.3);
+  border-radius: 8px; /* Reduced from 12px */
+  padding: 10px; /* Reduced from 16px */
+  margin: 8px 0; /* Reduced from 12px */
+  text-align: center;
+}
+
+.pendingTitle {
+  color: #FFC107;
+  margin: 0 0 6px 0; /* Reduced from 8px */
+  font-size: 1rem; /* Reduced from 1.1rem */
+  font-weight: bold;
+}
+
+.pendingAmount {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  margin: 0 0 4px 0; /* Reduced from 8px */
+  font-weight: 600;
+}
+
+.pendingHash {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem; /* Reduced from 0.8rem */
+  margin: 0 0 4px 0; /* Reduced from 8px */
+}
+
+.pendingTime {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.7rem; /* Reduced from 0.8rem */
+  margin: 0 0 8px 0; /* Reduced from 12px */
+}
+
+.pendingActions {
+  display: flex;
+  gap: 6px; /* Reduced from 8px */
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.searchButton, .cancelButton {
+  border-radius: 6px; /* Reduced from 8px */
+  padding: 6px 12px; /* Reduced from 8px 16px */
+  font-size: 0.7rem; /* Reduced from 0.8rem */
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.searchButton {
+  background: rgba(78, 205, 196, 0.3);
+  border: 1px solid rgba(78, 205, 196, 0.5);
+  color: #4ECDC4;
+}
+
+.searchButton:hover {
+  background: rgba(78, 205, 196, 0.4);
+  transform: translateY(-1px);
+}
+
+.cancelButton {
+  background: rgba(255, 107, 53, 0.3);
+  border: 1px solid rgba(255, 107, 53, 0.5);
+  color: #FF6B35;
+}
+
+.cancelButton:hover {
+  background: rgba(255, 107, 53, 0.4);
+  transform: translateY(-1px);
+}
+
+.connectSection {
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin: 12px 0;
+  text-align: center;
+}
+
+.connectText {
+  color: #4ECDC4;
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* Compact form sections */
+.quickAmounts {
+  margin-bottom: 10px; /* Reduced from 16px */
+}
+
+.inputLabel {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  margin-bottom: 6px; /* Reduced from 8px */
+  display: block;
+  font-weight: 600;
+}
+
+.quickButtons {
+  display: grid; /* Changed to grid for better space usage */
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px; /* Reduced from 8px */
+}
+
+.quickButton {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px; /* Reduced from 8px */
+  padding: 8px 12px; /* Reduced from 8px 16px */
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.quickButton:hover {
+  border-color: #4ECDC4;
+  color: #4ECDC4;
+  transform: translateY(-1px);
+  box-shadow: 0 0 10px rgba(78, 205, 196, 0.3);
+}
+
+.quickButtonActive {
+  background: linear-gradient(135deg, #FF6B35 0%, #4ECDC4 100%);
+  border-color: #FF6B35;
+  color: white;
+  box-shadow: 0 0 15px rgba(255, 107, 53, 0.4);
+}
+
+.amountInput {
+  margin-bottom: 10px; /* Reduced from 16px */
+}
+
+.input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 10px; /* Reduced from 12px */
+  padding: 12px; /* Reduced from 14px */
+  color: white;
+  font-size: 1rem; /* Reduced from 1.1rem */
+  text-align: center;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #4ECDC4;
+  box-shadow: 0 0 0 2px rgba(78, 205, 196, 0.3);
+}
+
+.input::placeholder {
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* Compact receive section */
+.receiveSection {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px; /* Reduced from 12px */
+  padding: 12px; /* Reduced from 16px */
+  margin-bottom: 12px; /* Reduced from 20px */
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.receiveLabel {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  margin-bottom: 2px; /* Reduced from 4px */
+  font-weight: 600;
+}
+
+.receiveAmount {
+  color: #4ECDC4;
+  font-size: 1.3rem; /* Reduced from 1.5rem */
+  font-weight: bold;
+  margin-bottom: 2px; /* Reduced from 4px */
+  text-shadow: 0 0 15px rgba(78, 205, 196, 0.5);
+}
+
+.receiveRate {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.7rem; /* Reduced from 0.8rem */
+  margin-top: 2px; /* Reduced from 4px */
+}
+
+.buyButtons {
+  margin-bottom: 10px; /* Reduced from 16px */
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* Reduced from 12px */
+}
+
+.buyButton {
+  width: 100%;
+  border: none;
+  border-radius: 12px; /* Reduced from 16px */
+  padding: 12px; /* Reduced from 16px */
+  color: white;
+  font-size: 1rem; /* Reduced from 1.1rem */
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-family: inherit;
+  text-transform: none;
+  position: relative;
+  overflow: hidden;
+}
+
+.buyButton:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.cryptoButton {
+  background: linear-gradient(135deg, #FF6B35 0%, #4ECDC4 100%);
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+}
+
+.cryptoButton:not(:disabled):hover {
+  box-shadow: 0 6px 25px rgba(255, 107, 53, 0.6);
+  transform: translateY(-2px);
+}
+
+.cardButton {
+  background: linear-gradient(135deg, #4ECDC4 0%, #FF6B35 100%);
+  box-shadow: 0 4px 15px rgba(78, 205, 196, 0.4);
+}
+
+.cardButton:not(:disabled):hover {
+  box-shadow: 0 6px 25px rgba(78, 205, 196, 0.6);
+  transform: translateY(-2px);
+}
+
+.paymentMethods {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px; /* Reduced from 12px */
+  margin: 10px 0; /* Reduced from 16px */
+  flex-wrap: wrap;
+}
+
+.acceptedText {
+  font-size: 0.8rem; /* Reduced from 0.9rem */
+  color: rgba(255, 255, 255, 0.7);
+  font-weight: 600;
+}
+
+.paymentIcons {
+  display: flex;
+  gap: 6px; /* Reduced from 8px */
+}
+
+.paymentIcon {
+  width: 28px; /* Reduced from 32px */
+  height: 28px; /* Reduced from 32px */
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border-radius: 4px; /* Reduced from 6px */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.6rem; /* Reduced from 0.7rem */
+  font-weight: bold;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(5px);
+}
+
+.instructions {
+  margin-top: 10px; /* Reduced from 16px */
+  padding: 8px; /* Reduced from 12px */
+  background: rgba(78, 205, 196, 0.1);
+  border-radius: 8px; /* Reduced from 12px */
+  font-size: 0.7rem; /* Reduced from 0.8rem */
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  line-height: 1.3; /* Reduced from 1.4 */
+  border: 1px solid rgba(78, 205, 196, 0.2);
+  font-weight: 500;
+}
+
+.technicalInfo {
+  margin-top: 8px; /* Reduced from 12px */
+  padding: 6px; /* Reduced from 8px */
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 6px; /* Reduced from 8px */
+  font-size: 0.6rem; /* Reduced from 0.7rem */
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Enhanced mobile responsiveness */
+@media (max-width: 480px) {
+  .presaleContainer {
+    margin: 5px; /* Reduced from 10px */
+    padding: 12px; /* Reduced from 16px */
+    max-width: calc(100vw - 10px); /* Use more screen width */
+  }
+  
+  .quickButtons {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on very small screens */
+    gap: 8px;
+  }
+  
+  .priceRow {
+    flex-direction: column;
+    gap: 2px; /* Reduced from 4px */
+    text-align: center;
+  }
+  
+  .paymentMethods {
+    flex-direction: column;
+    gap: 6px; /* Reduced from 8px */
+  }
+}
+
+@media (max-width: 360px) {
+  .presaleContainer {
+    margin: 2px;
+    padding: 8px;
+  }
+  
+  .title {
+    font-size: 1.1rem;
+  }
+  
+  .ctaText {
+    font-size: 0.9rem;
+  }
+}
