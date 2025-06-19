@@ -255,7 +255,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               style={{
                 ...(isMobile && {
                   fontSize: '14px',
-                  maxWidth: '140px'
+                 
                 })
               }}
             >
