@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Particles } from 'react-tsparticles';
 import { loadSlim } from 'tsparticles-slim';
-import PurchaseWidget from '../PurchaseWidget/PurchaseWidget';
+import MultiWalletMobilePurchase from '../PurchaseWidget/PurchaseWidget';
 import styles from './HeroSection.module.css';
 
 // Simple fade-in animation
@@ -119,7 +119,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ isLoaded }) => {
         </div>
 
         <div className={styles.heroRight}>
-          <PurchaseWidget />
+          <MultiWalletMobilePurchase />
         </div>
       </motion.div>
     </section>
