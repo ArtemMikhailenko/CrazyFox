@@ -1,17 +1,21 @@
-// components/Header/TrulyUnifiedHeader.tsx
+// components/Header/Header.tsx - MetaMask Only Version
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ConnectButton, useActiveAccount } from "thirdweb/react";
 import { createThirdwebClient } from "thirdweb";
+import { createWallet } from "thirdweb/wallets";
 import { bsc } from "thirdweb/chains";
 import styles from './Header.module.css';
 
-// ThirdWeb client configuration - ОДИН клиент для всего приложения
+// ThirdWeb client configuration
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
 });
+
+// Создаем только MetaMask кошелек
+const metamaskWallet = createWallet("io.metamask");
 
 interface HeaderProps {
   activeSection: string;
@@ -249,34 +253,35 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               </motion.button>
             )}
 
-            {/* 🔥 ГЛАВНЫЙ ConnectButton - ОДИН для всего приложения */}
+            {/* MetaMask Connect Button */}
             <div 
               className={styles.connectWallet}
               style={{
                 ...(isMobile && {
                   fontSize: '14px',
-                 
                 })
               }}
             >
               <ConnectButton 
                 client={client}
+                wallets={[metamaskWallet]} // Только MetaMask
                 theme="dark"
-                chains={[bsc]} // Только BSC для упрощения
+                chains={[bsc]}
                 connectModal={{
                   size: isMobile ? "compact" : "wide",
-                  title: "Connect to CrazyFox",
+                  title: "Connect MetaMask",
                   welcomeScreen: !isMobile ? {
                     title: "Welcome to CrazyFox",
-                    subtitle: "Connect your wallet to start buying CRFX tokens",
+                    subtitle: "Connect your MetaMask wallet to buy CRFX tokens",
                   } : undefined,
                   showThirdwebBranding: false,
                 }}
                 connectButton={{
+                  label: account ? undefined : "Connect MetaMask",
                   style: {
                     fontSize: isMobile ? '14px' : '16px',
                     padding: isMobile ? '8px 12px' : '12px 16px',
-                    minWidth: isMobile ? '120px' : '150px',
+                    minWidth: isMobile ? '140px' : '170px',
                     backgroundColor: account ? '#4ECDC4' : '#FF6B35',
                     borderRadius: '12px',
                     border: 'none',
@@ -330,7 +335,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               exit="hidden"
             >
               <div className={styles.mobileMenuContent}>
-                {/* Статус подключения кошелька в мобильном меню */}
+                {/* Статус подключения MetaMask в мобильном меню */}
                 {account && (
                   <motion.div
                     style={{
@@ -340,15 +345,14 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                       padding: '12px',
                       margin: '0 0 16px 0',
                       textAlign: 'center',
-                      color: '#4ECDC4',
+                      color: '#ff8b61',
                       fontSize: '0.9rem'
                     }}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                   >
-                    <span style={{ marginRight: '8px' }}>🟢</span>
-                    Wallet Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
+                    MetaMask Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
                   </motion.div>
                 )}
 
@@ -401,6 +405,40 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                     📄 White Paper
                   </button>
                 </motion.div>
+
+                {/* MetaMask Installation Link для мобильных */}
+                {!account && !window.ethereum && (
+                  <motion.div
+                    style={{
+                      background: 'rgba(255, 107, 53, 0.1)',
+                      border: '1px solid rgba(255, 107, 53, 0.3)',
+                      borderRadius: '12px',
+                      padding: '12px',
+                      margin: '16px 0 0 0',
+                      textAlign: 'center'
+                    }}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.3 }}
+                  >
+                    <p style={{ color: '#ff8b61', fontSize: '0.9rem', margin: '0 0 8px 0' }}>
+                      🦊 MetaMask Required
+                    </p>
+                    <a 
+                      href="https://metamask.io/download/" 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      style={{
+                        color: '#4ECDC4',
+                        textDecoration: 'none',
+                        fontSize: '0.8rem',
+                        fontWeight: '600'
+                      }}
+                    >
+                      Install MetaMask →
+                    </a>
+                  </motion.div>
+                )}
               </div>
             </motion.div>
           )}

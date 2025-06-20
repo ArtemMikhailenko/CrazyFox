@@ -1,14 +1,15 @@
+/* HeroSection.module.css - Simplified version */
 
 .hero {
   position: relative;
   min-height: 100vh;
   display: flex;
   align-items: center;
-  padding: 8rem 2rem 4rem;
+  padding: 6rem 2rem 4rem;
   overflow: hidden;
 }
 
-/* Updated Hero Layout */
+/* Hero Layout */
 .heroContent {
   max-width: 1200px;
   margin: 0 auto;
@@ -21,12 +22,7 @@
 }
 
 .heroText {
-  animation: slideInLeft 1s ease-out;
-}
-
-@keyframes slideInLeft {
-  from { transform: translateX(-50px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
+  /* Removed complex animations */
 }
 
 .heroTitle {
@@ -39,18 +35,6 @@
   background-clip: text;
 }
 
-.cursor {
-  animation: blink 1s infinite;
-  color: #4ECDC4;
-}
-
-@keyframes blink {
-  0%, 50% { opacity: 1; }
-  51%, 100% { opacity: 0; }
-}
-
-
-
 .heroRight {
   display: flex;
   flex-direction: column;
@@ -58,22 +42,15 @@
   align-items: center;
 }
 
-.heroImage {
+.heroImageLeft {
   display: flex;
-  /* justify-content: center; */
-  max-width: 300px;
-  animation: slideInRight 1s ease-out;
-  
+  justify-content: flex-start;
 }
 
-@keyframes slideInRight {
-  from { transform: translateX(50px); opacity: 0; }
-  to { transform: translateX(0); opacity: 1; }
-}
-
-.heroImage img {
-  max-height: 280px;
+.heroImageLeft img {
+  max-width: 480px;
   width: 100%;
+  height: auto;
   object-fit: contain;
 }
 
@@ -82,7 +59,7 @@
   display: flex;
   gap: 2rem;
   flex-wrap: wrap;
-  margin-top: 2rem;
+ 
 }
 
 .stat {
@@ -113,20 +90,6 @@
   z-index: 1;
 }
 
-.cursorFollower {
-  position: fixed;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(78, 205, 196, 0.4) 0%, transparent 70%);
-  pointer-events: none;
-  z-index: 9999;
-  filter: blur(1px);
-}
-
-.heroImageLeft img {
-  max-width: 480px;
-}
 /* Mobile Responsiveness */
 @media (max-width: 1024px) {
   .heroContent {
@@ -180,11 +143,6 @@
     max-height: 200px;
   }
   
-  .heroSubtitle {
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-  }
-  
   .stats {
     flex-wrap: wrap;
     justify-content: center;
@@ -220,12 +178,6 @@
   
   .heroImageLeft img {
     max-height: 160px;
-  }
-  
-  .heroSubtitle {
-    font-size: 1rem;
-    margin-bottom: 1.2rem;
-    padding: 0 1rem;
   }
   
   .stats {
