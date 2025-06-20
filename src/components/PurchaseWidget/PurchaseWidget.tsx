@@ -388,10 +388,10 @@ const MobileMetaMaskPurchase = () => {
         clearPendingTransaction();
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       } else {
-        console.error('Backend processing failed. Contact support with hash: ' + txHash);
+        toast.error('Backend processing failed. Contact support with hash: ' + txHash);
       }
     } catch (error) {
-      console.error('Error processing transaction. Please contact support.');
+      toast.error('Error processing transaction. Please contact support.');
     }
   };
 
@@ -498,25 +498,21 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  // УЛУЧШЕННЫЙ Deep Link с fallback для устройств без ethereum provider
+  // Проверка Safari
+  const isSafari = () => {
+    if (typeof window === 'undefined') return false;
+    return /^((?!chrome|android).)*safari/i.test(navigator.userAgent) || 
+           /iPad|iPhone|iPod/.test(navigator.userAgent);
+  };
+
+  // УЛУЧШЕННЫЙ Deep Link с специальной обработкой для Safari
   const handleDeepLinkSend = async (hexValue: string, amount: number) => {
     if (typeof window === 'undefined') return;
     
     try {
       console.log('📱 Using deep link fallback method...');
       
-      // Создаем Deep Link
-      const currentUrl = window.location.origin + window.location.pathname;
-      const deepLinkUrl = [
-        `https://metamask.app.link/send/0x${contractAddress.replace('0x','')}@56`,
-        `?value=${hexValue}`,
-        `&redirect=true`,
-        `&redirectUrl=${encodeURIComponent(currentUrl)}`
-      ].join('');
-      
-      console.log('🔗 Deep Link URL:', deepLinkUrl);
-      
-      // Сохраняем данные транзакции с дополнительной информацией
+      // Сохраняем данные транзакции ЗАРАНЕЕ
       const transactionData = {
         to: contractAddress,
         value: hexValue,
@@ -529,13 +525,70 @@ const MobileMetaMaskPurchase = () => {
       
       localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
       setPendingTransaction(transactionData);
+
+      if (isSafari()) {
+        // Специальная обработка для Safari
+        console.log('🍎 Safari detected - using alternative method');
+        
+        // Вариант 1: Пробуем прямой универсальный линк
+        const universalLink = `https://metamask.app.link/send/${contractAddress}@56/transfer?value=${hexValue}`;
+        
+        toast.info('Opening MetaMask app...', { autoClose: 2000 });
+        
+        // Создаем невидимый iframe для лучшей совместимости с Safari
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = universalLink;
+        document.body.appendChild(iframe);
+        
+        // Удаляем iframe через секунду
+        setTimeout(() => {
+          document.body.removeChild(iframe);
+        }, 1000);
+        
+        // Также пробуем открыть в новом окне как fallback
+        setTimeout(() => {
+          try {
+            const newWindow = window.open(universalLink, '_blank');
+            if (newWindow) {
+              newWindow.focus();
+            }
+          } catch (e) {
+            console.log('Fallback window open failed:', e);
+          }
+        }, 500);
+        
+        // Показываем инструкции для Safari
+        toast.info('📱 If MetaMask didn\'t open, please copy the contract address and send manually', {
+          autoClose: 10000
+        });
+        
+        // Показываем дополнительную информацию для ручной отправки
+        setTimeout(() => {
+          toast.info(`Contract: ${contractAddress}\nAmount: ${amount} BNB`, {
+            autoClose: 15000
+          });
+        }, 2000);
+        
+      } else {
+        // Стандартная обработка для других браузеров
+        const currentUrl = window.location.origin + window.location.pathname;
+        const deepLinkUrl = [
+          `https://metamask.app.link/send/0x${contractAddress.replace('0x','')}@56`,
+          `?value=${hexValue}`,
+          `&redirect=true`,
+          `&redirectUrl=${encodeURIComponent(currentUrl)}`
+        ].join('');
+        
+        console.log('🔗 Deep Link URL:', deepLinkUrl);
+        
+        toast.info('Opening MetaMask... Please confirm the transaction', { autoClose: 3000 });
+        
+        // Открываем MetaMask
+        window.open(deepLinkUrl, '_blank');
+      }
       
-      toast.info('Opening MetaMask... Please confirm the transaction', { autoClose: 3000 });
-      
-      // Открываем MetaMask
-      window.open(deepLinkUrl, '_blank');
-      
-      // Запускаем улучшенный поиск транзакции
+      // Запускаем улучшенный поиск транзакции для всех браузеров
       startAdvancedTransactionSearch(transactionData);
       
       setIsProcessing(false);
