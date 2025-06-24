@@ -119,8 +119,9 @@ const waitForTransactionReceipt = async (txHash: string, maxWaitTime = 60000): P
   
   while (!receipt && (Date.now() - startTime) < maxWaitTime) {
     try {
-      if (window.ethereum) {
-        receipt = await window.ethereum.request({
+      const provider = window.ethereum || (window as any).web3?.currentProvider;
+      if (provider) {
+        receipt = await provider.request({
           method: 'eth_getTransactionReceipt',
           params: [txHash]
         });
@@ -333,8 +334,17 @@ const MobileMetaMaskPurchase = () => {
       return;
     }
 
-    if (!window.ethereum) {
-      toast.error('MetaMask not found. Please install MetaMask extension.');
+    // Мобильный MetaMask проверка - улучшенная для мобильных устройств
+    const hasEthereum = window.ethereum || (window as any).web3?.currentProvider;
+    if (!hasEthereum) {
+      if (isMobile) {
+        // На мобильных направляем на MetaMask app
+        const metamaskAppUrl = `https://metamask.app.link/dapp/${window.location.host}${window.location.pathname}`;
+        toast.info('Opening MetaMask app...');
+        window.open(metamaskAppUrl, '_blank');
+      } else {
+        toast.error('MetaMask not found. Please install MetaMask extension.');
+      }
       return;
     }
 
@@ -357,7 +367,9 @@ const MobileMetaMaskPurchase = () => {
       console.log('Sending transaction with params:', transactionParams);
 
       // Use event-driven pattern instead of async/await chain
-      window.ethereum.request({
+      const provider = window.ethereum || (window as any).web3?.currentProvider;
+      
+      provider.request({
         method: 'eth_sendTransaction',
         params: [transactionParams],
       })
@@ -426,7 +438,14 @@ const MobileMetaMaskPurchase = () => {
     if (isNaN(amount) || amount <= 0 || tokensPerBnb <= 0) return '0';
     
     const tokensReceived = amount * tokensPerBnb;
-    return Math.floor(tokensReceived).toLocaleString();
+    // Более точная калькуляция для маленьких сумм
+    if (tokensReceived < 1) {
+      return tokensReceived.toFixed(4);
+    } else if (tokensReceived < 100) {
+      return tokensReceived.toFixed(2);
+    } else {
+      return Math.floor(tokensReceived).toLocaleString();
+    }
   };
 
   const quickAmounts = ['0.1', '0.5', '1.0', '2.0'];
@@ -571,14 +590,25 @@ const MobileMetaMaskPurchase = () => {
             {typeof window !== 'undefined' && !window.ethereum && (
               <div className={styles.installMetamask}>
                 <p>Don't have MetaMask?</p>
-                <a 
-                  href="https://metamask.io/download/" 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className={styles.installLink}
-                >
-                  Install MetaMask Extension
-                </a>
+                {isMobile ? (
+                  <a 
+                    href="https://metamask.io/download/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.installLink}
+                  >
+                    Download MetaMask App
+                  </a>
+                ) : (
+                  <a 
+                    href="https://metamask.io/download/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={styles.installLink}
+                  >
+                    Install MetaMask Extension
+                  </a>
+                )}
               </div>
             )}
           </div>
