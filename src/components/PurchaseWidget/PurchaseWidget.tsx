@@ -154,13 +154,12 @@ class MetaMaskMobileIntegration {
 
   async sendBNBTransaction(recipient: string, amount: string, userAddress: string) {
     const amountFloat = parseFloat(amount.replace(',', '.'));
-    const isMobileDevice = this.isMobile && !window.ethereum;
-    
+
+    // Используем Deep Link на всех мобильных устройствах
+    const isMobileDevice = this.isMobile;  
     if (isMobileDevice) {
-      // Используем deep link для прямой транзакции
       return this.sendViaDeepLink(recipient, amountFloat, userAddress);
     } else {
-      // Используем SDK или injected provider
       return this.sendViaProvider(recipient, amountFloat, userAddress);
     }
   }
@@ -181,7 +180,10 @@ class MetaMaskMobileIntegration {
       
       // Создаем direct deep link для BNB transfer
       const amountWei = (amount * 1e18).toString();
-      const deepLink = `https://metamask.app.link/send/${recipient}@56?value=${amountWei}`;
+      const deepLink =
+    `https://metamask.app.link/send/${recipient}@56?` +         // @56 = BSC
+    `value=0x${BigInt(amountWei).toString(16)}` +               // value в hex
+    `&from=${userAddress}`; 
       
       console.log('Opening MetaMask with deep link:', deepLink);
       
