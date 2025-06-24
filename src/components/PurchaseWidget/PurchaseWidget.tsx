@@ -883,12 +883,26 @@ const MobileMetaMaskPurchase = () => {
 
   const fetchTokenPrice = async () => {
     try {
-      const response = await executeApiWithRetry(`${API_ENDPOINTS.getPrice}?token=BNB`, {
-        method: 'GET'
-      }, 2);
-      
-      const tokensAmount = typeof response === 'string' ? parseFloat(response.trim()) : response.tokensPerBnb || response.amount;
-      
+      const response = await executeApiWithRetry(
+        `${API_ENDPOINTS.getPrice}?token=BNB`,
+        { method: 'GET' },
+        2
+      );
+  
+      let tokensAmount: number;
+      if (typeof response === 'number') {
+        // API вернул прямо число
+        tokensAmount = response;
+      } else if (typeof response === 'string') {
+        tokensAmount = parseFloat(response.trim());
+      } else if (response.tokensPerBnb !== undefined) {
+        tokensAmount = response.tokensPerBnb;
+      } else if (response.amount !== undefined) {
+        tokensAmount = response.amount;
+      } else {
+        throw new Error('Unexpected response format from getPrice');
+      }
+  
       if (mountedRef.current && !isNaN(tokensAmount) && tokensAmount > 0) {
         setTokensPerBnb(tokensAmount);
       }
@@ -1098,16 +1112,10 @@ const MobileMetaMaskPurchase = () => {
   const calculateTokens = () => {
     const amount = parseFloat(buyAmount.replace(',', '.'));
     if (isNaN(amount) || amount <= 0 || tokensPerBnb <= 0) return '0';
-    
+  
     const tokensReceived = amount * tokensPerBnb;
-    // Более точная калькуляция для маленьких сумм
-    if (tokensReceived < 1) {
-      return tokensReceived.toFixed(4);
-    } else if (tokensReceived < 100) {
-      return tokensReceived.toFixed(2);
-    } else {
-      return Math.floor(tokensReceived).toLocaleString();
-    }
+    // Отбрасываем дробную часть и форматируем целое число
+    return Math.floor(tokensReceived).toLocaleString();
   };
 
   const quickAmounts = ['0.1', '0.5', '1.0', '2.0'];
