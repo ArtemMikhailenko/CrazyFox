@@ -147,6 +147,15 @@ class MetaMaskMobileIntegration {
       if (typeof window !== 'undefined') {
         const MetaMaskSDK = (await import('@metamask/sdk')).default;
         
+        // Логирование для отладки
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Initializing MetaMask SDK:', {
+            isMobile: this.isMobile,
+            isInAppBrowser: this.isInAppBrowser,
+            userAgent: navigator.userAgent
+          });
+        }
+        
         this.sdk = new MetaMaskSDK({
           dappMetadata: {
             name: "CrazyFox Presale",
@@ -172,40 +181,78 @@ class MetaMaskMobileIntegration {
 
         // Слушаем события от SDK
         this.sdk.on('_initialized', () => {
-          console.log('MetaMask SDK initialized');
+          console.log('MetaMask SDK initialized successfully');
         });
 
         this.sdk.on('connecting', () => {
           console.log('Connecting to MetaMask...');
         });
+
+        this.sdk.on('connected', () => {
+          console.log('Connected to MetaMask');
+        });
+
+        this.sdk.on('disconnected', () => {
+          console.log('Disconnected from MetaMask');
+        });
       }
     } catch (error) {
       console.error('Failed to initialize MetaMask SDK:', error);
+      // Продолжаем работу без SDK, используя только window.ethereum
     }
   }
 
   async sendBNBTransaction(recipient: string, amount: string, userAddress: string) {
     const amountFloat = parseFloat(amount.replace(',', '.'));
 
-    console.log('Starting transaction:', { recipient, amount, userAddress, isMobile: this.isMobile });
+    console.log('Starting transaction:', { 
+      recipient, 
+      amount, 
+      userAddress, 
+      isMobile: this.isMobile, 
+      hasWindowEthereum: !!window.ethereum,
+      userAgent: navigator.userAgent.substring(0, 100) // Ограничиваем длину для логов
+    });
 
-    // Проверяем наличие MetaMask
-    if (!window.ethereum && this.isMobile) {
-      console.log('No injected provider found, using deep link');
-      return this.sendViaDeepLink(recipient, amountFloat, userAddress);
-    }
-
-    // На мобильных устройствах всегда пробуем сначала injected provider
-    if (this.isMobile) {
+    // На мобильных устройствах сначала пробуем injected provider
+    if (window.ethereum && this.isMobile) {
+      console.log('Mobile device with injected provider detected, trying provider first...');
       try {
-        return await this.sendViaProvider(recipient, amountFloat, userAddress);
-      } catch (error) {
-        console.log('Provider failed, falling back to deep link:', error);
+        // Проверяем, подключен ли MetaMask
+        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+        if (accounts.length > 0) {
+          console.log('Accounts found, sending via provider...');
+          return await this.sendViaProvider(recipient, amountFloat, userAddress);
+        } else {
+          console.log('No accounts connected, requesting connection...');
+          await window.ethereum.request({ method: 'eth_requestAccounts' });
+          return await this.sendViaProvider(recipient, amountFloat, userAddress);
+        }
+      } catch (error: any) {
+        console.log('Provider method failed, error:', error.message);
+        // Если провайдер не работает, fallback на deep link
+        if (error.code === 4001) {
+          throw error; // Пользователь отклонил
+        }
+        console.log('Falling back to deep link method...');
         return this.sendViaDeepLink(recipient, amountFloat, userAddress);
       }
-    } else {
+    }
+    
+    // Если нет injected provider на мобильном устройстве
+    if (this.isMobile && !window.ethereum) {
+      console.log('Mobile device without injected provider, using deep link...');
+      return this.sendViaDeepLink(recipient, amountFloat, userAddress);
+    }
+    
+    // Десктоп версия
+    if (!this.isMobile) {
+      console.log('Desktop device, using provider...');
       return this.sendViaProvider(recipient, amountFloat, userAddress);
     }
+
+    // Fallback
+    throw new Error('No suitable transaction method available');
   }
 
   private async sendViaDeepLink(recipient: string, amount: number, userAddress: string) {
@@ -220,34 +267,116 @@ class MetaMaskMobileIntegration {
     const amountWei = (amount * 1e18).toString();
     const hexValue = '0x' + BigInt(amountWei).toString(16);
 
-    // Улучшенная логика deep linking
-    const nativeLinks = [
-      // Основная схема MetaMask
-      `metamask://send?to=${recipient}&value=${hexValue}&chainId=0x38`,
-      // Альтернативная схема
-      `https://metamask.app.link/send/${recipient}@56?value=${hexValue}`,
+    console.log('Preparing deep link transaction:', {
+      recipient,
+      amount,
+      hexValue,
+      userAgent: navigator.userAgent
+    });
+
+    // Попытаемся несколько разных способов
+    const strategies = [
+      // 1. Попробуем через MetaMask SDK, если доступен
+      async () => {
+        if (this.sdk && this.sdk.connect) {
+          console.log('Trying SDK connect method...');
+          try {
+            await this.sdk.connect();
+            const provider = this.sdk.getProvider();
+            if (provider) {
+              return await this.sendViaProvider(recipient, amount, userAddress);
+            }
+          } catch (error) {
+            console.log('SDK connect failed:', error);
+            throw error;
+          }
+        }
+        throw new Error('SDK not available');
+      },
+      
+      // 2. Попробуем WalletConnect-style deep link
+      async () => {
+        console.log('Trying WalletConnect-style deep link...');
+        const wcLink = `https://metamask.app.link/wc?uri=wc:${encodeURIComponent(`ethereum:${recipient}@56/transfer?value=${hexValue}`)}`;
+        
+        if (this.isInAppBrowser) {
+          window.open(wcLink, '_blank');
+        } else {
+          window.location.href = wcLink;
+        }
+        
+        return this.waitForTransactionReturn();
+      },
+      
+      // 3. Стандартные MetaMask deep links
+      async () => {
+        console.log('Trying standard MetaMask deep links...');
+        const nativeLinks = [
+          `metamask://send?to=${recipient}&value=${hexValue}&chainId=0x38`,
+          `https://metamask.app.link/send/${recipient}@56?value=${hexValue}`,
+          `metamask://dapp/${window.location.host}?transaction=${encodeURIComponent(JSON.stringify({
+            to: recipient,
+            value: hexValue,
+            chainId: '0x38'
+          }))}`,
+        ];
+
+        // Пробуем первую ссылку
+        if (this.isInAppBrowser) {
+          window.open(nativeLinks[0], '_blank');
+          
+          // Fallback через задержки
+          setTimeout(() => window.open(nativeLinks[1], '_blank'), 1000);
+          setTimeout(() => window.open(nativeLinks[2], '_blank'), 2000);
+        } else {
+          window.location.href = nativeLinks[0];
+          
+          setTimeout(() => { window.location.href = nativeLinks[1]; }, 1000);
+          setTimeout(() => { window.location.href = nativeLinks[2]; }, 2000);
+        }
+
+        return this.waitForTransactionReturn();
+      },
+      
+      // 4. Ethereum URI scheme
+      async () => {
+        console.log('Trying Ethereum URI scheme...');
+        const ethereumUri = `ethereum:${recipient}@56/transfer?value=${hexValue}`;
+        
+        if (this.isInAppBrowser) {
+          window.open(ethereumUri, '_blank');
+        } else {
+          window.location.href = ethereumUri;
+        }
+        
+        return this.waitForTransactionReturn();
+      }
     ];
 
-    // Пробуем разные методы открытия
-    if (this.isInAppBrowser) {
-      // В in-app браузерах используем window.open
-      console.log('In-app browser detected, using window.open');
-      window.open(nativeLinks[0], '_blank');
-      
-      // Fallback через небольшую задержку
-      setTimeout(() => {
-        window.open(nativeLinks[1], '_blank');
-      }, 1000);
-    } else {
-      // В обычных браузерах используем location.href
-      console.log('Regular mobile browser, using location.href');
-      window.location.href = nativeLinks[0];
-      
-      setTimeout(() => {
-        window.location.href = nativeLinks[1];
-      }, 500);
+    // Пробуем стратегии по очереди
+    for (let i = 0; i < strategies.length; i++) {
+      try {
+        console.log(`Trying strategy ${i + 1}/${strategies.length}`);
+        const result = await strategies[i]();
+        
+        if (result && !result.cancelled && !result.timeout) {
+          return result;
+        }
+        
+        // Если результат неопределенный, пробуем следующую стратегию
+        if (i < strategies.length - 1) {
+          console.log(`Strategy ${i + 1} didn't work, trying next...`);
+          await new Promise(resolve => setTimeout(resolve, 1000));
+        }
+      } catch (error) {
+        console.log(`Strategy ${i + 1} failed:`, error);
+        if (i === strategies.length - 1) {
+          throw error;
+        }
+      }
     }
 
+    // Если все стратегии не сработали, возвращаем ожидание
     return this.waitForTransactionReturn();
   }
 
@@ -516,6 +645,65 @@ class MetaMaskMobileIntegration {
   // Публичный метод для верификации
   public async verifyExpectedTransactionPublic(): Promise<any> {
     return this.verifyExpectedTransaction();
+  }
+
+  // Добавляем метод для проверки доступности MetaMask
+  public async checkMetaMaskAvailability(): Promise<boolean> {
+    try {
+      if (window.ethereum) {
+        // Проверяем, что это действительно MetaMask
+        const isMetaMask = window.ethereum.isMetaMask;
+        console.log('MetaMask availability check:', { 
+          hasEthereum: true, 
+          isMetaMask,
+          networkVersion: window.ethereum.networkVersion 
+        });
+        return true;
+      }
+      
+      if (this.sdk) {
+        const provider = this.sdk.getProvider();
+        console.log('SDK provider check:', { hasProvider: !!provider });
+        return !!provider;
+      }
+      
+      return false;
+    } catch (error) {
+      console.error('Error checking MetaMask availability:', error);
+      return false;
+    }
+  }
+
+  // Метод для принудительного подключения к MetaMask
+  public async forceConnect(): Promise<any> {
+    try {
+      if (window.ethereum) {
+        console.log('Attempting to connect via window.ethereum...');
+        const accounts = await window.ethereum.request({ 
+          method: 'eth_requestAccounts' 
+        });
+        console.log('Connected accounts:', accounts);
+        return accounts;
+      }
+      
+      if (this.sdk) {
+        console.log('Attempting to connect via SDK...');
+        await this.sdk.connect();
+        const provider = this.sdk.getProvider();
+        if (provider) {
+          const accounts = await provider.request({ 
+            method: 'eth_requestAccounts' 
+          });
+          console.log('SDK connected accounts:', accounts);
+          return accounts;
+        }
+      }
+      
+      throw new Error('No connection method available');
+    } catch (error) {
+      console.error('Force connect failed:', error);
+      throw error;
+    }
   }
 
   clearExpectedTransaction() {
@@ -802,11 +990,32 @@ const MobileMetaMaskPurchase = () => {
     try {
       console.log('Starting mobile-optimized transaction...');
       
+      // Добавляем проверку доступности MetaMask
+      const isAvailable = await metamaskIntegration.checkMetaMaskAvailability();
+      console.log('MetaMask availability:', isAvailable);
+      
+      if (!isAvailable && isMobile) {
+        console.log('MetaMask not available, trying to force connect...');
+        try {
+          await metamaskIntegration.forceConnect();
+          toast.info('🔗 Connecting to MetaMask...');
+        } catch (connectError) {
+          console.log('Force connect failed, will try deep link method');
+        }
+      }
+      
+      // Показываем пользователю, что происходит
+      if (isMobile) {
+        toast.info('📱 Preparing mobile transaction... You may be redirected to MetaMask app.');
+      }
+      
       const result = await metamaskIntegration.sendBNBTransaction(
         contractAddress,
         buyAmount,
         account.address
       );
+
+      console.log('Transaction result:', result);
 
       if (result.cancelled) {
         toast.info('Transaction was cancelled');
@@ -844,6 +1053,11 @@ const MobileMetaMaskPurchase = () => {
               console.error('Backend processing failed:', error);
             });
         }, 2000);
+      } else {
+        // Если нет txHash, но и нет ошибки, возможно пользователь ушел в MetaMask
+        if (isMobile) {
+          toast.info('💫 Please complete the transaction in MetaMask app and return here.');
+        }
       }
 
     } catch (error: any) {
@@ -853,8 +1067,17 @@ const MobileMetaMaskPurchase = () => {
         toast.warning('Transaction cancelled by user');
       } else if (error.code === -32002) {
         toast.error('MetaMask is busy. Please try again.');
+      } else if (error.message?.includes('User rejected')) {
+        toast.warning('Transaction was rejected');
       } else {
         toast.error(`Transaction failed: ${error.message || 'Unknown error'}`);
+        
+        // На мобильных устройствах предлагаем альтернативу
+        if (isMobile) {
+          setTimeout(() => {
+            toast.info('💡 If transaction failed, try opening MetaMask app first, then return here.');
+          }, 2000);
+        }
       }
     } finally {
       processingRef.current = false;
@@ -971,6 +1194,32 @@ const MobileMetaMaskPurchase = () => {
               <div style={{ fontSize: '0.8rem', color: '#00D4AA', marginTop: '4px' }}>
                 📱 Mobile Deep Link Mode
               </div>
+            )}
+            {isMobile && (
+              <button 
+                onClick={async () => {
+                  if (metamaskIntegration) {
+                    try {
+                      const isAvailable = await metamaskIntegration.checkMetaMaskAvailability();
+                      toast.info(`MetaMask ${isAvailable ? 'is available' : 'not detected'}`);
+                    } catch (error) {
+                      toast.error('Failed to check MetaMask');
+                    }
+                  }
+                }}
+                style={{
+                  fontSize: '0.7rem',
+                  padding: '4px 8px',
+                  marginTop: '4px',
+                  backgroundColor: 'rgba(0, 212, 170, 0.2)',
+                  border: '1px solid #00D4AA',
+                  borderRadius: '4px',
+                  color: '#00D4AA',
+                  cursor: 'pointer'
+                }}
+              >
+                Test Connection
+              </button>
             )}
           </div>
         )}
