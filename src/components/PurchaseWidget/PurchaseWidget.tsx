@@ -181,7 +181,7 @@ class MetaMaskMobileIntegration {
       
       // Создаем direct deep link для BNB transfer
       const amountWei = (amount * 1e18).toString();
-      const deepLink = `https://metamask.app.link/send/${recipient}@56?value=${amountWei}`;
+      const deepLink = `https://metamask.app.link/send?address=${recipient}&value=${amountWei}&chain=56`;
       
       console.log('Opening MetaMask with deep link:', deepLink);
       
