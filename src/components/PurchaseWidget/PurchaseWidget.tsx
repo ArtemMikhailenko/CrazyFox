@@ -165,47 +165,35 @@ class MetaMaskMobileIntegration {
   }
 
   private async sendViaDeepLink(recipient: string, amount: number, userAddress: string) {
-    try {
-      // Сохраняем ожидаемую транзакцию
-      const expectedTx = {
-        recipient,
-        amount: amount.toString(),
-        userAddress,
-        timestamp: Date.now(),
-        status: 'pending',
-        type: 'bnb_transfer'
-      };
-      localStorage.setItem('expectedTransaction', JSON.stringify(expectedTx));
-
-      // value в hex
-      const amountWei = (amount * 1e18).toString();
-      const hexValue = '0x' + BigInt(amountWei).toString(16);
-    
-      // 1) Сначала пробуем Native URL-Scheme (метамаск://). 
-      //    На iOS и Android он сразу откроет приложение, 
-      //    если оно установлено
-      const nativeLink = `metamask://send?address=${recipient}&uint256=${hexValue}&from=${userAddress}`;
-    
-      // 2) Запасной Web Universal Link (будет работать в обычных браузерах)
-      const webLink = 
-        `https://metamask.app.link/send/${recipient}@56` + 
-        `?value=${hexValue}&from=${userAddress}`;
-    
-      // Попробуем открыть Native-ссылку через window.location,
-      // и если она не сработает (некоторые WebView тупят), 
-      // через небольшую задержку откроем webLink:
-      window.location.href = nativeLink;
-    
-      setTimeout(() => {
-        window.location.href = webLink;
-      }, 500);   // 0.5 сек — спокойно возвращает управление вашему таймеру
-    
-      return this.waitForTransactionReturn();
-    } catch (error) {
-      console.error('Deep link error:', error);
-      throw error;
-    }
+    const expectedTx = { recipient, amount: amount.toString(), userAddress, timestamp: Date.now() };
+    localStorage.setItem('expectedTransaction', JSON.stringify(expectedTx));
+  
+    // конвертируем в hex
+    const amountWei = (amount * 1e18).toString();
+    const hexValue = '0x' + BigInt(amountWei).toString(16);
+  
+    // 1) native-схема — сработает в большинстве WebView (Telegram, WhatsApp и т.п.)
+    const nativeLink = 
+      `metamask://send?` +
+      `to=${recipient}` +
+      `&value=${hexValue}` +
+      `&from=${userAddress}` +
+      `&chainId=0x38`;
+  
+    // 2) fallback на Universal Link для обычных браузеров
+    const webLink =
+      `https://metamask.app.link/send/${recipient}@56` +
+      `?value=${hexValue}` +
+      `&from=${userAddress}`;
+  
+    // сначала пробуем схему
+    window.location.href = nativeLink;
+    // если приложение не перехватило — через полсекунды откатимся на веб-ссылку
+    setTimeout(() => { window.location.href = webLink; }, 500);
+  
+    return this.waitForTransactionReturn();
   }
+  
 
   private async sendViaProvider(
     recipient: string,
@@ -397,7 +385,8 @@ const MobileMetaMaskPurchase = () => {
   useEffect(() => {
     setIsClient(true);
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-    
+    localStorage.removeItem('expectedTransaction');
+
     const integration = new MetaMaskMobileIntegration();
         setMetamaskIntegration(integration);
     
