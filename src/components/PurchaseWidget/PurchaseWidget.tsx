@@ -161,7 +161,7 @@ class MetaMaskMobileIntegration {
       return this.sendViaDeepLink(recipient, amountFloat, userAddress);
     } else {
       // Используем SDK или injected provider
-      return this.sendViaProvider(recipient, amountFloat);
+      return this.sendViaProvider(recipient, amountFloat, userAddress);
     }
   }
 
@@ -181,7 +181,7 @@ class MetaMaskMobileIntegration {
       
       // Создаем direct deep link для BNB transfer
       const amountWei = (amount * 1e18).toString();
-      const deepLink = `https://metamask.app.link/send?address=${recipient}&value=${amountWei}&chain=56`;
+      const deepLink = `https://metamask.app.link/send/${recipient}@56?value=${amountWei}`;
       
       console.log('Opening MetaMask with deep link:', deepLink);
       
@@ -196,29 +196,27 @@ class MetaMaskMobileIntegration {
     }
   }
 
-  private async sendViaProvider(recipient: string, amount: number) {
+  private async sendViaProvider(recipient: string, amount: number, userAddress: string) {
     try {
       const provider = this.sdk?.getProvider() || window.ethereum;
-      
-      if (!provider) {
-        throw new Error('No provider available');
-      }
-
+      if (!provider) throw new Error('No provider available');
+  
       const amountWei = (amount * 1e18).toString();
       const hexValue = '0x' + BigInt(amountWei).toString(16);
-
+  
       const txParams = {
+        from: userAddress,          // ← добавили поле from
         to: recipient,
         value: hexValue,
-        chainId: '0x38', // BSC
-        gas: '0x5208' // 21000
+        chainId: '0x38',            // BSC
+       
       };
-
+  
       const txHash = await provider.request({
         method: 'eth_sendTransaction',
         params: [txParams]
       });
-
+  
       console.log('Transaction sent via provider:', txHash);
       return { txHash, method: 'provider' };
     } catch (error) {
@@ -226,6 +224,7 @@ class MetaMaskMobileIntegration {
       throw error;
     }
   }
+  
 
   private waitForTransactionReturn(): Promise<any> {
     return new Promise((resolve, reject) => {
