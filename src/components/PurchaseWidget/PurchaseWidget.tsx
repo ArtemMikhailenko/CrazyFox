@@ -377,20 +377,25 @@ const MobileMetaMaskPurchase = () => {
     setIsClient(true);
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
     
-    // Инициализируем MetaMask integration
     const integration = new MetaMaskMobileIntegration();
-    setMetamaskIntegration(integration);
+        setMetamaskIntegration(integration);
     
-    fetchContractAddress();
-    fetchTokenPrice();
-    loadPendingTransactions();
-    checkExpectedTransaction();
+        fetchContractAddress();
+        fetchTokenPrice();
+        loadPendingTransactions();
     
-    return () => {
-      mountedRef.current = false;
-    };
-  }, []);
-
+        return () => { mountedRef.current = false; };
+      }, []);
+      useEffect(() => {
+            if (!metamaskIntegration) return;
+        
+            const expected = localStorage.getItem('expectedTransaction');
+            if (!expected) return;
+        
+            console.log('🐾 Detected pending tx on load, will verify…');
+            // даём SDK время проинициализироваться
+            setTimeout(() => verifyReturnedTransaction(), 2000);
+         }, [metamaskIntegration]);
   const checkExpectedTransaction = () => {
     // Проверяем есть ли ожидаемая транзакция при загрузке страницы
     const expected = localStorage.getItem('expectedTransaction');
