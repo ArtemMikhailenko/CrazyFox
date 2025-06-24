@@ -1379,11 +1379,6 @@ const MobileMetaMaskPurchase = () => {
                 '🚀 Buy with MetaMask'
               )}
             </motion.button>
-
-            {/* Instructions */}
-            <div className={styles.instructions}>
-              💡 Mobile-optimized: Transaction sent directly, backend processing happens automatically. Check pending transactions above if needed.
-            </div>
           </>
         )}
       </div>
