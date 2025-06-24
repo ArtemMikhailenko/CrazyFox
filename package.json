@@ -11,6 +11,7 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@metamask/sdk": "^0.33.0",
     "@react-three/drei": "^10.0.8",
     "@react-three/fiber": "^9.1.2",
     "@thirdweb-dev/chains": "^0.1.120",
