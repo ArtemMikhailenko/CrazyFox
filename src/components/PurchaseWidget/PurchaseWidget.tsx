@@ -1,7 +1,7 @@
-// components/MobileMetaMaskPurchase.tsx - Simple fixed countdown
+// components/MobileMetaMaskPurchase.tsx - Mobile-optimized with reliable API calls
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { toast } from 'react-toastify';
 import confetti from 'canvas-confetti';
@@ -21,7 +21,6 @@ const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
 });
 
-// Создаем только MetaMask кошелек
 const metamaskWallet = createWallet("io.metamask");
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://crfx.org";
@@ -31,8 +30,7 @@ const API_ENDPOINTS = {
   verifyAndDistribute: `${API_BASE_URL}/verifyAndDistributeTokens`
 };
 
-// ФИКСИРОВАННАЯ ДАТА ОКОНЧАНИЯ - одинакова для всех пользователей
-// 18 сентября 2025, 00:00 UTC (90 дней с 20 июня 2025)
+// ФИКСИРОВАННАЯ ДАТА ОКОНЧАНИЯ - 18 сентября 2025, 00:00 UTC
 const PRESALE_END_DATE = new Date('2025-09-18T00:00:00.000Z');
 
 // Простой хук таймера с фиксированной датой
@@ -61,23 +59,89 @@ const useFixedCountdown = () => {
       }
     };
 
-    // Немедленное обновление
     updateTimer();
-    
-    // Обновление каждую секунду
     const timer = setInterval(updateTimer, 1000);
-    
     return () => clearInterval(timer);
-  }, []); // Пустой массив зависимостей - таймер не будет сбрасываться
+  }, []);
 
   return timeLeft;
+};
+
+// Mobile-optimized API retry function
+const executeApiWithRetry = async (url: string, options: any, maxRetries = 3): Promise<any> => {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      console.log(`API attempt ${attempt + 1}/${maxRetries + 1} to ${url}`);
+      
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout for mobile
+      
+      const response = await fetch(url, {
+        ...options,
+        signal: controller.signal,
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers
+        }
+      });
+      
+      clearTimeout(timeoutId);
+      
+      if (response.ok) {
+        const result = await response.json();
+        console.log(`API success on attempt ${attempt + 1}`);
+        return result;
+      } else {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+    } catch (error: any) {
+      lastError = error;
+      console.log(`API attempt ${attempt + 1} failed:`, error.message);
+      
+      if (attempt < maxRetries) {
+        // Exponential backoff: 1s, 2s, 4s
+        const delay = 1000 * Math.pow(2, attempt);
+        console.log(`Retrying in ${delay}ms...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+    }
+  }
+  
+  throw lastError || new Error('API call failed after all retries');
+};
+
+// Mobile-optimized transaction receipt waiting
+const waitForTransactionReceipt = async (txHash: string, maxWaitTime = 60000): Promise<any> => {
+  const startTime = Date.now();
+  let receipt = null;
+  
+  while (!receipt && (Date.now() - startTime) < maxWaitTime) {
+    try {
+      if (window.ethereum) {
+        receipt = await window.ethereum.request({
+          method: 'eth_getTransactionReceipt',
+          params: [txHash]
+        });
+      }
+      
+      if (!receipt) {
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Check every 2s
+      }
+    } catch (error) {
+      console.log('Receipt check failed, retrying...', error);
+      await new Promise(resolve => setTimeout(resolve, 3000));
+    }
+  }
+  
+  return receipt;
 };
 
 const MobileMetaMaskPurchase = () => {
   const account = useActiveAccount();
   const activeChain = useActiveWalletChain();
   
-  // Используем фиксированный таймер
   const timeLeft = useFixedCountdown();
   
   const [buyAmount, setBuyAmount] = useState('0.1');
@@ -86,92 +150,168 @@ const MobileMetaMaskPurchase = () => {
   const [tokensPerBnb, setTokensPerBnb] = useState<number>(60000);
   const [isMobile, setIsMobile] = useState(false);
   const [isClient, setIsClient] = useState(false);
-  const [pendingTransaction, setPendingTransaction] = useState<any>(null);
+  const [pendingTransactions, setPendingTransactions] = useState<any[]>([]);
+
+  // Refs to prevent state issues during async operations
+  const processingRef = useRef(false);
+  const mountedRef = useRef(true);
 
   useEffect(() => {
     setIsClient(true);
     setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
     fetchContractAddress();
     fetchTokenPrice();
-    checkPendingTransaction();
+    loadPendingTransactions();
+    
+    return () => {
+      mountedRef.current = false;
+    };
   }, []);
 
   const fetchContractAddress = async () => {
     try {
-      const response = await fetch(API_ENDPOINTS.getTransferAddress);
-      if (response.ok) {
-        const data = await response.text();
-        setContractAddress(data.replace(/['"]/g, '').trim());
-      } else {
-        setContractAddress("0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556");
+      const response = await executeApiWithRetry(API_ENDPOINTS.getTransferAddress, {
+        method: 'GET'
+      }, 2);
+      
+      if (mountedRef.current) {
+        const address = typeof response === 'string' ? response : response.address || "0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556";
+        setContractAddress(address.replace(/['"]/g, '').trim());
       }
     } catch (error) {
-      setContractAddress("0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556");
+      console.error('Failed to fetch contract address:', error);
+      if (mountedRef.current) {
+        setContractAddress("0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556");
+      }
     }
   };
 
   const fetchTokenPrice = async () => {
     try {
-      const response = await fetch(`${API_ENDPOINTS.getPrice}?token=BNB`);
-      if (response.ok) {
-        const data = await response.text();
-        const tokensAmount = parseFloat(data.trim());
-        if (!isNaN(tokensAmount) && tokensAmount > 0) {
-          setTokensPerBnb(tokensAmount);
-        }
+      const response = await executeApiWithRetry(`${API_ENDPOINTS.getPrice}?token=BNB`, {
+        method: 'GET'
+      }, 2);
+      
+      const tokensAmount = typeof response === 'string' ? parseFloat(response.trim()) : response.tokensPerBnb || response.amount;
+      
+      if (mountedRef.current && !isNaN(tokensAmount) && tokensAmount > 0) {
+        setTokensPerBnb(tokensAmount);
       }
     } catch (error) {
       console.error('Error fetching token price:', error);
     }
   };
 
-  const checkPendingTransaction = () => {
+  const loadPendingTransactions = () => {
     if (typeof window === 'undefined') return;
     
-    const pendingTx = localStorage.getItem('pendingTransaction');
-    if (pendingTx) {
-      try {
-        const txData = JSON.parse(pendingTx);
-        const timeDiff = Date.now() - txData.timestamp;
-        if (timeDiff < 15 * 60 * 1000) {
-          setPendingTransaction(txData);
-        } else {
-          localStorage.removeItem('pendingTransaction');
+    try {
+      const stored = localStorage.getItem('pendingTransactions');
+      if (stored) {
+        const transactions = JSON.parse(stored);
+        const validTransactions = transactions.filter((tx: any) => {
+          const timeDiff = Date.now() - tx.timestamp;
+          return timeDiff < 20 * 60 * 1000; // 20 minutes
+        });
+        
+        setPendingTransactions(validTransactions);
+        
+        // Clean up expired transactions
+        if (validTransactions.length !== transactions.length) {
+          localStorage.setItem('pendingTransactions', JSON.stringify(validTransactions));
         }
-      } catch (error) {
-        localStorage.removeItem('pendingTransaction');
       }
+    } catch (error) {
+      console.error('Error loading pending transactions:', error);
+      localStorage.removeItem('pendingTransactions');
     }
   };
 
-  const sendTransactionToBackend = async (txHash: string) => {
+  const addPendingTransaction = (txData: any) => {
+    if (typeof window === 'undefined') return;
+    
     try {
-      const payload = {
-        txHash: txHash,
-        userAddress: account?.address || '',
-        amountSent: buyAmount.replace(',', '.'),
-        symbol: 'BNB'
+      const newTransaction = {
+        ...txData,
+        timestamp: Date.now(),
+        status: 'pending'
       };
-
-      const response = await fetch(API_ENDPOINTS.verifyAndDistribute, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      if (response.ok) {
-        toast.success('🎉 Transaction processed successfully!');
-        clearPendingTransaction();
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      } else {
-        toast.error('Backend processing failed. Contact support with hash: ' + txHash);
-      }
+      
+      const updated = [...pendingTransactions, newTransaction];
+      setPendingTransactions(updated);
+      localStorage.setItem('pendingTransactions', JSON.stringify(updated));
     } catch (error) {
-      toast.error('Error processing transaction. Please contact support.');
+      console.error('Error saving pending transaction:', error);
     }
+  };
+
+  const removePendingTransaction = (txHash: string) => {
+    if (typeof window === 'undefined') return;
+    
+    try {
+      const updated = pendingTransactions.filter(tx => tx.txHash !== txHash);
+      setPendingTransactions(updated);
+      localStorage.setItem('pendingTransactions', JSON.stringify(updated));
+    } catch (error) {
+      console.error('Error removing pending transaction:', error);
+    }
+  };
+
+  // Mobile-optimized backend call with event-driven pattern
+  const processTransactionWithBackend = (txHash: string, amount: string) => {
+    return new Promise<void>((resolve, reject) => {
+      console.log('Starting backend processing for tx:', txHash);
+      
+      // Wait for transaction receipt first
+      waitForTransactionReceipt(txHash)
+        .then(receipt => {
+          if (!receipt) {
+            throw new Error('Transaction receipt not found');
+          }
+          
+          console.log('Transaction confirmed, calling backend...');
+          
+          // Add delay for mobile state consistency
+          setTimeout(() => {
+            const payload = {
+              txHash: txHash,
+              userAddress: account?.address || '',
+              amountSent: amount.replace(',', '.'),
+              symbol: 'BNB'
+            };
+
+            executeApiWithRetry(API_ENDPOINTS.verifyAndDistribute, {
+              method: 'POST',
+              body: JSON.stringify(payload)
+            }, 3)
+            .then(() => {
+              console.log('Backend API call successful');
+              toast.success('🎉 Tokens distributed successfully!');
+              confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+              removePendingTransaction(txHash);
+              resolve();
+            })
+            .catch(error => {
+              console.error('Backend API call failed:', error);
+              toast.error(`API processing failed: ${error.message}. Transaction: ${txHash.slice(0, 10)}...`);
+              reject(error);
+            });
+          }, 2000); // 2 second delay for mobile state consistency
+        })
+        .catch(error => {
+          console.error('Transaction receipt error:', error);
+          toast.error('Transaction confirmation failed. Please check manually.');
+          reject(error);
+        });
+    });
   };
 
   const handleBuy = async () => {
+    if (processingRef.current) {
+      toast.warning('Transaction already in progress...');
+      return;
+    }
+
     if (!account) {
       toast.warning('Please connect your MetaMask wallet first! 🦊');
       return;
@@ -193,72 +333,92 @@ const MobileMetaMaskPurchase = () => {
       return;
     }
 
+    if (!window.ethereum) {
+      toast.error('MetaMask not found. Please install MetaMask extension.');
+      return;
+    }
+
+    processingRef.current = true;
     setIsProcessing(true);
 
     try {
+      console.log('Starting transaction process...');
+      
       const amountWei = BigInt(Math.round(amount * 1e18));
       const hexValue = '0x' + amountWei.toString(16);
 
-      if (window.ethereum) {
-        await handleDirectTransaction(hexValue, amount);
-      } else {
-        toast.error('MetaMask not found. Please install MetaMask extension.');
+      const transactionParams = {
+        from: account.address,
+        to: contractAddress,
+        value: hexValue,
+        gas: '0x5208', // 21000
+      };
+
+      console.log('Sending transaction with params:', transactionParams);
+
+      // Use event-driven pattern instead of async/await chain
+      window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParams],
+      })
+      .then((txHash: string) => {
+        console.log('Transaction sent successfully:', txHash);
+        
+        toast.success(`🎉 Transaction sent! Hash: ${txHash.slice(0, 10)}...`);
+        
+        // Add to pending transactions immediately
+        addPendingTransaction({
+          txHash: txHash,
+          to: contractAddress,
+          value: hexValue,
+          amount: amount.toString(),
+          userAddress: account.address
+        });
+
+        // Process with backend in background (non-blocking)
+        processTransactionWithBackend(txHash, amount.toString())
+          .catch(error => {
+            console.error('Backend processing failed:', error);
+            // Don't throw - transaction was successful, backend issue is separate
+          })
+          .finally(() => {
+            if (mountedRef.current) {
+              processingRef.current = false;
+              setIsProcessing(false);
+            }
+          });
+      })
+      .catch((error: any) => {
+        console.error('Transaction failed:', error);
+        
+        if (error.code === 4001) {
+          toast.warning('Transaction cancelled by user');
+        } else if (error.code === -32002) {
+          toast.error('MetaMask is busy. Please try again in a moment.');
+        } else {
+          toast.error(`Transaction failed: ${error.message || 'Unknown error'}`);
+        }
+        
+        processingRef.current = false;
         setIsProcessing(false);
-      }
+      });
+
     } catch (error: any) {
       console.error('Purchase error:', error);
       toast.error('Purchase failed: ' + (error.message || 'Unknown error'));
+      processingRef.current = false;
       setIsProcessing(false);
     }
   };
 
-  const handleDirectTransaction = async (hexValue: string, amount: number) => {
-    try {
-      const transactionParams = {
-        from: account?.address,
-        to: contractAddress,
-        value: hexValue,
-        gas: '0x5208',
-      };
-
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParams],
+  const retryPendingTransaction = (tx: any) => {
+    console.log('Retrying pending transaction:', tx.txHash);
+    
+    processTransactionWithBackend(tx.txHash, tx.amount)
+      .catch(error => {
+        console.error('Retry failed:', error);
+        toast.error('Retry failed. Please contact support with your transaction hash.');
       });
-
-      const transactionData = {
-        txHash: txHash,
-        to: contractAddress,
-        value: hexValue,
-        amount: amount.toString(),
-        timestamp: Date.now(),
-        userAddress: account?.address,
-        status: 'pending'
-      };
-      
-      localStorage.setItem('pendingTransaction', JSON.stringify(transactionData));
-      setPendingTransaction(transactionData);
-      
-      toast.success('🎉 Transaction sent! Hash: ' + txHash.slice(0, 10) + '...');
-      await sendTransactionToBackend(txHash);
-      setIsProcessing(false);
-
-    } catch (error: any) {
-      if (error.code === 4001) {
-        toast.warning('Transaction cancelled by user');
-      } else {
-        toast.error('Transaction failed: ' + (error.message || 'Unknown error'));
-      }
-      setIsProcessing(false);
-      clearPendingTransaction();
-    }
-  };
-
-  const clearPendingTransaction = () => {
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('pendingTransaction');
-    }
-    setPendingTransaction(null);
   };
 
   const calculateTokens = () => {
@@ -291,7 +451,7 @@ const MobileMetaMaskPurchase = () => {
         </div>
       </div>
 
-      {/* Countdown Timer - синхронизированный для всех */}
+      {/* Countdown Timer */}
       <div className={styles.countdown}>
         <div className={styles.countdownTitle}>🚀 Mission Launch In:</div>
         <div className={styles.countdownGrid}>
@@ -312,7 +472,6 @@ const MobileMetaMaskPurchase = () => {
             <div className={styles.countdownLabel}>Sec</div>
           </div>
         </div>
-        {/* Показываем дату окончания для прозрачности */}
         <div style={{ 
           fontSize: '0.7rem', 
           color: 'rgba(255,255,255,0.5)', 
@@ -353,14 +512,24 @@ const MobileMetaMaskPurchase = () => {
           </div>
         )}
 
-        {/* Pending Transaction */}
-        {pendingTransaction && (
-          <div className={styles.pendingTransaction}>
-            <div className={styles.pendingTitle}>⏳ Transaction Pending</div>
-            <div className={styles.pendingAmount}>Amount: {pendingTransaction.amount} BNB</div>
-            <button onClick={clearPendingTransaction} className={styles.cancelButton}>
-              Cancel
-            </button>
+        {/* Pending Transactions */}
+        {pendingTransactions.length > 0 && (
+          <div className={styles.pendingTransactions}>
+            <div className={styles.pendingTitle}>⏳ Pending Transactions</div>
+            {pendingTransactions.map((tx, index) => (
+              <div key={tx.txHash} className={styles.pendingTransaction}>
+                <div className={styles.pendingAmount}>Amount: {tx.amount} BNB</div>
+                <div className={styles.pendingHash}>Hash: {tx.txHash.slice(0, 10)}...</div>
+                <div className={styles.pendingActions}>
+                  <button onClick={() => retryPendingTransaction(tx)} className={styles.retryButton}>
+                    Retry API Call
+                  </button>
+                  <button onClick={() => removePendingTransaction(tx.txHash)} className={styles.cancelButton}>
+                    Remove
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
         )}
 
@@ -465,17 +634,15 @@ const MobileMetaMaskPurchase = () => {
             {/* Buy Button */}
             <motion.button
               onClick={handleBuy}
-              disabled={isProcessing || !isOnBSC || !!pendingTransaction}
-              whileHover={{ scale: (isProcessing || !isOnBSC || !!pendingTransaction) ? 1 : 1.02 }}
-              whileTap={{ scale: (isProcessing || !isOnBSC || !!pendingTransaction) ? 1 : 0.98 }}
+              disabled={isProcessing || !isOnBSC}
+              whileHover={{ scale: (isProcessing || !isOnBSC) ? 1 : 1.02 }}
+              whileTap={{ scale: (isProcessing || !isOnBSC) ? 1 : 0.98 }}
               className={styles.buyButton}
             >
               {isProcessing ? (
-                '🔄 Processing...'
+                '🔄 Processing Transaction...'
               ) : !isOnBSC ? (
                 '⚠️ Switch to BSC Network'
-              ) : !!pendingTransaction ? (
-                '⏳ Transaction Pending'
               ) : (
                 '🚀 Buy with MetaMask'
               )}
@@ -483,7 +650,7 @@ const MobileMetaMaskPurchase = () => {
 
             {/* Instructions */}
             <div className={styles.instructions}>
-              💡 Transaction will be sent directly through MetaMask. Make sure you're on BSC network.
+              💡 Mobile-optimized: Transaction sent directly, backend processing happens automatically. Check pending transactions above if needed.
             </div>
           </>
         )}
