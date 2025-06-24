@@ -198,34 +198,46 @@ class MetaMaskMobileIntegration {
     }
   }
 
-  private async sendViaProvider(recipient: string, amount: number, userAddress: string) {
-    try {
-      const provider = this.sdk?.getProvider() || window.ethereum;
-      if (!provider) throw new Error('No provider available');
-  
-      const amountWei = (amount * 1e18).toString();
-      const hexValue = '0x' + BigInt(amountWei).toString(16);
-  
-      const txParams = {
-        from: userAddress,          // ← добавили поле from
-        to: recipient,
-        value: hexValue,
-        chainId: '0x38',            // BSC
-       
-      };
-  
-      const txHash = await provider.request({
-        method: 'eth_sendTransaction',
-        params: [txParams]
-      });
-  
-      console.log('Transaction sent via provider:', txHash);
-      return { txHash, method: 'provider' };
-    } catch (error) {
-      console.error('Provider transaction error:', error);
-      throw error;
+  private async sendViaProvider(
+    recipient: string,
+    amount: number,
+    userAddress: string
+  ) {
+    // Получаем провайдера (SDK или injected)
+    const provider = this.sdk?.getProvider() || (window.ethereum as any);
+    if (!provider) {
+      throw new Error('No provider available');
     }
+  
+    // 1) Запрашиваем доступ к аккаунту, если нужно
+    try {
+      await provider.request({ method: 'eth_requestAccounts' });
+    } catch (err) {
+      // Пользователь отказал — можно показать уведомление или прервать
+      throw new Error('Please connect your MetaMask wallet first');
+    }
+  
+    // 2) Теперь можно отправлять
+    const amountWei = (amount * 1e18).toString();
+    const hexValue = '0x' + BigInt(amountWei).toString(16);
+  
+    const txParams = {
+      from: userAddress,
+      to: recipient,
+      value: hexValue,
+      chainId: '0x38',
+      // gas можно убрать — MetaMask сам рассчитает
+    };
+  
+    const txHash = await provider.request({
+      method: 'eth_sendTransaction',
+      params: [txParams]
+    });
+  
+    console.log('Transaction sent via provider:', txHash);
+    return { txHash, method: 'provider' };
   }
+  
   
 
   private waitForTransactionReturn(): Promise<any> {
