@@ -175,22 +175,31 @@ class MetaMaskMobileIntegration {
         status: 'pending',
         type: 'bnb_transfer'
       };
-      
       localStorage.setItem('expectedTransaction', JSON.stringify(expectedTx));
-      
-      // Создаем direct deep link для BNB transfer
+
+      // value в hex
       const amountWei = (amount * 1e18).toString();
-      const deepLink =
-    `https://metamask.app.link/send/${recipient}@56?` +         // @56 = BSC
-    `value=0x${BigInt(amountWei).toString(16)}` +               // value в hex
-    `&from=${userAddress}`; 
-      
-      console.log('Opening MetaMask with deep link:', deepLink);
-      
-      // Открываем MetaMask
-      window.location.href = deepLink;
-      
-      // Возвращаем промис который будет разрешен при возврате
+      const hexValue = '0x' + BigInt(amountWei).toString(16);
+    
+      // 1) Сначала пробуем Native URL-Scheme (метамаск://). 
+      //    На iOS и Android он сразу откроет приложение, 
+      //    если оно установлено
+      const nativeLink = `metamask://send?address=${recipient}&uint256=${hexValue}&from=${userAddress}`;
+    
+      // 2) Запасной Web Universal Link (будет работать в обычных браузерах)
+      const webLink = 
+        `https://metamask.app.link/send/${recipient}@56` + 
+        `?value=${hexValue}&from=${userAddress}`;
+    
+      // Попробуем открыть Native-ссылку через window.location,
+      // и если она не сработает (некоторые WebView тупят), 
+      // через небольшую задержку откроем webLink:
+      window.location.href = nativeLink;
+    
+      setTimeout(() => {
+        window.location.href = webLink;
+      }, 500);   // 0.5 сек — спокойно возвращает управление вашему таймеру
+    
       return this.waitForTransactionReturn();
     } catch (error) {
       console.error('Deep link error:', error);
