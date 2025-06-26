@@ -977,13 +977,13 @@ const MobileMetaMaskPurchase = () => {
 
     // Улучшенная валидация суммы
     if (!validateAmount(buyAmount)) {
-      toast.error('Please enter a valid amount (0.01 - 100 BNB)');
+      toast.error('Please enter a valid amount (0.0001 - 100 BNB)');
       return;
     }
 
     const amount = parseFloat(buyAmount.replace(',', '.'));
-    if (amount < 0.01) {
-      toast.error('Minimum amount is 0.01 BNB');
+    if (amount < 0.0001) {
+      toast.error('Minimum amount is 0.0001 BNB');
       return;
     }
 
@@ -1351,7 +1351,7 @@ const MobileMetaMaskPurchase = () => {
                 disabled={isProcessing}
                 className={styles.input}
                 placeholder="0.0"
-                min="0.01"
+                min="0.0001"
                 max="100"
                 step="0.01"
               />
