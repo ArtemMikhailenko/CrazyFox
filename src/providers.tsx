@@ -30,7 +30,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
           modalSize="compact"
           appInfo={{
             appName: 'CrazyFox Presale',
-            learnMoreUrl: 'https://crfx.org',
+            learnMoreUrl: 'https://www.crazy-fox.io/',
           }}
           showRecentTransactions={true}
         >

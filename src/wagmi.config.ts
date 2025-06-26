@@ -38,8 +38,8 @@ const connectors = connectorsForWallets(
     },
   ],
   {
-    appName: 'CrazyFox Presale',
-    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
+    appName: 'CrazyFox',
+    projectId: process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID || '68e6993e072db866f348eddaa67146e8',
   }
 );
 
