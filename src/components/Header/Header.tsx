@@ -1,21 +1,11 @@
-// components/Header/Header.tsx - MetaMask Only Version
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ConnectButton, useActiveAccount } from "thirdweb/react";
-import { createThirdwebClient } from "thirdweb";
-import { createWallet } from "thirdweb/wallets";
-import { bsc } from "thirdweb/chains";
+import { useAccount, useChainId } from 'wagmi';
+import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { bsc } from 'viem/chains';
 import styles from './Header.module.css';
-
-// ThirdWeb client configuration
-const client = createThirdwebClient({
-  clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
-});
-
-// Создаем только MetaMask кошелек
-const metamaskWallet = createWallet("io.metamask");
 
 interface HeaderProps {
   activeSection: string;
@@ -29,8 +19,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
   const [isMobile, setIsMobile] = useState(false);
   const scrollPositionRef = useRef<number>(0);
   
-  // Получаем состояние подключения из ThirdWeb
-  const account = useActiveAccount();
+  // Wagmi hooks для состояния подключения
+  const { address, isConnected, connector } = useAccount();
+  const chainId = useChainId();
+
+  // Проверка правильной сети
+  const isOnBSC = chainId === bsc.id;
 
   // Проверка мобильного устройства
   useEffect(() => {
@@ -253,58 +247,118 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               </motion.button>
             )}
 
-            {/* MetaMask Connect Button */}
-            <div 
-              className={styles.connectWallet}
-              style={{
-                ...(isMobile && {
-                  fontSize: '14px',
-                })
-              }}
-            >
-              <ConnectButton 
-                client={client}
-                wallets={[metamaskWallet]} // Только MetaMask
-                theme="dark"
-                chains={[bsc]}
-                connectModal={{
-                  size: isMobile ? "compact" : "wide",
-                  title: "Connect MetaMask",
-                  welcomeScreen: !isMobile ? {
-                    title: "Welcome to CrazyFox",
-                    subtitle: "Connect your MetaMask wallet to buy CRFX tokens",
-                  } : undefined,
-                  showThirdwebBranding: false,
+            {/* RainbowKit Connect Button */}
+            <div className={styles.connectWallet}>
+              <ConnectButton.Custom>
+                {({
+                  account,
+                  chain,
+                  openAccountModal,
+                  openChainModal,
+                  openConnectModal,
+                  authenticationStatus,
+                  mounted,
+                }) => {
+                  const ready = mounted && authenticationStatus !== 'loading';
+                  const connected = ready && account && chain && (!authenticationStatus || authenticationStatus === 'authenticated');
+
+                  return (
+                    <div
+                      {...(!ready && {
+                        'aria-hidden': true,
+                        style: {
+                          opacity: 0,
+                          pointerEvents: 'none',
+                          userSelect: 'none',
+                        },
+                      })}
+                    >
+                      {(() => {
+                        if (!connected) {
+                          return (
+                            <motion.button
+                              onClick={openConnectModal}
+                              type="button"
+                              className={styles.connectButton}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              🌈 Connect Wallet
+                            </motion.button>
+                          );
+                        }
+
+                        if (chain.unsupported) {
+                          return (
+                            <motion.button
+                              onClick={openChainModal}
+                              type="button"
+                              className={styles.wrongNetworkButton}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              ⚠️ Wrong Network
+                            </motion.button>
+                          );
+                        }
+
+                        return (
+                          <div className={styles.connectedWallet}>
+                            {/* Chain Button */}
+                            <motion.button
+                              onClick={openChainModal}
+                              style={{ display: 'flex', alignItems: 'center' }}
+                              type="button"
+                              className={styles.chainButton}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {chain.hasIcon && (
+                                <div
+                                  style={{
+                                    background: chain.iconBackground,
+                                    width: isMobile ? 16 : 20,
+                                    height: isMobile ? 16 : 20,
+                                    borderRadius: 999,
+                                    overflow: 'hidden',
+                                    marginRight: 4,
+                                  }}
+                                >
+                                  {chain.iconUrl && (
+                                    <img
+                                      alt={chain.name ?? 'Chain icon'}
+                                      src={chain.iconUrl}
+                                      style={{ width: isMobile ? 16 : 20, height: isMobile ? 16 : 20 }}
+                                    />
+                                  )}
+                                </div>
+                              )}
+                              {isMobile ? chain.name?.slice(0, 3) : chain.name}
+                            </motion.button>
+
+                            {/* Account Button */}
+                            <motion.button
+                              onClick={openAccountModal}
+                              type="button"
+                              className={styles.accountButton}
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {isMobile 
+                                ? `${account.displayName?.slice(0, 6)}...${account.displayName?.slice(-4)}`
+                                : account.displayName
+                              }
+                              {!isMobile && account.displayBalance
+                                ? ` (${account.displayBalance})`
+                                : ''}
+                            </motion.button>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  );
                 }}
-                connectButton={{
-                  label: account ? undefined : "Connect MetaMask",
-                  style: {
-                    fontSize: isMobile ? '14px' : '16px',
-                    padding: isMobile ? '8px 12px' : '12px 16px',
-                    minWidth: isMobile ? '140px' : '170px',
-                    backgroundColor: account ? '#4ECDC4' : '#FF6B35',
-                    borderRadius: '12px',
-                    border: 'none',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                  }
-                }}
-                detailsButton={{
-                  style: {
-                    fontSize: isMobile ? '12px' : '14px',
-                    padding: isMobile ? '6px 10px' : '10px 14px',
-                    backgroundColor: '#4ECDC4',
-                    borderRadius: '8px',
-                  }
-                }}
-                switchButton={{
-                  style: {
-                    fontSize: isMobile ? '12px' : '14px',
-                    backgroundColor: '#FF6B35',
-                    borderRadius: '8px',
-                  }
-                }}
-              />
+              </ConnectButton.Custom>
             </div>
 
             {/* Mobile Menu Button */}
@@ -335,24 +389,32 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               exit="hidden"
             >
               <div className={styles.mobileMenuContent}>
-                {/* Статус подключения MetaMask в мобильном меню */}
-                {account && (
+                {/* Статус подключения в мобильном меню */}
+                {isConnected && address && (
                   <motion.div
-                    style={{
-                      background: 'rgba(78, 205, 196, 0.1)',
-                      border: '1px solid rgba(78, 205, 196, 0.3)',
-                      borderRadius: '12px',
-                      padding: '12px',
-                      margin: '0 0 16px 0',
-                      textAlign: 'center',
-                      color: '#ff8b61',
-                      fontSize: '0.9rem'
-                    }}
+                    className={styles.mobileConnectionStatus}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.1 }}
                   >
-                    MetaMask Connected: {account.address.slice(0, 6)}...{account.address.slice(-4)}
+                    <div className={styles.connectionInfo}>
+                      <span className={styles.connectionIcon}>
+                        {isOnBSC ? '🌈' : '⚠️'}
+                      </span>
+                      <div className={styles.connectionDetails}>
+                        <div className={styles.walletName}>
+                          {connector?.name} Connected
+                        </div>
+                        <div className={styles.walletAddress}>
+                          {address.slice(0, 6)}...{address.slice(-4)}
+                        </div>
+                        {!isOnBSC && (
+                          <div className={styles.networkWarning}>
+                            Switch to BSC Network
+                          </div>
+                        )}
+                      </div>
+                    </div>
                   </motion.div>
                 )}
 
@@ -406,37 +468,20 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                   </button>
                 </motion.div>
 
-                {/* MetaMask Installation Link для мобильных */}
-                {!account && !window.ethereum && (
+                {/* Wallet Info для неподключенных пользователей */}
+                {!isConnected && (
                   <motion.div
-                    style={{
-                      background: 'rgba(255, 107, 53, 0.1)',
-                      border: '1px solid rgba(255, 107, 53, 0.3)',
-                      borderRadius: '12px',
-                      padding: '12px',
-                      margin: '16px 0 0 0',
-                      textAlign: 'center'
-                    }}
+                    className={styles.mobileWalletPrompt}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.3 }}
                   >
-                    <p style={{ color: '#ff8b61', fontSize: '0.9rem', margin: '0 0 8px 0' }}>
-                      🦊 MetaMask Required
+                    <p className={styles.promptText}>
+                      🌈 Connect your wallet to participate in the presale
                     </p>
-                    <a 
-                      href="https://metamask.io/download/" 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      style={{
-                        color: '#4ECDC4',
-                        textDecoration: 'none',
-                        fontSize: '0.8rem',
-                        fontWeight: '600'
-                      }}
-                    >
-                      Install MetaMask →
-                    </a>
+                    <div className={styles.supportedWallets}>
+                      <span>Supported: MetaMask, Trust Wallet, Coinbase Wallet & more</span>
+                    </div>
                   </motion.div>
                 )}
               </div>
