@@ -1,4 +1,4 @@
-/* Header.module.css - Optimized */
+/* Header.module.css - Updated for Wagmi + RainbowKit */
 
 .header {
   position: fixed;
@@ -6,27 +6,28 @@
   left: 0;
   right: 0;
   z-index: 1000;
-  background: rgba(20, 20, 30, 0.95);
+  padding: 16px 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  background: rgba(26, 26, 46, 0.85);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
 }
 
 .header.scrolled {
-  background: rgba(15, 15, 25, 0.98);
-  border-bottom: 1px solid rgba(255, 107, 53, 0.3);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 12px 0;
+  background: rgba(26, 26, 46, 0.95);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .container {
-  max-width: 1400px;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 80px;
+  position: relative;
 }
 
 /* Logo */
@@ -36,47 +37,51 @@
   gap: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
-  z-index: 1002;
 }
 
 .logo img {
-  width: 45px;
-  height: 45px;
+  width: 40px;
+  height: 40px;
   border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid #FF6B35;
-  box-shadow: 0 0 20px rgba(255, 107, 53, 0.3);
+  border: 2px solid rgba(255, 107, 53, 0.3);
+  transition: all 0.3s ease;
+}
+
+.logo:hover img {
+  border-color: #ff6b35;
+  box-shadow: 0 0 20px rgba(255, 107, 53, 0.4);
 }
 
 .logoText {
-  font-size: 24px;
-  font-weight: 800;
-  background: linear-gradient(135deg, #FF6B35, #4ECDC4);
+  font-size: 1.5rem;
+  font-weight: 700;
+  background: linear-gradient(45deg, #ff6b35, #4ecdc4);
+  background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  background-clip: text;
+  letter-spacing: -0.5px;
 }
 
 /* Desktop Navigation */
 .desktopNav {
   display: flex;
-  gap: 8px;
   align-items: center;
+  gap: 8px;
 }
 
 .navLink {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 20px;
+  padding: 12px 16px;
   background: none;
   border: none;
-  color: #ffffff;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-radius: 12px;
   cursor: pointer;
-  border-radius: 50px;
   transition: all 0.3s ease;
-  font-size: 14px;
-  font-weight: 600;
   position: relative;
   overflow: hidden;
 }
@@ -97,23 +102,24 @@
 }
 
 .navLink:hover {
+  color: white;
   background: rgba(255, 107, 53, 0.1);
-  color: #FF6B35;
-  transform: translateY(-2px);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  transform: translateY(-1px);
 }
 
 .navLink.active {
-  background: linear-gradient(135deg, #FF6B35, #4ECDC4);
-  color: #ffffff;
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  color: #ff6b35;
+  background: rgba(255, 107, 53, 0.15);
+  border: 1px solid rgba(255, 107, 53, 0.4);
 }
 
 .navIcon {
-  font-size: 16px;
+  font-size: 1.1rem;
 }
 
 .navLabel {
-  white-space: nowrap;
+  font-weight: 600;
 }
 
 /* Actions */
@@ -121,35 +127,136 @@
   display: flex;
   align-items: center;
   gap: 16px;
-  z-index: 1002;
 }
 
 .whitePaperButton {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border: none;
-  border-radius: 50px;
-  color: white;
+  padding: 10px 16px;
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 12px;
+  color: #4ecdc4;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
 }
 
 .whitePaperButton:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(99, 102, 241, 0.4);
+  background: rgba(78, 205, 196, 0.2);
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(78, 205, 196, 0.2);
 }
 
 .buttonIcon {
-  font-size: 16px;
+  font-size: 1rem;
 }
 
 .buttonText {
-  font-size: 14px;
+  font-weight: 600;
+}
+
+/* Wallet Connection */
+.connectWallet {
+  position: relative;
+}
+
+.connectButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.connectButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
+}
+
+.wrongNetworkButton {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 20px;
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 160px;
+  justify-content: center;
+}
+
+.wrongNetworkButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+}
+
+.connectedWallet {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.chainButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 8px;
+  color: #4ecdc4;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.chainButton:hover {
+  background: rgba(78, 205, 196, 0.2);
+  border-color: #4ecdc4;
+}
+
+.accountButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 8px;
+  color: #ff6b35;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.accountButton:hover {
+  background: rgba(255, 107, 53, 0.2);
+  border-color: #ff6b35;
+  transform: translateY(-1px);
 }
 
 /* Mobile Menu Button */
@@ -158,182 +265,213 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   background: rgba(255, 255, 255, 0.1);
   border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
   cursor: pointer;
-  border-radius: 12px;
   transition: all 0.3s ease;
-  backdrop-filter: blur(10px);
-  z-index: 1002;
-  position: relative;
 }
 
 .mobileMenuButton:hover {
-  background: rgba(255, 107, 53, 0.2);
-  border-color: rgba(255, 107, 53, 0.4);
+  background: rgba(255, 107, 53, 0.1);
+  border-color: rgba(255, 107, 53, 0.3);
 }
 
 .hamburger {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  width: 20px;
-  height: 16px;
-  justify-content: center;
-  align-items: center;
+  gap: 3px;
+  transition: all 0.3s ease;
 }
 
 .hamburger span {
   width: 20px;
   height: 2px;
-  background: #ffffff;
+  background: white;
+  border-radius: 1px;
   transition: all 0.3s ease;
-  border-radius: 2px;
-  display: block;
+  transform-origin: center;
 }
 
 .hamburger.open span:nth-child(1) {
-  transform: rotate(45deg) translate(4px, 3px);
-  background: #FF6B35;
+  transform: rotate(45deg) translate(5px, 5px);
 }
 
 .hamburger.open span:nth-child(2) {
   opacity: 0;
-  transform: translateX(20px);
+  transform: scaleX(0);
 }
 
 .hamburger.open span:nth-child(3) {
-  transform: rotate(-45deg) translate(7px, -6px);
-  background: #FF6B35;
+  transform: rotate(-45deg) translate(5px, -5px);
 }
 
-/* Mobile Menu - IMPROVED ANIMATIONS */
+/* Mobile Menu */
 .mobileMenu {
-  position: fixed;
-  top: 80px;
+  position: absolute;
+  top: 100%;
   left: 0;
   right: 0;
-  background: rgba(15, 15, 25, 0.98);
+  background: rgba(26, 26, 46, 0.98);
   backdrop-filter: blur(20px);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
   overflow: hidden;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-  z-index: 1001;
-  max-height: calc(100vh - 80px);
-  /* Smoother animations */
-  will-change: height, opacity;
+  z-index: 999;
 }
 
 .mobileMenuContent {
-  padding: 24px 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-  /* Smooth container for animations */
-  will-change: transform;
+  padding: 20px 24px;
+  max-height: calc(100vh - 80px);
+  overflow-y: auto;
 }
 
+/* Mobile Connection Status */
+.mobileConnectionStatus {
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+}
+
+.connectionInfo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.connectionIcon {
+  font-size: 1.2rem;
+}
+
+.connectionDetails {
+  flex: 1;
+}
+
+.walletName {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4ecdc4;
+  margin-bottom: 4px;
+}
+
+.walletAddress {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 4px;
+}
+
+.networkWarning {
+  font-size: 0.75rem;
+  color: #ff6b6b;
+  font-weight: 600;
+}
+
+/* Mobile Navigation Links */
 .mobileNavLink {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   width: 100%;
-  padding: 20px 24px;
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  padding: 16px;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 12px;
   cursor: pointer;
-  border-radius: 16px;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smoother easing */
-  font-size: 18px;
-  font-weight: 600;
-  margin-bottom: 12px;
+  transition: all 0.3s ease;
+  margin-bottom: 8px;
   text-align: left;
-  backdrop-filter: blur(10px);
-  text-decoration: none;
-  -webkit-tap-highlight-color: transparent;
-  min-height: 60px;
-  /* Improve animation performance */
-  will-change: transform, background-color, border-color;
-  transform: translateZ(0); /* Force hardware acceleration */
 }
 
-.mobileNavLink:hover,
-.mobileNavLink:active,
-.mobileNavLink:focus {
-  background: rgba(255, 107, 53, 0.15);
-  border-color: rgba(255, 107, 53, 0.3);
-  color: #FF6B35;
-  transform: translateX(8px) translateZ(0);
-  outline: none;
+.mobileNavLink:hover {
+  color: white;
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  transform: translateX(4px);
 }
 
-/* FIXED: Active state with smooth transitions */
 .mobileNavLink.active {
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.3), rgba(78, 205, 196, 0.2));
-  border: 2px solid rgba(255, 107, 53, 0.5);
-  color: #FF6B35;
-  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.3);
-  transform: translateX(8px) translateZ(0);
-  /* Ensure active state is preserved */
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  color: #ff6b35;
+  background: rgba(255, 107, 53, 0.15);
+  border: 1px solid rgba(255, 107, 53, 0.4);
 }
 
 .mobileNavLink .navIcon {
-  font-size: 20px;
+  font-size: 1.2rem;
   min-width: 24px;
-  text-align: center;
 }
 
 .mobileNavLink .navLabel {
-  font-size: 18px;
   font-weight: 600;
 }
 
+/* Mobile Actions */
 .mobileActions {
-  margin-top: 24px;
-  padding-top: 24px;
+  margin-top: 20px;
+  padding-top: 20px;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  /* Smooth animations */
-  will-change: transform, opacity;
 }
 
 .mobileWhitePaperButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
   width: 100%;
-  padding: 20px;
-  background: linear-gradient(135deg, #6366f1, #8b5cf6);
-  border: none;
-  border-radius: 16px;
-  color: white;
-  font-weight: 700;
-  font-size: 18px;
+  padding: 14px;
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  border-radius: 12px;
+  color: #4ecdc4;
+  font-size: 0.95rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.3);
-  backdrop-filter: blur(10px);
-  -webkit-tap-highlight-color: transparent;
-  min-height: 60px;
-  /* Performance optimization */
-  will-change: transform, box-shadow;
-  transform: translateZ(0);
+  transition: all 0.3s ease;
 }
 
-.mobileWhitePaperButton:hover,
-.mobileWhitePaperButton:active {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 30px rgba(99, 102, 241, 0.4);
+.mobileWhitePaperButton:hover {
+  background: rgba(78, 205, 196, 0.2);
+  border-color: #4ecdc4;
+  transform: translateY(-1px);
 }
 
-/* White Paper Modal */
+/* Mobile Wallet Prompt */
+.mobileWalletPrompt {
+  background: rgba(255, 107, 53, 0.1);
+  border: 1px solid rgba(255, 107, 53, 0.3);
+  border-radius: 12px;
+  padding: 16px;
+  margin-top: 20px;
+  text-align: center;
+}
+
+.promptText {
+  color: #ff8b61;
+  font-size: 0.9rem;
+  margin: 0 0 8px 0;
+  font-weight: 600;
+}
+
+.supportedWallets {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+/* Modal Styles */
 .modalOverlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -342,23 +480,22 @@
 }
 
 .whitePaperModal {
-  background: linear-gradient(145deg, #1a1a2e, #16213e);
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
   border-radius: 20px;
-  max-width: 800px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  max-width: 600px;
   width: 100%;
   max-height: 90vh;
-  overflow: hidden;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
 }
 
 .modalHeader {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 30px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  background: linear-gradient(135deg, rgba(255, 107, 53, 0.1), rgba(78, 205, 196, 0.1));
+  align-items: center;
+  padding: 24px 24px 0 24px;
+  margin-bottom: 20px;
 }
 
 .modalTitle {
@@ -368,99 +505,81 @@
 }
 
 .titleIcon {
-  font-size: 28px;
+  font-size: 1.5rem;
 }
 
 .modalTitle h3 {
-  font-size: 24px;
+  font-size: 1.5rem;
   font-weight: 700;
-  background: linear-gradient(135deg, #FF6B35, #4ECDC4);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: white;
   margin: 0;
 }
 
 .closeButton {
-  width: 40px;
-  height: 40px;
-  border: none;
   background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
-  border-radius: 50%;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  font-size: 18px;
+  border: none;
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.7);
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-tap-highlight-color: transparent;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-size: 1rem;
 }
 
 .closeButton:hover {
-  background: rgba(255, 107, 53, 0.2);
-  transform: rotate(90deg);
+  background: rgba(255, 255, 255, 0.2);
+  color: white;
 }
 
 .modalContent {
-  padding: 30px;
-  overflow-y: auto;
-  max-height: calc(90vh - 120px);
+  padding: 0 24px 24px 24px;
 }
 
 .whitePaperPreview {
   display: grid;
   grid-template-columns: 1fr 2fr;
-  gap: 30px;
-  margin-bottom: 30px;
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
 .previewImage {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 200px;
-}
-
-.previewImage img {
-  width: 100%;
-  height: auto;
-  border-radius: 8px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  aspect-ratio: 3/4;
 }
 
 .previewContent h4 {
-  color: #FF6B35;
-  font-size: 20px;
+  font-size: 1.2rem;
   font-weight: 700;
-  margin-bottom: 15px;
+  color: white;
+  margin: 0 0 12px 0;
 }
 
 .previewContent p {
-  color: #b0b0b0;
+  color: rgba(255, 255, 255, 0.8);
   line-height: 1.6;
-  margin-bottom: 20px;
+  margin: 0 0 16px 0;
 }
 
 .previewContent ul {
   list-style: none;
   padding: 0;
+  margin: 0;
 }
 
 .previewContent li {
-  color: #ffffff;
-  margin-bottom: 10px;
-  padding-left: 30px;
-  position: relative;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+  margin-bottom: 8px;
+  padding-left: 0;
 }
 
 .downloadActions {
   display: flex;
-  gap: 16px;
-  margin-bottom: 30px;
+  gap: 12px;
+  margin-bottom: 24px;
 }
 
 .downloadButton,
@@ -469,37 +588,42 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  padding: 16px 24px;
+  gap: 8px;
+  padding: 14px 20px;
   border: none;
   border-radius: 12px;
+  font-size: 0.95rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
   text-decoration: none;
-  font-size: 16px;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .downloadButton {
-  background: linear-gradient(135deg, #10b981, #059669);
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
   color: white;
+}
+
+.downloadButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(255, 107, 53, 0.3);
 }
 
 .viewOnlineButton {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
+  background: rgba(78, 205, 196, 0.1);
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  color: #4ecdc4;
 }
 
-.downloadButton:hover,
 .viewOnlineButton:hover {
+  background: rgba(78, 205, 196, 0.2);
+  border-color: #4ecdc4;
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.3);
 }
 
 .downloadIcon,
 .viewIcon {
-  font-size: 18px;
+  font-size: 1rem;
 }
 
 .socialShare {
@@ -509,8 +633,9 @@
 }
 
 .socialShare p {
-  color: #b0b0b0;
-  margin-bottom: 15px;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 12px 0;
+  font-size: 0.9rem;
 }
 
 .shareButtons {
@@ -520,19 +645,18 @@
 }
 
 .shareButton {
-  width: 50px;
-  height: 50px;
+  width: 44px;
+  height: 44px;
   border: none;
-  border-radius: 50%;
+  border-radius: 12px;
   background: rgba(255, 255, 255, 0.1);
-  color: #ffffff;
+  color: white;
+  font-size: 1.2rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  font-size: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
-  -webkit-tap-highlight-color: transparent;
 }
 
 .shareButton:hover {
@@ -542,31 +666,7 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .container {
-    padding: 0 16px;
-  }
-  
-  .navLink {
-    padding: 12px 16px;
-  }
-  
-  .buttonText {
-    display: none;
-  }
-  
-  .whitePaperButton {
-    padding: 12px 16px;
-    min-width: 44px;
-  }
-  
-  .whitePaperButton .buttonIcon {
-    font-size: 18px;
-  }
-}
-
-@media (max-width: 768px) {
-  .desktopNav,
-  .whitePaperButton {
+  .desktopNav {
     display: none;
   }
   
@@ -574,367 +674,143 @@
     display: flex;
   }
   
+  .actions {
+    gap: 12px;
+  }
+  
+  .whitePaperButton {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
   .container {
-    height: 75px;
     padding: 0 16px;
   }
   
   .logo img {
-    width: 42px;
-    height: 42px;
+    width: 36px;
+    height: 36px;
   }
   
   .logoText {
-    font-size: 22px;
+    font-size: 1.3rem;
   }
   
-  .mobileMenu {
-    top: 75px;
-    max-height: calc(100vh - 75px);
+  .actions {
+    gap: 8px;
   }
   
-  .whitePaperModal {
-    margin: 16px;
-    max-height: 92vh;
-    border-radius: 16px;
+  .connectButton,
+  .wrongNetworkButton {
+    min-width: 120px;
+    padding: 10px 16px;
+    font-size: 0.85rem;
   }
   
-  .modalHeader {
-    padding: 24px 20px;
+  .chainButton,
+  .accountButton {
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
   
-  .modalTitle h3 {
-    font-size: 22px;
-  }
-  
-  .titleIcon {
-    font-size: 24px;
-  }
-  
-  .closeButton {
-    width: 44px;
-    height: 44px;
-    font-size: 20px;
-  }
-  
-  .modalContent {
-    padding: 24px 20px;
-    max-height: calc(92vh - 140px);
+  .mobileMenuContent {
+    padding: 16px;
   }
   
   .whitePaperPreview {
     grid-template-columns: 1fr;
-    gap: 20px;
-  }
-  
-  .previewContent h4 {
-    font-size: 18px;
-  }
-  
-  .previewContent p {
-    font-size: 15px;
-  }
-  
-  .previewContent li {
-    font-size: 15px;
-    margin-bottom: 8px;
+    gap: 16px;
   }
   
   .downloadActions {
     flex-direction: column;
-    gap: 12px;
   }
   
-  .downloadButton,
-  .viewOnlineButton {
-    padding: 18px 20px;
-    font-size: 16px;
+  .modalContent {
+    padding: 0 16px 16px 16px;
   }
   
-  .shareButtons {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  
-  .shareButton {
-    width: 48px;
-    height: 48px;
-    font-size: 18px;
+  .modalHeader {
+    padding: 16px 16px 0 16px;
   }
 }
 
 @media (max-width: 480px) {
-  .container {
-    padding: 0 12px;
-    height: 70px;
+  .header {
+    padding: 12px 0;
   }
   
-  .logo img {
-    width: 38px;
-    height: 38px;
+  .container {
+    padding: 0 12px;
   }
   
   .logoText {
-    font-size: 20px;
+    font-size: 1.2rem;
   }
   
-  .mobileMenuButton {
-    width: 40px;
-    height: 40px;
+  .connectButton,
+  .wrongNetworkButton {
+    min-width: 100px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
   
-  .hamburger span {
-    width: 18px;
-  }
-  
-  .mobileMenu {
-    top: 70px;
-    max-height: calc(100vh - 70px);
-  }
-  
-  .mobileMenuContent {
-    padding: 20px 16px;
+  .chainButton,
+  .accountButton {
+    padding: 4px 8px;
+    font-size: 0.75rem;
   }
   
   .mobileNavLink {
-    padding: 18px 20px;
-    font-size: 16px;
-    margin-bottom: 10px;
-    min-height: 56px;
+    padding: 12px;
+    font-size: 0.95rem;
   }
   
-  .mobileNavLink .navIcon {
-    font-size: 18px;
-  }
-  
-  .mobileNavLink .navLabel {
-    font-size: 16px;
-  }
-  
-  .mobileWhitePaperButton {
-    padding: 18px;
-    font-size: 16px;
-    min-height: 56px;
+  .modalOverlay {
+    padding: 12px;
   }
   
   .whitePaperModal {
-    margin: 12px;
-    max-height: 95vh;
-    border-radius: 12px;
-  }
-  
-  .modalHeader {
-    padding: 20px 16px;
-  }
-  
-  .modalTitle h3 {
-    font-size: 20px;
-  }
-  
-  .titleIcon {
-    font-size: 22px;
-  }
-  
-  .closeButton {
-    width: 40px;
-    height: 40px;
-    font-size: 18px;
-  }
-  
-  .modalContent {
-    padding: 20px 16px;
-    max-height: calc(95vh - 120px);
-  }
-  
-  .previewContent h4 {
-    font-size: 16px;
-  }
-  
-  .previewContent p {
-    font-size: 14px;
-  }
-  
-  .previewContent li {
-    font-size: 14px;
-  }
-  
-  .downloadButton,
-  .viewOnlineButton {
-    padding: 16px 18px;
-    font-size: 15px;
-  }
-  
-  .downloadIcon,
-  .viewIcon {
-    font-size: 16px;
-  }
-  
-  .shareButton {
-    width: 44px;
-    height: 44px;
-    font-size: 16px;
-  }
-  
-  .socialShare p {
-    font-size: 14px;
+    border-radius: 16px;
   }
 }
 
-@media (max-width: 360px) {
-  .container {
-    padding: 0 10px;
-    height: 65px;
+/* Dark theme support */
+@media (prefers-color-scheme: dark) {
+  .header {
+    background: rgba(26, 26, 46, 0.9);
   }
   
-  .logo img {
-    width: 35px;
-    height: 35px;
-  }
-  
-  .logoText {
-    font-size: 18px;
-  }
-  
-  .mobileMenuButton {
-    width: 38px;
-    height: 38px;
-  }
-  
-  .mobileMenu {
-    top: 65px;
-    max-height: calc(100vh - 65px);
-  }
-  
-  .mobileMenuContent {
-    padding: 16px 12px;
-  }
-  
-  .mobileNavLink {
-    padding: 16px 18px;
-    font-size: 15px;
-    min-height: 52px;
-  }
-  
-  .mobileWhitePaperButton {
-    padding: 16px;
-    font-size: 15px;
-    min-height: 52px;
-  }
-  
-  .modalContent {
-    padding: 16px 12px;
-  }
-  
-  .downloadButton,
-  .viewOnlineButton {
-    padding: 14px 16px;
-    font-size: 14px;
+  .header.scrolled {
+    background: rgba(26, 26, 46, 0.98);
   }
 }
 
-/* Performance optimizations */
-@media (prefers-reduced-motion: reduce) {
-  .header,
-  .navLink,
-  .mobileNavLink,
-  .mobileMenuButton,
-  .whitePaperButton,
-  .mobileWhitePaperButton,
-  .closeButton,
-  .downloadButton,
-  .viewOnlineButton,
-  .shareButton {
-    transition: none;
-  }
-  
-  .navLink::before,
-  .hamburger span {
-    transition: none;
-  }
-  
-  .navLink:hover,
-  .mobileNavLink:hover,
-  .closeButton:hover {
-    transform: none;
-  }
+/* Focus states for accessibility */
+.navLink:focus,
+.connectButton:focus,
+.wrongNetworkButton:focus,
+.chainButton:focus,
+.accountButton:focus,
+.mobileMenuButton:focus,
+.mobileNavLink:focus,
+.whitePaperButton:focus,
+.mobileWhitePaperButton:focus {
+  outline: 2px solid #ff6b35;
+  outline-offset: 2px;
 }
-
-/* Touch-friendly improvements */
-@media (hover: none) and (pointer: coarse) {
-  .mobileNavLink,
-  .mobileWhitePaperButton,
-  .closeButton,
-  .downloadButton,
-  .viewOnlineButton,
-  .shareButton {
-    min-height: 44px;
-    -webkit-tap-highlight-color: rgba(255, 107, 53, 0.2);
-  }
-  
-  .mobileNavLink:active {
-    background: rgba(255, 107, 53, 0.2);
-    transform: scale(0.98) translateZ(0);
-  }
-  
-  .mobileNavLink.active:active {
-    transform: scale(0.98) translateX(8px) translateZ(0);
-  }
-  
-  .mobileWhitePaperButton:active {
-    transform: scale(0.98) translateZ(0);
-  }
-  
-  .logo:active {
-    transform: scale(0.95) translateZ(0);
-  }
-  
-  /* Better mobile touch feedback */
-  .mobileNavLink {
-    -webkit-touch-callout: none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-  }
-}
-
-/* Custom scrollbar for modal */
-.modalContent::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modalContent::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 3px;
-}
-
-.modalContent::-webkit-scrollbar-thumb {
-  background: rgba(255, 107, 53, 0.5);
-  border-radius: 3px;
-}
-
-.modalContent::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 107, 53, 0.7);
-}
-
-
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
   .header {
-    background: rgba(0, 0, 0, 0.95);
-    border-bottom-color: #FF6B35;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.3);
   }
   
-  .navLink.active {
-    background: #FF6B35;
-    color: #000;
-  }
-  
-  .mobileNavLink.active {
-    background: #FF6B35;
-    color: #000;
-    border-color: #FF6B35;
+  .navLink,
+  .connectButton,
+  .chainButton,
+  .accountButton {
+    border: 2px solid currentColor;
   }
 }

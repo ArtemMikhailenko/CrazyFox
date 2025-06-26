@@ -342,7 +342,59 @@
   cursor: not-allowed;
   transform: none !important;
 }
+/* Connect Section */
+.connectSection {
+  text-align: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
+.connectText {
+  margin-bottom: 20px;
+  font-size: 1rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.connectButton,
+.wrongNetworkButton,
+.chainButton,
+.accountButton {
+  background: linear-gradient(45deg, #ff6b35, #f7931e);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px 24px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  display: block;
+}
+
+.connectButton:hover,
+.wrongNetworkButton:hover,
+.chainButton:hover,
+.accountButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(255, 107, 53, 0.3);
+}
+
+.wrongNetworkButton {
+  background: linear-gradient(45deg, #e74c3c, #c0392b);
+}
+
+.chainButton,
+.accountButton {
+  width: auto;
+  max-width: none;
+  padding: 8px 16px;
+  font-size: 0.9rem;
+}
 /* Instructions */
 .instructions {
   background: rgba(59, 130, 246, 0.1);
