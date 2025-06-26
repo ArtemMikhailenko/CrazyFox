@@ -183,98 +183,163 @@ class MetaMaskMobileIntegration {
     }
   }
 
-  async sendBNBTransaction(recipient: string, amount: string, userAddress: string) {
-    const amountFloat = parseFloat(amount.replace(',', '.'));
-    const isMobileDevice = this.isMobile && !window.ethereum;
+
+
+ // Fixed sendViaProvider method in MetaMaskMobileIntegration class
+private async sendViaProvider(recipient: string, amount: number) {
+  try {
+    if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
+      throw new Error(`Invalid recipient address: ${recipient}`);
+    }
     
-    if (isMobileDevice) {
-      return this.sendViaDeepLink(recipient, amountFloat, userAddress);
+    const provider = this.sdk?.getProvider() || window.ethereum;
+    
+    if (!provider) {
+      throw new Error('No provider available');
+    }
+
+    // Get current account first
+    const accounts = await provider.request({
+      method: 'eth_requestAccounts'
+    });
+
+    if (!accounts || accounts.length === 0) {
+      throw new Error('No accounts available');
+    }
+
+    const fromAddress = accounts[0];
+    console.log('Using from address:', fromAddress);
+
+    const amountWei = BigInt(Math.floor(amount * 1e18));
+    const hexValue = '0x' + amountWei.toString(16);
+
+    const txParams = {
+      from: fromAddress.toLowerCase(), // Explicitly add from address
+      to: recipient.toLowerCase(),
+      value: hexValue,
+      chainId: '0x38', // BSC
+      gas: '0x5208' // 21000
+    };
+
+    console.log('Sending transaction with params:', txParams);
+
+    const txHash = await provider.request({
+      method: 'eth_sendTransaction',
+      params: [txParams]
+    });
+
+    console.log('Transaction sent via provider:', txHash);
+    return { txHash, method: 'provider' };
+  } catch (error) {
+    console.error('Provider transaction error:', error);
+    throw error;
+  }
+}
+
+// Also update the sendViaDeepLink method to handle mobile better
+private async sendViaDeepLink(recipient: string, amount: number, userAddress: string) {
+  try {
+    // Validation
+    if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
+      throw new Error(`Invalid recipient address: ${recipient}`);
+    }
+    
+    if (isNaN(amount) || amount <= 0) {
+      throw new Error(`Invalid amount: ${amount}`);
+    }
+    
+    if (!userAddress || !userAddress.startsWith('0x') || userAddress.length !== 42) {
+      throw new Error(`Invalid user address: ${userAddress}`);
+    }
+    
+    console.log('Creating deep link transaction:', {
+      recipient,
+      amount,
+      userAddress
+    });
+    
+    // Save expected transaction
+    const expectedTx = {
+      recipient: recipient.toLowerCase(),
+      amount: amount.toString(),
+      userAddress: userAddress.toLowerCase(),
+      timestamp: Date.now(),
+      status: 'pending',
+      type: 'bnb_transfer'
+    };
+    
+    localStorage.setItem('expectedTransaction', JSON.stringify(expectedTx));
+    
+    // Create MetaMask deep link for BNB transfer
+    const amountWei = BigInt(Math.floor(amount * 1e18)).toString();
+    
+    // Try multiple deep link formats for better compatibility
+    const deepLinks = [
+      `metamask://send/${recipient.toLowerCase()}?value=${amountWei}&chainId=56`,
+      `https://metamask.app.link/send/${recipient.toLowerCase()}@56?value=${amountWei}`,
+      `dapp://${window.location.host}/send?to=${recipient.toLowerCase()}&value=${amountWei}&chainId=56`
+    ];
+    
+    console.log('Trying deep links:', deepLinks);
+    
+    // Try the first deep link
+    const deepLink = deepLinks[0];
+    
+    // For mobile browsers, use window.open with small delay
+    if (this.isMobile) {
+      window.open(deepLink, '_self');
+      
+      // Fallback to app link after short delay
+      setTimeout(() => {
+        window.location.href = deepLinks[1];
+      }, 1000);
     } else {
-      return this.sendViaProvider(recipient, amountFloat);
-    }
-  }
-
-  private async sendViaDeepLink(recipient: string, amount: number, userAddress: string) {
-    try {
-      // Validation
-      if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
-        throw new Error(`Invalid recipient address: ${recipient}`);
-      }
-      
-      if (isNaN(amount) || amount <= 0) {
-        throw new Error(`Invalid amount: ${amount}`);
-      }
-      
-      console.log('Creating deep link transaction:', {
-        recipient,
-        amount,
-        userAddress
-      });
-      
-      // Save expected transaction
-      const expectedTx = {
-        recipient: recipient.toLowerCase(),
-        amount: amount.toString(),
-        userAddress: userAddress.toLowerCase(),
-        timestamp: Date.now(),
-        status: 'pending',
-        type: 'bnb_transfer'
-      };
-      
-      localStorage.setItem('expectedTransaction', JSON.stringify(expectedTx));
-      
-      // Create direct deep link for BNB transfer
-      const amountWei = BigInt(Math.floor(amount * 1e18)).toString();
-      const deepLink = `https://metamask.app.link/send/${recipient.toLowerCase()}@56?value=${amountWei}`;
-      
-      console.log('Opening MetaMask with deep link:', deepLink);
-      
-      // Open MetaMask
       window.location.href = deepLink;
-      
-      return this.waitForTransactionReturn();
-    } catch (error) {
-      console.error('Deep link error:', error);
-      throw error;
     }
+    
+    return this.waitForTransactionReturn();
+  } catch (error) {
+    console.error('Deep link error:', error);
+    throw error;
   }
+}
 
-  private async sendViaProvider(recipient: string, amount: number) {
-    try {
-      if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
-        throw new Error(`Invalid recipient address: ${recipient}`);
-      }
-      
-      const provider = this.sdk?.getProvider() || window.ethereum;
-      
-      if (!provider) {
-        throw new Error('No provider available');
-      }
-
-      const amountWei = BigInt(Math.floor(amount * 1e18));
-      const hexValue = '0x' + amountWei.toString(16);
-
-      const txParams = {
-        to: recipient.toLowerCase(),
-        value: hexValue,
-        chainId: '0x38', // BSC
-        gas: '0x5208' // 21000
-      };
-
-      console.log('Sending transaction with params:', txParams);
-
-      const txHash = await provider.request({
-        method: 'eth_sendTransaction',
-        params: [txParams]
-      });
-
-      console.log('Transaction sent via provider:', txHash);
-      return { txHash, method: 'provider' };
-    } catch (error) {
-      console.error('Provider transaction error:', error);
-      throw error;
-    }
+// Updated sendBNBTransaction method with better error handling
+async sendBNBTransaction(recipient: string, amount: string, userAddress: string) {
+  const amountFloat = parseFloat(amount.replace(',', '.'));
+  
+  // Validate inputs
+  if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
+    throw new Error('Invalid recipient address format');
   }
+  
+  if (!userAddress || !userAddress.startsWith('0x') || userAddress.length !== 42) {
+    throw new Error('Invalid user address format');
+  }
+  
+  if (isNaN(amountFloat) || amountFloat <= 0) {
+    throw new Error('Invalid amount');
+  }
+  
+  console.log('Starting transaction:', {
+    recipient,
+    amount: amountFloat,
+    userAddress,
+    isMobile: this.isMobile,
+    hasEthereum: !!window.ethereum
+  });
+  
+  // Determine transaction method
+  const shouldUseDeepLink = this.isMobile && (!window.ethereum || !window.ethereum.isConnected);
+  
+  if (shouldUseDeepLink) {
+    console.log('Using deep link method');
+    return this.sendViaDeepLink(recipient, amountFloat, userAddress);
+  } else {
+    console.log('Using provider method');
+    return this.sendViaProvider(recipient, amountFloat);
+  }
+}
 
   private waitForTransactionReturn(): Promise<any> {
     return new Promise((resolve, reject) => {
@@ -495,21 +560,121 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
-  const fetchTokenPrice = async () => {
-    try {
-      const response = await executeApiWithRetry(`${API_ENDPOINTS.getPrice}?token=BNB`, {
-        method: 'GET'
-      }, 2);
-      
-      const tokensAmount = typeof response === 'string' ? parseFloat(response.trim()) : response.tokensPerBnb || response.amount;
-      
-      if (mountedRef.current && !isNaN(tokensAmount) && tokensAmount > 0) {
-        setTokensPerBnb(tokensAmount);
-      }
-    } catch (error) {
-      console.error('Error fetching token price:', error);
+// Исправленная функция fetchTokenPrice
+const fetchTokenPrice = async () => {
+  try {
+    const response = await executeApiWithRetry(`${API_ENDPOINTS.getPrice}?token=BNB`, {
+      method: 'GET'
+    }, 2);
+    
+    console.log('Price API response:', response);
+    
+    // API возвращает количество токенов за 1 BNB
+    let tokensAmount;
+    if (typeof response === 'string') {
+      tokensAmount = parseFloat(response.trim());
+    } else if (typeof response === 'number') {
+      tokensAmount = response;
+    } else {
+      // Если объект, ищем нужное поле
+      tokensAmount = response.tokensPerBnb || response.amount || response.tokens || response.rate;
     }
-  };
+    
+    console.log('Parsed tokens per BNB:', tokensAmount);
+    
+    if (mountedRef.current && !isNaN(tokensAmount) && tokensAmount > 0) {
+      setTokensPerBnb(tokensAmount);
+    } else {
+      console.error('Invalid tokens amount:', tokensAmount);
+      // Fallback значение
+      setTokensPerBnb(60000);
+    }
+  } catch (error) {
+    console.error('Error fetching token price:', error);
+    // Fallback значение при ошибке
+    if (mountedRef.current) {
+      setTokensPerBnb(60000);
+    }
+  }
+};
+
+// Исправленная функция calculateTokens БЕЗ округления
+const calculateTokens = () => {
+  const amount = parseFloat(buyAmount.replace(',', '.'));
+  if (isNaN(amount) || amount <= 0 || tokensPerBnb <= 0) return '0';
+  
+  const tokensReceived = amount * tokensPerBnb;
+  
+  console.log('Token calculation:', {
+    inputAmount: amount,
+    tokensPerBnb: tokensPerBnb,
+    tokensReceived: tokensReceived
+  });
+  
+  // НЕ округляем! Показываем точное количество
+  if (tokensReceived >= 1000000) {
+    // Для больших чисел показываем с разделителями тысяч
+    return tokensReceived.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+  } else if (tokensReceived >= 1000) {
+    // Для средних чисел показываем до 2 знаков после запятой
+    return tokensReceived.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 2
+    });
+  } else if (tokensReceived >= 1) {
+    // Для чисел больше 1 показываем до 4 знаков после запятой
+    return tokensReceived.toFixed(4);
+  } else {
+    // Для маленьких чисел показываем до 8 знаков после запятой
+    return tokensReceived.toFixed(8);
+  }
+};
+
+// Также добавим отладочную информацию в компонент
+// Добавьте это в JSX после receiveRate для отладки:
+
+{/* Debug Info - можно убрать в продакшене */}
+{process.env.NODE_ENV === 'development' && (
+  <div style={{ 
+    fontSize: '0.7rem', 
+    color: 'rgba(255,255,255,0.5)', 
+    marginTop: '8px',
+    textAlign: 'center',
+    fontFamily: 'monospace'
+  }}>
+    Debug: {buyAmount} BNB × {tokensPerBnb} = {parseFloat(buyAmount.replace(',', '.')) * tokensPerBnb}
+  </div>
+)}
+
+// Улучшенная версия секции "You receive" с более точным отображением
+<div className={styles.receiveSection}>
+  <div className={styles.receiveLabel}>You receive:</div>
+  <div className={styles.receiveAmount}>
+    {calculateTokens()} CRFX 🦊
+  </div>
+  <div className={styles.receiveRate}>
+    Rate: {tokensPerBnb.toLocaleString('en-US', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    })} CRFX per BNB
+  </div>
+  
+  {/* Отладочная информация в режиме разработки */}
+  {process.env.NODE_ENV === 'development' && (
+    <div style={{ 
+      fontSize: '0.7rem', 
+      color: 'rgba(255,255,255,0.5)', 
+      marginTop: '4px',
+      textAlign: 'center',
+      fontFamily: 'monospace'
+    }}>
+      Debug: {buyAmount} × {tokensPerBnb} = {(parseFloat(buyAmount.replace(',', '.')) * tokensPerBnb).toFixed(8)}
+    </div>
+  )}
+</div>
 
   const loadPendingTransactions = () => {
     if (typeof window === 'undefined') return;
@@ -716,20 +881,6 @@ const MobileMetaMaskPurchase = () => {
       });
   };
 
-  const calculateTokens = () => {
-    const amount = parseFloat(buyAmount.replace(',', '.'));
-    if (isNaN(amount) || amount <= 0 || tokensPerBnb <= 0) return '0';
-    
-    const tokensReceived = amount * tokensPerBnb;
-    // Более точная калькуляция для маленьких сумм
-    if (tokensReceived < 1) {
-      return tokensReceived.toFixed(4);
-    } else if (tokensReceived < 100) {
-      return tokensReceived.toFixed(2);
-    } else {
-      return Math.floor(tokensReceived).toLocaleString();
-    }
-  };
 
   const quickAmounts = ['0.1', '0.5', '1.0', '2.0'];
   const isOnBSC = activeChain?.id === bsc.id;
