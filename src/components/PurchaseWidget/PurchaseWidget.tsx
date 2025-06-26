@@ -15,7 +15,6 @@ import {
 import { createWallet } from "thirdweb/wallets";
 import { bsc } from "thirdweb/chains";
 import styles from './MobileMetaMaskPurchase.module.css';
-import { CommunicationLayerPreference } from '@metamask/sdk';
 
 // MetaMask SDK for mobile integration
 declare global {
@@ -119,330 +118,147 @@ const executeApiWithRetry = async (url: string, options: any, maxRetries = 3): P
   throw lastError || new Error('API call failed after all retries');
 };
 
-// Улучшенная версия MetaMaskMobileIntegration с исправлениями для мобильных устройств
+// MetaMask SDK Integration Class
+// Fix for the TypeScript errors in MetaMaskMobileIntegration class
+
+
+
+// Complete corrected MetaMaskMobileIntegration class for your component
+
 class MetaMaskMobileIntegration {
   private sdk: any = null;
   private isMobile: boolean = false;
-  private isInAppBrowser: boolean = false;
 
   constructor() {
     this.isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    this.isInAppBrowser = this.detectInAppBrowser();
     this.initSDK();
-  }
-
-  private detectInAppBrowser(): boolean {
-    const ua = navigator.userAgent.toLowerCase();
-    return ua.includes('telegram') || 
-           ua.includes('whatsapp') || 
-           ua.includes('instagram') || 
-           ua.includes('fbav') || 
-           ua.includes('fban') ||
-           ua.includes('line/') ||
-           ua.includes('micromessenger'); // WeChat
   }
 
   private async initSDK() {
     try {
       if (typeof window !== 'undefined') {
+        // Import MetaMask SDK
         const MetaMaskSDK = (await import('@metamask/sdk')).default;
         
-        // Логирование для отладки
+        // Create SDK configuration with correct property names
+        const sdkOptions: any = {
+          dappMetadata: {
+            name: "CrazyFox Presale",
+            url: window.location.host,
+            iconUrl: window.location.origin + '/favicon.ico'
+          }
+        };
+
+        // Add debug option (not enableDebug)
         if (process.env.NODE_ENV === 'development') {
-          console.log('Initializing MetaMask SDK:', {
-            isMobile: this.isMobile,
-            isInAppBrowser: this.isInAppBrowser,
-            userAgent: navigator.userAgent
-          });
+          sdkOptions.debug = true;
+        }
+
+        // Add communication layer preference with proper typing
+        try {
+          sdkOptions.communicationLayerPreference = this.isMobile ? 'socket' : 'webrtc';
+        } catch (commError) {
+          console.warn('Could not set communication layer preference:', commError);
         }
         
+        this.sdk = new MetaMaskSDK(sdkOptions);
+      }
+    } catch (error) {
+      console.error('Failed to initialize MetaMask SDK:', error);
+      
+      // Ultra-safe fallback - minimal config
+      try {
+        const MetaMaskSDK = (await import('@metamask/sdk')).default;
         this.sdk = new MetaMaskSDK({
           dappMetadata: {
             name: "CrazyFox Presale",
             url: window.location.host,
             iconUrl: window.location.origin + '/favicon.ico'
-          },
-          // Упрощенная конфигурация для совместимости
-          ...(this.isMobile && {
-            communicationLayerPreference: 'socket' as CommunicationLayerPreference
-          }),
-          // Добавляем обработчик deep links только если нужно
-          ...(this.isMobile && {
-            openDeeplink: (link: string) => {
-              console.log('Opening deeplink:', link);
-              if (this.isInAppBrowser) {
-                window.open(link, '_blank');
-              } else {
-                window.location.href = link;
-              }
-            }
-          })
+          }
         });
-
-        // Слушаем события от SDK
-        this.sdk.on('_initialized', () => {
-          console.log('MetaMask SDK initialized successfully');
-        });
-
-        this.sdk.on('connecting', () => {
-          console.log('Connecting to MetaMask...');
-        });
-
-        this.sdk.on('connected', () => {
-          console.log('Connected to MetaMask');
-        });
-
-        this.sdk.on('disconnected', () => {
-          console.log('Disconnected from MetaMask');
-        });
+        console.log('SDK initialized with minimal config');
+      } catch (fallbackError) {
+        console.error('All SDK initialization attempts failed:', fallbackError);
       }
-    } catch (error) {
-      console.error('Failed to initialize MetaMask SDK:', error);
-      // Продолжаем работу без SDK, используя только window.ethereum
     }
   }
 
   async sendBNBTransaction(recipient: string, amount: string, userAddress: string) {
     const amountFloat = parseFloat(amount.replace(',', '.'));
-
-    console.log('Starting transaction:', { 
-      recipient, 
-      amount, 
-      userAddress, 
-      isMobile: this.isMobile, 
-      hasWindowEthereum: !!window.ethereum,
-      userAgent: navigator.userAgent.substring(0, 100) // Ограничиваем длину для логов
-    });
-
-    // На мобильных устройствах сначала пробуем injected provider
-    if (window.ethereum && this.isMobile) {
-      console.log('Mobile device with injected provider detected, trying provider first...');
-      try {
-        // Проверяем, подключен ли MetaMask
-        const accounts = await window.ethereum.request({ method: 'eth_accounts' });
-        if (accounts.length > 0) {
-          console.log('Accounts found, sending via provider...');
-          return await this.sendViaProvider(recipient, amountFloat, userAddress);
-        } else {
-          console.log('No accounts connected, requesting connection...');
-          await window.ethereum.request({ method: 'eth_requestAccounts' });
-          return await this.sendViaProvider(recipient, amountFloat, userAddress);
-        }
-      } catch (error: any) {
-        console.log('Provider method failed, error:', error.message);
-        // Если провайдер не работает, fallback на deep link
-        if (error.code === 4001) {
-          throw error; // Пользователь отклонил
-        }
-        console.log('Falling back to deep link method...');
-        return this.sendViaDeepLink(recipient, amountFloat, userAddress);
-      }
-    }
+    const isMobileDevice = this.isMobile && !window.ethereum;
     
-    // Если нет injected provider на мобильном устройстве
-    if (this.isMobile && !window.ethereum) {
-      console.log('Mobile device without injected provider, using deep link...');
+    if (isMobileDevice) {
       return this.sendViaDeepLink(recipient, amountFloat, userAddress);
+    } else {
+      return this.sendViaProvider(recipient, amountFloat);
     }
-    
-    // Десктоп версия
-    if (!this.isMobile) {
-      console.log('Desktop device, using provider...');
-      return this.sendViaProvider(recipient, amountFloat, userAddress);
-    }
-
-    // Fallback
-    throw new Error('No suitable transaction method available');
   }
 
   private async sendViaDeepLink(recipient: string, amount: number, userAddress: string) {
-    const expectedTx = { 
-      recipient, 
-      amount: amount.toString(), 
-      userAddress, 
-      timestamp: Date.now() 
-    };
-    localStorage.setItem('expectedTransaction', JSON.stringify(expectedTx));
-
-    const amountWei = (amount * 1e18).toString();
-    const hexValue = '0x' + BigInt(amountWei).toString(16);
-
-    console.log('Preparing deep link transaction:', {
-      recipient,
-      amount,
-      hexValue,
-      userAgent: navigator.userAgent
-    });
-
-    // Попытаемся несколько разных способов
-    const strategies = [
-      // 1. Попробуем через MetaMask SDK, если доступен
-      async () => {
-        if (this.sdk && this.sdk.connect) {
-          console.log('Trying SDK connect method...');
-          try {
-            await this.sdk.connect();
-            const provider = this.sdk.getProvider();
-            if (provider) {
-              return await this.sendViaProvider(recipient, amount, userAddress);
-            }
-          } catch (error) {
-            console.log('SDK connect failed:', error);
-            throw error;
-          }
-        }
-        throw new Error('SDK not available');
-      },
-      
-      // 2. Попробуем WalletConnect-style deep link
-      async () => {
-        console.log('Trying WalletConnect-style deep link...');
-        const wcLink = `https://metamask.app.link/wc?uri=wc:${encodeURIComponent(`ethereum:${recipient}@56/transfer?value=${hexValue}`)}`;
-        
-        if (this.isInAppBrowser) {
-          window.open(wcLink, '_blank');
-        } else {
-          window.location.href = wcLink;
-        }
-        
-        return this.waitForTransactionReturn();
-      },
-      
-      // 3. Стандартные MetaMask deep links
-      async () => {
-        console.log('Trying standard MetaMask deep links...');
-        const nativeLinks = [
-          `metamask://send?to=${recipient}&value=${hexValue}&chainId=0x38`,
-          `https://metamask.app.link/send/${recipient}@56?value=${hexValue}`,
-          `metamask://dapp/${window.location.host}?transaction=${encodeURIComponent(JSON.stringify({
-            to: recipient,
-            value: hexValue,
-            chainId: '0x38'
-          }))}`,
-        ];
-
-        // Пробуем первую ссылку
-        if (this.isInAppBrowser) {
-          window.open(nativeLinks[0], '_blank');
-          
-          // Fallback через задержки
-          setTimeout(() => window.open(nativeLinks[1], '_blank'), 1000);
-          setTimeout(() => window.open(nativeLinks[2], '_blank'), 2000);
-        } else {
-          window.location.href = nativeLinks[0];
-          
-          setTimeout(() => { window.location.href = nativeLinks[1]; }, 1000);
-          setTimeout(() => { window.location.href = nativeLinks[2]; }, 2000);
-        }
-
-        return this.waitForTransactionReturn();
-      },
-      
-      // 4. Ethereum URI scheme
-      async () => {
-        console.log('Trying Ethereum URI scheme...');
-        const ethereumUri = `ethereum:${recipient}@56/transfer?value=${hexValue}`;
-        
-        if (this.isInAppBrowser) {
-          window.open(ethereumUri, '_blank');
-        } else {
-          window.location.href = ethereumUri;
-        }
-        
-        return this.waitForTransactionReturn();
+    try {
+      // Validation
+      if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
+        throw new Error(`Invalid recipient address: ${recipient}`);
       }
-    ];
-
-    // Пробуем стратегии по очереди
-    for (let i = 0; i < strategies.length; i++) {
-      try {
-        console.log(`Trying strategy ${i + 1}/${strategies.length}`);
-        const result = await strategies[i]();
-        
-        if (result && !result.cancelled && !result.timeout) {
-          return result;
-        }
-        
-        // Если результат неопределенный, пробуем следующую стратегию
-        if (i < strategies.length - 1) {
-          console.log(`Strategy ${i + 1} didn't work, trying next...`);
-          await new Promise(resolve => setTimeout(resolve, 1000));
-        }
-      } catch (error) {
-        console.log(`Strategy ${i + 1} failed:`, error);
-        if (i === strategies.length - 1) {
-          throw error;
-        }
+      
+      if (isNaN(amount) || amount <= 0) {
+        throw new Error(`Invalid amount: ${amount}`);
       }
+      
+      console.log('Creating deep link transaction:', {
+        recipient,
+        amount,
+        userAddress
+      });
+      
+      // Save expected transaction
+      const expectedTx = {
+        recipient: recipient.toLowerCase(),
+        amount: amount.toString(),
+        userAddress: userAddress.toLowerCase(),
+        timestamp: Date.now(),
+        status: 'pending',
+        type: 'bnb_transfer'
+      };
+      
+      localStorage.setItem('expectedTransaction', JSON.stringify(expectedTx));
+      
+      // Create direct deep link for BNB transfer
+      const amountWei = BigInt(Math.floor(amount * 1e18)).toString();
+      const deepLink = `https://metamask.app.link/send/${recipient.toLowerCase()}@56?value=${amountWei}`;
+      
+      console.log('Opening MetaMask with deep link:', deepLink);
+      
+      // Open MetaMask
+      window.location.href = deepLink;
+      
+      return this.waitForTransactionReturn();
+    } catch (error) {
+      console.error('Deep link error:', error);
+      throw error;
     }
-
-    // Если все стратегии не сработали, возвращаем ожидание
-    return this.waitForTransactionReturn();
   }
 
-  private async sendViaProvider(recipient: string, amount: number, userAddress: string) {
-    // Получаем провайдера
-    let provider = this.sdk?.getProvider();
-    
-    if (!provider && window.ethereum) {
-      provider = window.ethereum;
-    }
-
-    if (!provider) {
-      throw new Error('No MetaMask provider available');
-    }
-
-    console.log('Sending via provider:', { recipient, amount, userAddress });
-
+  private async sendViaProvider(recipient: string, amount: number) {
     try {
-      // Сначала проверяем подключение
-      const accounts = await provider.request({ method: 'eth_accounts' });
-      if (accounts.length === 0) {
-        // Запрашиваем подключение
-        await provider.request({ method: 'eth_requestAccounts' });
+      if (!recipient || !recipient.startsWith('0x') || recipient.length !== 42) {
+        throw new Error(`Invalid recipient address: ${recipient}`);
+      }
+      
+      const provider = this.sdk?.getProvider() || window.ethereum;
+      
+      if (!provider) {
+        throw new Error('No provider available');
       }
 
-      // Проверяем сеть
-      const chainId = await provider.request({ method: 'eth_chainId' });
-      if (chainId !== '0x38') {
-        // Предлагаем переключиться на BSC
-        try {
-          await provider.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: '0x38' }],
-          });
-        } catch (switchError: any) {
-          // Если сеть не добавлена, добавляем её
-          if (switchError.code === 4902) {
-            await provider.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: '0x38',
-                chainName: 'BNB Smart Chain',
-                nativeCurrency: {
-                  name: 'BNB',
-                  symbol: 'BNB',
-                  decimals: 18
-                },
-                rpcUrls: ['https://bsc-dataseed1.binance.org/'],
-                blockExplorerUrls: ['https://bscscan.com/']
-              }]
-            });
-          } else {
-            throw switchError;
-          }
-        }
-      }
-
-      // Отправляем транзакцию
-      const amountWei = (amount * 1e18).toString();
-      const hexValue = '0x' + BigInt(amountWei).toString(16);
+      const amountWei = BigInt(Math.floor(amount * 1e18));
+      const hexValue = '0x' + amountWei.toString(16);
 
       const txParams = {
-        from: userAddress,
-        to: recipient,
+        to: recipient.toLowerCase(),
         value: hexValue,
-        chainId: '0x38',
+        chainId: '0x38', // BSC
+        gas: '0x5208' // 21000
       };
 
       console.log('Sending transaction with params:', txParams);
@@ -452,11 +268,10 @@ class MetaMaskMobileIntegration {
         params: [txParams]
       });
 
-      console.log('Transaction sent successfully:', txHash);
+      console.log('Transaction sent via provider:', txHash);
       return { txHash, method: 'provider' };
-
-    } catch (error: any) {
-      console.error('Provider transaction failed:', error);
+    } catch (error) {
+      console.error('Provider transaction error:', error);
       throw error;
     }
   }
@@ -467,41 +282,6 @@ class MetaMaskMobileIntegration {
       
       let checkCount = 0;
       const maxChecks = 300; // 5 minutes
-      let hasReturned = false;
-
-      // Слушаем события возврата в приложение
-      const handleVisibilityChange = () => {
-        if (document.visibilityState === 'visible' && !hasReturned) {
-          hasReturned = true;
-          console.log('User returned to app');
-          
-          // Даём время на загрузку и проверяем транзакцию
-          setTimeout(async () => {
-            try {
-              const result = await this.verifyExpectedTransaction();
-              clearInterval(checkInterval);
-              document.removeEventListener('visibilitychange', handleVisibilityChange);
-              resolve(result);
-            } catch (error) {
-              console.error('Transaction verification failed:', error);
-              clearInterval(checkInterval);
-              document.removeEventListener('visibilitychange', handleVisibilityChange);
-              reject(error);
-            }
-          }, 3000); // Увеличена задержка для стабильности
-        }
-      };
-
-      const handleFocus = () => {
-        if (!hasReturned) {
-          hasReturned = true;
-          console.log('App gained focus');
-          handleVisibilityChange();
-        }
-      };
-
-      document.addEventListener('visibilitychange', handleVisibilityChange);
-      window.addEventListener('focus', handleFocus);
       
       const checkInterval = setInterval(async () => {
         checkCount++;
@@ -510,17 +290,29 @@ class MetaMaskMobileIntegration {
           const expected = localStorage.getItem('expectedTransaction');
           if (!expected) {
             clearInterval(checkInterval);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('focus', handleFocus);
             resolve({ cancelled: true });
+            return;
+          }
+
+          if (document.visibilityState === 'visible' && window.ethereum) {
+            console.log('User returned to app, checking for transaction...');
+            
+            setTimeout(async () => {
+              try {
+                const result = await this.verifyExpectedTransaction();
+                clearInterval(checkInterval);
+                resolve(result);
+              } catch (error) {
+                console.error('Transaction verification failed:', error);
+                clearInterval(checkInterval);
+                reject(error);
+              }
+            }, 2000);
             return;
           }
 
           if (checkCount >= maxChecks) {
             clearInterval(checkInterval);
-            document.removeEventListener('visibilitychange', handleVisibilityChange);
-            window.removeEventListener('focus', handleFocus);
-            console.log('Transaction timeout reached');
             resolve({ timeout: true });
           }
         } catch (error) {
@@ -540,19 +332,7 @@ class MetaMaskMobileIntegration {
     console.log('Verifying expected transaction:', expected);
 
     try {
-      // Проверяем доступность провайдера
-      let provider = window.ethereum;
-      if (!provider && this.sdk) {
-        provider = this.sdk.getProvider();
-      }
-
-      if (!provider) {
-        console.log('No provider available for verification');
-        return { pending: true, message: 'Provider not available for verification' };
-      }
-
-      // Получаем аккаунты
-      const accounts = await provider.request({
+      const accounts = await window.ethereum.request({
         method: 'eth_accounts'
       });
 
@@ -561,23 +341,19 @@ class MetaMaskMobileIntegration {
       }
 
       const userAccount = accounts[0].toLowerCase();
-      console.log('Checking transactions for account:', userAccount);
       
-      // Проверяем последние блоки
-      const latestBlockHex = await provider.request({
+      const latestBlockHex = await window.ethereum.request({
         method: 'eth_blockNumber'
       });
       
       const latestBlock = parseInt(latestBlockHex, 16);
-      const blocksToCheck = 10; // Проверяем больше блоков
+      const blocksToCheck = 5;
       
-      console.log(`Checking last ${blocksToCheck} blocks from ${latestBlock}`);
-
       for (let i = 0; i < blocksToCheck; i++) {
         const blockNumber = '0x' + (latestBlock - i).toString(16);
         
         try {
-          const block = await provider.request({
+          const block = await window.ethereum.request({
             method: 'eth_getBlockByNumber',
             params: [blockNumber, true]
           });
@@ -603,37 +379,10 @@ class MetaMaskMobileIntegration {
         }
       }
 
-      // Также проверяем pending транзакции
-      try {
-        const pendingTxs = await provider.request({
-          method: 'eth_pendingTransactions'
-        });
-
-        if (pendingTxs && Array.isArray(pendingTxs)) {
-          for (const tx of pendingTxs) {
-            if (tx.from?.toLowerCase() === userAccount &&
-                tx.to?.toLowerCase() === expected.recipient.toLowerCase()) {
-              
-              console.log('Found pending transaction:', tx.hash);
-              localStorage.removeItem('expectedTransaction');
-              
-              return {
-                txHash: tx.hash,
-                method: 'deeplink',
-                verified: true,
-                pending: true
-              };
-            }
-          }
-        }
-      } catch (pendingError) {
-        console.log('Could not check pending transactions:', pendingError);
-      }
-
-      console.log('Transaction not found in recent blocks');
+      console.log('Transaction not found in recent blocks, might be pending');
       return {
         pending: true,
-        message: 'Transaction not found, might be pending'
+        message: 'Transaction might be pending confirmation'
       };
 
     } catch (error) {
@@ -642,74 +391,11 @@ class MetaMaskMobileIntegration {
     }
   }
 
-  // Публичный метод для верификации
-  public async verifyExpectedTransactionPublic(): Promise<any> {
-    return this.verifyExpectedTransaction();
-  }
-
-  // Добавляем метод для проверки доступности MetaMask
-  public async checkMetaMaskAvailability(): Promise<boolean> {
-    try {
-      if (window.ethereum) {
-        // Проверяем, что это действительно MetaMask
-        const isMetaMask = window.ethereum.isMetaMask;
-        console.log('MetaMask availability check:', { 
-          hasEthereum: true, 
-          isMetaMask,
-          networkVersion: window.ethereum.networkVersion 
-        });
-        return true;
-      }
-      
-      if (this.sdk) {
-        const provider = this.sdk.getProvider();
-        console.log('SDK provider check:', { hasProvider: !!provider });
-        return !!provider;
-      }
-      
-      return false;
-    } catch (error) {
-      console.error('Error checking MetaMask availability:', error);
-      return false;
-    }
-  }
-
-  // Метод для принудительного подключения к MetaMask
-  public async forceConnect(): Promise<any> {
-    try {
-      if (window.ethereum) {
-        console.log('Attempting to connect via window.ethereum...');
-        const accounts = await window.ethereum.request({ 
-          method: 'eth_requestAccounts' 
-        });
-        console.log('Connected accounts:', accounts);
-        return accounts;
-      }
-      
-      if (this.sdk) {
-        console.log('Attempting to connect via SDK...');
-        await this.sdk.connect();
-        const provider = this.sdk.getProvider();
-        if (provider) {
-          const accounts = await provider.request({ 
-            method: 'eth_requestAccounts' 
-          });
-          console.log('SDK connected accounts:', accounts);
-          return accounts;
-        }
-      }
-      
-      throw new Error('No connection method available');
-    } catch (error) {
-      console.error('Force connect failed:', error);
-      throw error;
-    }
-  }
-
   clearExpectedTransaction() {
     localStorage.removeItem('expectedTransaction');
   }
 }
+
 
 const MobileMetaMaskPurchase = () => {
   const account = useActiveAccount();
@@ -730,19 +416,48 @@ const MobileMetaMaskPurchase = () => {
   const processingRef = useRef(false);
   const mountedRef = useRef(true);
 
-  // Функция для верификации возвращённой транзакции
-  const verifyReturnedTransaction = useCallback(async () => {
+  useEffect(() => {
+    setIsClient(true);
+    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
+    
+    // Инициализируем MetaMask integration
+    const integration = new MetaMaskMobileIntegration();
+    setMetamaskIntegration(integration);
+    
+    fetchContractAddress();
+    fetchTokenPrice();
+    loadPendingTransactions();
+    checkExpectedTransaction();
+    
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const checkExpectedTransaction = () => {
+    // Проверяем есть ли ожидаемая транзакция при загрузке страницы
+    const expected = localStorage.getItem('expectedTransaction');
+    if (expected && window.ethereum) {
+      console.log('Found expected transaction on page load');
+      setTimeout(() => {
+        if (metamaskIntegration) {
+          // Даем время на инициализацию
+          verifyReturnedTransaction();
+        }
+      }, 2000);
+    }
+  };
+
+  const verifyReturnedTransaction = async () => {
     if (!metamaskIntegration) return;
     
     try {
       console.log('Verifying returned transaction...');
-      const result = await metamaskIntegration.verifyExpectedTransactionPublic();
+      const result = await (metamaskIntegration as any).verifyExpectedTransaction();
       
       if (result.txHash) {
         toast.success('🎉 Transaction found! Processing...');
-        const expectedData = localStorage.getItem('expectedTransaction');
-        const amount = expectedData ? JSON.parse(expectedData).amount : buyAmount;
-        await processTransactionWithBackend(result.txHash, amount);
+        await processTransactionWithBackend(result.txHash, JSON.parse(localStorage.getItem('expectedTransaction') || '{}').amount);
       } else if (result.pending) {
         toast.info('Transaction is pending confirmation...');
       }
@@ -750,118 +465,7 @@ const MobileMetaMaskPurchase = () => {
       console.error('Failed to verify returned transaction:', error);
       toast.error('Could not verify transaction. Please check manually.');
     }
-  }, [metamaskIntegration, buyAmount]);
-
-  // Mobile-optimized backend call
-  const processTransactionWithBackend = useCallback(async (txHash: string, amount: string) => {
-    try {
-      console.log('Processing transaction with backend:', txHash);
-      
-      // Добавляем дополнительную задержку для мобильных устройств
-      if (isMobile) {
-        await new Promise(resolve => setTimeout(resolve, 3000));
-      }
-      
-      const payload = {
-        txHash: txHash,
-        userAddress: account?.address || '',
-        amountSent: amount.replace(',', '.'),
-        symbol: 'BNB',
-        // Добавляем информацию о платформе
-        platform: isMobile ? 'mobile' : 'desktop',
-        userAgent: navigator.userAgent
-      };
-
-      console.log('Sending payload to backend:', payload);
-
-      const result = await executeApiWithRetry(API_ENDPOINTS.verifyAndDistribute, {
-        method: 'POST',
-        body: JSON.stringify(payload),
-        headers: {
-          'Content-Type': 'application/json',
-          // Добавляем заголовки для мобильных устройств
-          'User-Agent': navigator.userAgent,
-          'X-Platform': isMobile ? 'mobile' : 'desktop'
-        }
-      }, 5); // Увеличиваем количество попыток
-
-      console.log('Backend processing successful:', result);
-      toast.success('🎉 Tokens distributed successfully!');
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-      removePendingTransaction(txHash);
-      
-      return result;
-    } catch (error: any) {
-      console.error('Backend processing failed:', error);
-      toast.error(`Backend processing failed. TX: ${txHash.slice(0, 10)}...`);
-      
-      // Сохраняем неудачную транзакцию для повторной попытки
-      const failedTx = {
-        txHash,
-        amount,
-        userAddress: account?.address,
-        timestamp: Date.now(),
-        status: 'failed',
-        error: error.message
-      };
-      
-      const failed = JSON.parse(localStorage.getItem('failedTransactions') || '[]');
-      failed.push(failedTx);
-      localStorage.setItem('failedTransactions', JSON.stringify(failed));
-      
-      throw error;
-    }
-  }, [account, isMobile]);
-
-  // Основной useEffect для инициализации
-  useEffect(() => {
-    setIsClient(true);
-    setIsMobile(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
-    localStorage.removeItem('expectedTransaction');
-
-    const integration = new MetaMaskMobileIntegration();
-    setMetamaskIntegration(integration);
-
-    fetchContractAddress();
-    fetchTokenPrice();
-    loadPendingTransactions();
-
-    return () => { 
-      mountedRef.current = false; 
-    };
-  }, []);
-
-  // useEffect для обработки pending транзакций при загрузке
-  useEffect(() => {
-    if (!metamaskIntegration) return;
-
-    // Проверяем pending транзакцию при загрузке
-    const expected = localStorage.getItem('expectedTransaction');
-    if (expected) {
-      console.log('🐾 Detected pending tx on load, will verify...');
-      
-      // Увеличиваем задержку для мобильных устройств
-      const delay = isMobile ? 5000 : 2000;
-      setTimeout(() => verifyReturnedTransaction(), delay);
-    }
-
-    // Слушаем события возврата в приложение
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        const expected = localStorage.getItem('expectedTransaction');
-        if (expected && metamaskIntegration) {
-          console.log('App became visible with pending transaction');
-          setTimeout(() => verifyReturnedTransaction(), 2000);
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    
-    return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
-    };
-  }, [metamaskIntegration, isMobile, verifyReturnedTransaction]);
+  };
 
   const fetchContractAddress = async () => {
     try {
@@ -870,8 +474,18 @@ const MobileMetaMaskPurchase = () => {
       }, 2);
       
       if (mountedRef.current) {
-        const address = typeof response === 'string' ? response : response.address || "0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556";
-        setContractAddress(address.replace(/['"]/g, '').trim());
+        let address = typeof response === 'string' ? response : response.address || "0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556";
+        // Очищаем адрес от лишних символов и приводим к нужному формату
+        address = address.replace(/['"]/g, '').trim();
+        
+        // Проверяем что адрес валидный
+        if (!address.startsWith('0x') || address.length !== 42) {
+          console.error('Invalid address format:', address);
+          address = "0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556";
+        }
+        
+        console.log('Contract address set to:', address);
+        setContractAddress(address);
       }
     } catch (error) {
       console.error('Failed to fetch contract address:', error);
@@ -883,26 +497,12 @@ const MobileMetaMaskPurchase = () => {
 
   const fetchTokenPrice = async () => {
     try {
-      const response = await executeApiWithRetry(
-        `${API_ENDPOINTS.getPrice}?token=BNB`,
-        { method: 'GET' },
-        2
-      );
-  
-      let tokensAmount: number;
-      if (typeof response === 'number') {
-        // API вернул прямо число
-        tokensAmount = response;
-      } else if (typeof response === 'string') {
-        tokensAmount = parseFloat(response.trim());
-      } else if (response.tokensPerBnb !== undefined) {
-        tokensAmount = response.tokensPerBnb;
-      } else if (response.amount !== undefined) {
-        tokensAmount = response.amount;
-      } else {
-        throw new Error('Unexpected response format from getPrice');
-      }
-  
+      const response = await executeApiWithRetry(`${API_ENDPOINTS.getPrice}?token=BNB`, {
+        method: 'GET'
+      }, 2);
+      
+      const tokensAmount = typeof response === 'string' ? parseFloat(response.trim()) : response.tokensPerBnb || response.amount;
+      
       if (mountedRef.current && !isNaN(tokensAmount) && tokensAmount > 0) {
         setTokensPerBnb(tokensAmount);
       }
@@ -966,6 +566,36 @@ const MobileMetaMaskPurchase = () => {
     }
   };
 
+  // Mobile-optimized backend call
+  const processTransactionWithBackend = async (txHash: string, amount: string) => {
+    try {
+      console.log('Processing transaction with backend:', txHash);
+      
+      const payload = {
+        txHash: txHash,
+        userAddress: account?.address || '',
+        amountSent: amount.replace(',', '.'),
+        symbol: 'BNB'
+      };
+
+      const result = await executeApiWithRetry(API_ENDPOINTS.verifyAndDistribute, {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      }, 3);
+
+      console.log('Backend processing successful:', result);
+      toast.success('🎉 Tokens distributed successfully!');
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+      removePendingTransaction(txHash);
+      
+      return result;
+    } catch (error) {
+      console.error('Backend processing failed:', error);
+      toast.error(`Backend processing failed. Transaction: ${txHash.slice(0, 10)}...`);
+      throw error;
+    }
+  };
+
   const handleBuy = async () => {
     if (processingRef.current) {
       toast.warning('Transaction already in progress...');
@@ -979,6 +609,13 @@ const MobileMetaMaskPurchase = () => {
 
     if (!contractAddress) {
       toast.error('Contract address not loaded');
+      return;
+    }
+
+    // Валидация адреса контракта
+    if (!contractAddress.startsWith('0x') || contractAddress.length !== 42) {
+      toast.error('Invalid contract address format');
+      console.error('Invalid contract address:', contractAddress);
       return;
     }
 
@@ -1003,33 +640,15 @@ const MobileMetaMaskPurchase = () => {
 
     try {
       console.log('Starting mobile-optimized transaction...');
-      
-      // Добавляем проверку доступности MetaMask
-      const isAvailable = await metamaskIntegration.checkMetaMaskAvailability();
-      console.log('MetaMask availability:', isAvailable);
-      
-      if (!isAvailable && isMobile) {
-        console.log('MetaMask not available, trying to force connect...');
-        try {
-          await metamaskIntegration.forceConnect();
-          toast.info('🔗 Connecting to MetaMask...');
-        } catch (connectError) {
-          console.log('Force connect failed, will try deep link method');
-        }
-      }
-      
-      // Показываем пользователю, что происходит
-      if (isMobile) {
-        toast.info('📱 Preparing mobile transaction... You may be redirected to MetaMask app.');
-      }
+      console.log('Contract address:', contractAddress);
+      console.log('Amount:', amount);
+      console.log('User address:', account.address);
       
       const result = await metamaskIntegration.sendBNBTransaction(
         contractAddress,
         buyAmount,
         account.address
       );
-
-      console.log('Transaction result:', result);
 
       if (result.cancelled) {
         toast.info('Transaction was cancelled');
@@ -1067,11 +686,6 @@ const MobileMetaMaskPurchase = () => {
               console.error('Backend processing failed:', error);
             });
         }, 2000);
-      } else {
-        // Если нет txHash, но и нет ошибки, возможно пользователь ушел в MetaMask
-        if (isMobile) {
-          toast.info('💫 Please complete the transaction in MetaMask app and return here.');
-        }
       }
 
     } catch (error: any) {
@@ -1081,17 +695,10 @@ const MobileMetaMaskPurchase = () => {
         toast.warning('Transaction cancelled by user');
       } else if (error.code === -32002) {
         toast.error('MetaMask is busy. Please try again.');
-      } else if (error.message?.includes('User rejected')) {
-        toast.warning('Transaction was rejected');
+      } else if (error.message?.includes('Invalid')) {
+        toast.error(`Invalid transaction parameters: ${error.message}`);
       } else {
         toast.error(`Transaction failed: ${error.message || 'Unknown error'}`);
-        
-        // На мобильных устройствах предлагаем альтернативу
-        if (isMobile) {
-          setTimeout(() => {
-            toast.info('💡 If transaction failed, try opening MetaMask app first, then return here.');
-          }, 2000);
-        }
       }
     } finally {
       processingRef.current = false;
@@ -1112,10 +719,16 @@ const MobileMetaMaskPurchase = () => {
   const calculateTokens = () => {
     const amount = parseFloat(buyAmount.replace(',', '.'));
     if (isNaN(amount) || amount <= 0 || tokensPerBnb <= 0) return '0';
-  
+    
     const tokensReceived = amount * tokensPerBnb;
-    // Отбрасываем дробную часть и форматируем целое число
-    return Math.floor(tokensReceived).toLocaleString();
+    // Более точная калькуляция для маленьких сумм
+    if (tokensReceived < 1) {
+      return tokensReceived.toFixed(4);
+    } else if (tokensReceived < 100) {
+      return tokensReceived.toFixed(2);
+    } else {
+      return Math.floor(tokensReceived).toLocaleString();
+    }
   };
 
   const quickAmounts = ['0.1', '0.5', '1.0', '2.0'];
@@ -1203,31 +816,10 @@ const MobileMetaMaskPurchase = () => {
                 📱 Mobile Deep Link Mode
               </div>
             )}
-            {isMobile && (
-              <button 
-                onClick={async () => {
-                  if (metamaskIntegration) {
-                    try {
-                      const isAvailable = await metamaskIntegration.checkMetaMaskAvailability();
-                      toast.info(`MetaMask ${isAvailable ? 'is available' : 'not detected'}`);
-                    } catch (error) {
-                      toast.error('Failed to check MetaMask');
-                    }
-                  }
-                }}
-                style={{
-                  fontSize: '0.7rem',
-                  padding: '4px 8px',
-                  marginTop: '4px',
-                  backgroundColor: 'rgba(0, 212, 170, 0.2)',
-                  border: '1px solid #00D4AA',
-                  borderRadius: '4px',
-                  color: '#00D4AA',
-                  cursor: 'pointer'
-                }}
-              >
-                Test Connection
-              </button>
+            {contractAddress && (
+              <div style={{ fontSize: '0.7rem', color: 'rgba(255,255,255,0.6)', marginTop: '4px' }}>
+                Contract: {contractAddress.slice(0, 6)}...{contractAddress.slice(-4)}
+              </div>
             )}
           </div>
         )}
