@@ -1,3 +1,4 @@
+// components/WagmiPresalePurchase.tsx - Updated with Binance Wallet Support
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -10,11 +11,13 @@ import {
   useSendTransaction, 
   useWaitForTransactionReceipt,
   useSwitchChain,
-  useBalance
+  useBalance,
+  useConnectorClient
 } from 'wagmi';
 import { parseEther, formatEther, type Hash } from 'viem';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { bsc } from 'viem/chains';
+import { isBinanceWallet, switchToBSCInBinanceWallet } from '@/wagmi.config';
 import styles from './WagmiPresalePurchase.module.css';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://crfx.org";
@@ -112,6 +115,7 @@ interface PendingTransaction {
   userAddress: string;
   timestamp: number;
   status: 'pending' | 'confirmed' | 'failed';
+  walletType?: string;
 }
 
 const WagmiPresalePurchase = () => {
@@ -123,6 +127,7 @@ const WagmiPresalePurchase = () => {
     address,
     chainId: bsc.id,
   });
+  const { data: connectorClient } = useConnectorClient();
 
   // Transaction hooks
   const {
@@ -151,9 +156,15 @@ const WagmiPresalePurchase = () => {
   const [isClient, setIsClient] = useState(false);
   const [pendingTransactions, setPendingTransactions] = useState<PendingTransaction[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isBinanceWalletDetected, setIsBinanceWalletDetected] = useState(false);
 
   const mountedRef = useRef(true);
   const processingRef = useRef(false);
+
+  // Проверка Binance Wallet
+  useEffect(() => {
+    setIsBinanceWalletDetected(isBinanceWallet());
+  }, [connector]);
 
   // Валидация суммы
   const validateAmount = (value: string): boolean => {
@@ -285,8 +296,8 @@ const WagmiPresalePurchase = () => {
     try {
       console.log('Processing transaction with backend:', txHash);
       
-      // Небольшая задержка для мобильных устройств
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      // Небольшая задержка для мобильных устройств и Binance Wallet
+      await new Promise(resolve => setTimeout(resolve, isBinanceWalletDetected ? 3000 : 2000));
       
       const payload = {
         txHash: txHash,
@@ -295,7 +306,9 @@ const WagmiPresalePurchase = () => {
         symbol: 'BNB',
         platform: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ? 'mobile' : 'desktop',
         userAgent: navigator.userAgent,
-        chainId: bsc.id
+        chainId: bsc.id,
+        walletType: connector?.name || 'unknown',
+        isBinanceWallet: isBinanceWalletDetected
       };
 
       console.log('Sending payload to backend:', payload);
@@ -306,7 +319,8 @@ const WagmiPresalePurchase = () => {
         headers: {
           'Content-Type': 'application/json',
           'User-Agent': navigator.userAgent,
-          'X-Platform': payload.platform
+          'X-Platform': payload.platform,
+          'X-Wallet-Type': payload.walletType
         }
       }, 5);
 
@@ -327,7 +341,8 @@ const WagmiPresalePurchase = () => {
         userAddress: address,
         timestamp: Date.now(),
         status: 'failed',
-        error: error.message
+        error: error.message,
+        walletType: connector?.name
       };
       
       const failed = JSON.parse(localStorage.getItem('failedTransactions') || '[]');
@@ -338,9 +353,9 @@ const WagmiPresalePurchase = () => {
     } finally {
       processingRef.current = false;
     }
-  }, [address]);
+  }, [address, connector, isBinanceWalletDetected]);
 
-  // Основная функция покупки
+  // Улучшенная функция покупки с поддержкой Binance Wallet
   const handleBuy = async () => {
     if (isSubmitting || !isConnected || !address) {
       toast.warning('Please connect your wallet first! 🦊');
@@ -369,10 +384,18 @@ const WagmiPresalePurchase = () => {
       return;
     }
 
-    // Проверка сети
+    // Проверка сети с особой логикой для Binance Wallet
     if (chainId !== bsc.id) {
       try {
-        await switchChain({ chainId: bsc.id });
+        if (isBinanceWalletDetected) {
+          toast.info('🔶 Switching to BSC network in Binance Wallet...');
+          const switched = await switchToBSCInBinanceWallet();
+          if (!switched) {
+            await switchChain({ chainId: bsc.id });
+          }
+        } else {
+          await switchChain({ chainId: bsc.id });
+        }
         toast.info('Switching to BSC network...');
         return;
       } catch (error) {
@@ -391,11 +414,18 @@ const WagmiPresalePurchase = () => {
     resetTransaction();
 
     try {
-      console.log('Starting Wagmi transaction...', {
+      console.log('Starting Wagmi transaction with Binance Wallet support...', {
         to: contractAddress,
         value: parseEther(buyAmount),
-        from: address
+        from: address,
+        walletType: connector?.name,
+        isBinanceWallet: isBinanceWalletDetected
       });
+
+      // Специальная обработка для Binance Wallet
+      if (isBinanceWalletDetected) {
+        toast.info('🔶 Processing with Binance Wallet...');
+      }
 
       // Отправляем транзакцию через Wagmi
       sendTransaction({
@@ -410,7 +440,10 @@ const WagmiPresalePurchase = () => {
       console.error('Transaction error:', error);
       setIsSubmitting(false);
       
-      if (error.code === 4001) {
+      // Специальные сообщения об ошибках для Binance Wallet
+      if (isBinanceWalletDetected && error.message?.includes('User denied')) {
+        toast.warning('Transaction cancelled in Binance Wallet');
+      } else if (error.code === 4001) {
         toast.warning('Transaction cancelled by user');
       } else if (error.code === -32002) {
         toast.error('Wallet is busy. Please try again.');
@@ -452,21 +485,22 @@ const WagmiPresalePurchase = () => {
         txHash,
         amount: buyAmount,
         userAddress: address || '',
+        walletType: connector?.name || 'unknown'
       });
 
       toast.success(`✅ Transaction confirmed! Hash: ${txHash.slice(0, 10)}...`);
       
-      // Обрабатываем на бэкенде
+      // Обрабатываем на бэкенде с задержкой для Binance Wallet
       setTimeout(() => {
         processTransactionWithBackend(txHash, buyAmount)
           .catch(error => {
             console.error('Backend processing failed:', error);
           });
-      }, 1000);
+      }, isBinanceWalletDetected ? 2000 : 1000);
 
       setIsSubmitting(false);
     }
-  }, [isReceiptSuccess, txReceipt, txHash, buyAmount, address, processTransactionWithBackend]);
+  }, [isReceiptSuccess, txReceipt, txHash, buyAmount, address, processTransactionWithBackend, connector, isBinanceWalletDetected]);
 
   // Effect для обработки ошибок транзакций
   useEffect(() => {
@@ -582,13 +616,18 @@ const WagmiPresalePurchase = () => {
         {/* Connection Status */}
         {isConnected && address && (
           <div className={styles.connectionStatus}>
-            🌈 Connected: {address.slice(0, 6)}...{address.slice(-4)}
+            {isBinanceWalletDetected ? '🔶' : '🌈'} Connected: {address.slice(0, 6)}...{address.slice(-4)}
             <div style={{ fontSize: '0.8rem', color: '#00D4AA', marginTop: '4px' }}>
-              Wallet: {connector?.name} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>⚠️ Switch to BSC</span>}
+              Wallet: {connector?.name} {isBinanceWalletDetected && '(Binance)'} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>⚠️ Switch to BSC</span>}
             </div>
             {balance && (
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}>
                 Balance: {parseFloat(formatEther(balance.value)).toFixed(4)} BNB
+              </div>
+            )}
+            {isBinanceWalletDetected && (
+              <div style={{ fontSize: '0.75rem', color: '#ffc107', marginTop: '2px' }}>
+                ✨ Optimized for Binance Wallet
               </div>
             )}
           </div>
@@ -599,12 +638,12 @@ const WagmiPresalePurchase = () => {
           <div className={styles.transactionStatus}>
             {isTxPending && (
               <div className={styles.statusItem}>
-                🔄 Waiting for wallet confirmation...
+                {isBinanceWalletDetected ? '🔶 Confirm in Binance Wallet...' : '🔄 Waiting for wallet confirmation...'}
               </div>
             )}
             {isReceiptLoading && (
               <div className={styles.statusItem}>
-                ⏳ Confirming transaction on blockchain...
+                ⏳ Confirming transaction on BSC blockchain...
               </div>
             )}
           </div>
@@ -619,6 +658,9 @@ const WagmiPresalePurchase = () => {
                 <div className={styles.pendingAmount}>Amount: {tx.amount} BNB</div>
                 <div className={styles.pendingHash}>Hash: {tx.txHash.slice(0, 10)}...</div>
                 <div className={styles.pendingStatus}>Status: {tx.status}</div>
+                {tx.walletType && (
+                  <div className={styles.pendingWallet}>Wallet: {tx.walletType}</div>
+                )}
                 <div className={styles.pendingActions}>
                   <button onClick={() => retryPendingTransaction(tx)} className={styles.retryButton}>
                     Retry API Call
@@ -732,12 +774,28 @@ const WagmiPresalePurchase = () => {
                 );
               }}
             </ConnectButton.Custom>
+            
+           
           </div>
         )}
 
         {/* Main Form */}
         {isConnected && (
           <>
+            {/* Binance Wallet Benefits */}
+            {isBinanceWalletDetected && (
+              <div className={styles.binanceBenefits}>
+                <div className={styles.benefitsTitle}>
+                  🔶 Binance Wallet Benefits
+                </div>
+                <div className={styles.benefitsList}>
+                  <div className={styles.benefit}>⚡ Native BSC integration</div>
+                  <div className={styles.benefit}>💰 Lower transaction fees</div>
+                  <div className={styles.benefit}>🚀 Faster confirmations</div>
+                </div>
+              </div>
+            )}
+
             {/* Quick Amounts */}
             <div className={styles.quickAmounts}>
               <label className={styles.inputLabel}>Quick amounts (BNB):</label>
@@ -796,17 +854,26 @@ const WagmiPresalePurchase = () => {
               className={styles.buyButton}
             >
               {isTransactionInProgress ? (
-                isTxPending ? '🔄 Confirm in Wallet...' : 
-                isReceiptLoading ? '⏳ Confirming...' : 
+                isTxPending ? (isBinanceWalletDetected ? '🔶 Confirm in Binance Wallet...' : '🔄 Confirm in Wallet...') : 
+                isReceiptLoading ? '⏳ Confirming on BSC...' : 
                 '🔄 Processing...'
               ) : !isOnBSC ? (
                 '⚠️ Switch to BSC Network'
               ) : !validateAmount(buyAmount) ? (
                 '❌ Invalid Amount'
               ) : (
-                '🚀 Buy with Wagmi'
+                isBinanceWalletDetected ? '🔶 Buy with Binance Wallet' : '🚀 Buy with Wagmi'
               )}
             </motion.button>
+
+            {/* Network Switch Helper for Binance Wallet */}
+            {isConnected && !isOnBSC && isBinanceWalletDetected && (
+              <div className={styles.networkHelper}>
+                <div className={styles.helperText}>
+                  🔶 Binance Wallet detected! Click the button above to automatically switch to BSC network.
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
