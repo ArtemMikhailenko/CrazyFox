@@ -1,4 +1,4 @@
-// components/WagmiPresalePurchase.tsx - Полная версия с автоматическим переключением на BSC
+// components/WagmiPresalePurchase.tsx - Исправленная версия для Trust Wallet
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -145,7 +145,7 @@ const WagmiPresalePurchase = () => {
     isSuccess: isReceiptSuccess
   } = useWaitForTransactionReceipt({
     hash: txHash,
-    confirmations: 2, // Ждем 2 подтверждения для надежности
+    confirmations: 2,
   });
 
   // Local state
@@ -158,32 +158,176 @@ const WagmiPresalePurchase = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBinanceWalletDetected, setIsBinanceWalletDetected] = useState(false);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
+  const [trustWalletFailedTx, setTrustWalletFailedTx] = useState<boolean>(false);
+  const [trustWalletError, setTrustWalletError] = useState<string>('');
+  const [isRetrying, setIsRetrying] = useState<boolean>(false);
 
   const mountedRef = useRef(true);
   const processingRef = useRef(false);
+
+  // Проверка Trust Wallet
+  const isTrustWallet = (): boolean => {
+    if (typeof window === 'undefined') return false;
+    return !!(
+      window.ethereum?.isTrust || 
+      window.ethereum?.isTrustWallet ||
+      connector?.name?.toLowerCase().includes('trust') ||
+      navigator.userAgent.includes('Trust')
+    );
+  };
 
   // Проверка Binance Wallet
   useEffect(() => {
     setIsBinanceWalletDetected(isBinanceWallet());
   }, [connector]);
 
+  // Функция для получения оптимального газа для Trust Wallet
+  const getOptimalGasForTrustWallet = async (): Promise<{gasLimit: string, gasPrice: string}> => {
+    try {
+      // Получаем актуальный gas price для BSC
+      const response = await fetch('https://api.bscscan.com/api?module=gastracker&action=gasoracle');
+      const data = await response.json();
+      
+      let gasPriceGwei = 8; // Увеличенный базовый gas price для Trust Wallet
+      
+      if (data.status === '1' && data.result) {
+        // Используем FastGasPrice + буфер для Trust Wallet
+        gasPriceGwei = Math.max(parseInt(data.result.FastGasPrice) + 2, 8);
+      }
+      
+      return {
+        gasLimit: '35000', // Увеличенный лимит для Trust Wallet
+        gasPrice: (gasPriceGwei * 1000000000).toString() // В wei как строка
+      };
+    } catch (error) {
+      console.error('Failed to get optimal gas for Trust Wallet:', error);
+      return {
+        gasLimit: '35000',
+        gasPrice: '8000000000' // 8 gwei fallback
+      };
+    }
+  };
+
+  // Функция для отправки транзакции через Trust Wallet
+  const sendTrustWalletTransaction = async (): Promise<string> => {
+    if (!window.ethereum || !contractAddress || !address) {
+      throw new Error('Trust Wallet not available or missing data');
+    }
+
+    const { gasLimit, gasPrice } = await getOptimalGasForTrustWallet();
+    
+    const txParams = {
+      from: address,
+      to: contractAddress,
+      value: `0x${parseEther(buyAmount).toString(16)}`, // В hex
+      gas: `0x${parseInt(gasLimit).toString(16)}`, // В hex
+      gasPrice: `0x${parseInt(gasPrice).toString(16)}`, // В hex
+    };
+
+    console.log('Trust Wallet transaction params:', txParams);
+
+    try {
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [txParams],
+      });
+
+      console.log('Trust Wallet transaction sent:', txHash);
+      return txHash;
+    } catch (error: any) {
+      console.error('Trust Wallet transaction failed:', error);
+      throw error;
+    }
+  };
+
+  // Функция для retry транзакции Trust Wallet
+  const retryTransactionForTrustWallet = async () => {
+    if (!isTrustWallet() || !contractAddress || !validateAmount(buyAmount)) {
+      toast.error('Cannot retry: invalid conditions');
+      return;
+    }
+    
+    setIsRetrying(true);
+    setTrustWalletError('');
+    
+    try {
+      toast.info('🛡️ Retrying with Trust Wallet optimizations...', {
+        toastId: 'trust-retry',
+      });
+      
+      // Проверяем баланс еще раз
+      if (balance) {
+        const balanceInBNB = parseFloat(formatEther(balance.value));
+        const amount = parseFloat(buyAmount.replace(',', '.'));
+        const gasBuffer = 0.005; // Больший буфер для retry
+        
+        if (balanceInBNB < (amount + gasBuffer)) {
+          throw new Error(`Insufficient balance for retry. Need ${(amount + gasBuffer).toFixed(4)} BNB`);
+        }
+      }
+      
+      // Задержка для стабильности Trust Wallet
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      const txHash = await sendTrustWalletTransaction();
+      
+      if (txHash) {
+        // Добавляем в pending транзакции
+        addPendingTransaction({
+          txHash: txHash as Hash,
+          amount: buyAmount,
+          userAddress: address || '',
+          walletType: 'Trust Wallet'
+        });
+        
+        toast.success('🛡️ Retry transaction sent! Processing...', {
+          toastId: 'trust-retry-success',
+        });
+        
+        // Обрабатываем на бэкенде
+        setTimeout(() => {
+          processTransactionWithBackend(txHash as Hash, buyAmount)
+            .catch(error => {
+              console.error('Backend processing failed:', error);
+            });
+        }, 3000);
+      }
+      
+    } catch (error: any) {
+      console.error('Trust Wallet retry failed:', error);
+      setTrustWalletError(error.message || 'Retry failed');
+      
+      toast.error(
+        <div>
+          <div>🛡️ Retry failed: {error.message}</div>
+          <div style={{ fontSize: '0.8rem', marginTop: '4px', opacity: 0.8 }}>
+            Try with a smaller amount or contact support
+          </div>
+        </div>,
+        {
+          toastId: 'trust-retry-error',
+          autoClose: 8000,
+        }
+      );
+    } finally {
+      setIsRetrying(false);
+    }
+  };
+
   // 1. Автоматическое переключение на BSC при подключении кошелька
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
     
     const handleAutoSwitchToBSC = async () => {
-      // Проверяем что кошелек подключен и сеть не BSC
       if (isConnected && address && chainId !== bsc.id) {
         console.log(`Wallet connected on chain ${chainId}, auto-switching to BSC (${bsc.id})...`);
         
-        // Показываем уведомление
         toast.info('🔄 Auto-switching to BSC network for optimal experience...', {
           autoClose: 4000,
           hideProgressBar: false,
         });
 
         try {
-          // Небольшая задержка для стабильности подключения
           await new Promise(resolve => setTimeout(resolve, 1500));
 
           const success = await autoSwitchToBSC(switchChain);
@@ -194,7 +338,6 @@ const WagmiPresalePurchase = () => {
               autoClose: 3000,
             });
             
-            // Дополнительное уведомление для Binance Wallet
             if (isBinanceWalletDetected) {
               toast.info('🔶 You\'re now using Binance Wallet on BSC - the optimal setup!', {
                 autoClose: 3000,
@@ -207,7 +350,6 @@ const WagmiPresalePurchase = () => {
         } catch (error: any) {
           console.error('Auto BSC switch failed:', error);
           
-          // Показываем соответствующее сообщение об ошибке
           if (error.code === 4001) {
             toast.warning('⚠️ Network switch was cancelled. Please switch to BSC manually for the best experience.');
           } else if (error.message?.includes('Connector not found')) {
@@ -216,7 +358,6 @@ const WagmiPresalePurchase = () => {
             toast.error('⚠️ Could not auto-switch to BSC. Please switch manually.');
           }
           
-          // Показываем подсказку через некоторое время
           timeoutId = setTimeout(() => {
             if (chainId !== bsc.id) {
               toast.info('💡 Tip: Switch to BSC network in your wallet for the full CrazyFox experience!', {
@@ -228,12 +369,10 @@ const WagmiPresalePurchase = () => {
       }
     };
 
-    // Запускаем автоматическое переключение
     if (isConnected && address) {
       handleAutoSwitchToBSC();
     }
 
-    // Очистка таймаута при размонтировании
     return () => {
       if (timeoutId) {
         clearTimeout(timeoutId);
@@ -243,21 +382,19 @@ const WagmiPresalePurchase = () => {
 
   // 2. Отслеживание первого подключения кошелька
   useEffect(() => {
-    // Этот эффект срабатывает только при изменении статуса подключения
     if (isConnected && address && !hasShownWelcome) {
       console.log('Wallet connected:', { 
         address: address.slice(0, 6) + '...' + address.slice(-4), 
         chainId, 
         connector: connector?.name,
-        isBinance: isBinanceWalletDetected 
+        isBinance: isBinanceWalletDetected,
+        isTrust: isTrustWallet()
       });
       
-      // Приветственное сообщение
       toast.success(`🦊 Welcome to CrazyFox! Connected with ${connector?.name || 'wallet'}`, {
         autoClose: 3000,
       });
       
-      // Если уже на BSC, показываем позитивное сообщение
       if (chainId === bsc.id) {
         toast.success('🚀 Perfect! You\'re already on BSC network!', {
           autoClose: 2000,
@@ -275,10 +412,8 @@ const WagmiPresalePurchase = () => {
     if (isConnected && address) {
       if (chainId === bsc.id) {
         console.log('User is now on BSC network');
-        // Можно добавить логику для обновления UI когда пользователь на правильной сети
       } else {
         console.log('User is on wrong network:', chainId);
-        // Показываем reminder через некоторое время
         const reminderTimeout = setTimeout(() => {
           if (chainId !== bsc.id) {
             toast.warning('⚠️ You\'re not on BSC network. Some features may not work properly.', {
@@ -295,7 +430,6 @@ const WagmiPresalePurchase = () => {
   // 4. Показать дополнительную информацию для пользователей Binance Wallet
   useEffect(() => {
     if (isConnected && isBinanceWalletDetected && chainId === bsc.id) {
-      // Показываем специальное сообщение для Binance Wallet пользователей
       const binanceInfoTimeout = setTimeout(() => {
         toast.info('🔶 Binance Wallet + BSC = Optimal setup for CrazyFox! Lower fees and faster transactions.', {
           autoClose: 5000,
@@ -306,6 +440,21 @@ const WagmiPresalePurchase = () => {
       return () => clearTimeout(binanceInfoTimeout);
     }
   }, [isConnected, isBinanceWalletDetected, chainId]);
+
+  // 5. Специальный useEffect для Trust Wallet
+  useEffect(() => {
+    if (isConnected && isTrustWallet()) {
+      console.log('Trust Wallet detected, applying optimizations...');
+      
+      const trustWalletTimeout = setTimeout(() => {
+        toast.info('🛡️ Trust Wallet detected! Optimized settings applied for better compatibility.', {
+          autoClose: 6000,
+        });
+      }, 2000);
+      
+      return () => clearTimeout(trustWalletTimeout);
+    }
+  }, [isConnected, connector]);
 
   // Валидация суммы
   const validateAmount = (value: string): boolean => {
@@ -437,8 +586,7 @@ const WagmiPresalePurchase = () => {
     try {
       console.log('Processing transaction with backend:', txHash);
       
-      // Небольшая задержка для мобильных устройств и Binance Wallet
-      await new Promise(resolve => setTimeout(resolve, isBinanceWalletDetected ? 3000 : 2000));
+      await new Promise(resolve => setTimeout(resolve, isBinanceWalletDetected ? 3000 : (isTrustWallet() ? 4000 : 2000)));
       
       const payload = {
         txHash: txHash,
@@ -449,7 +597,8 @@ const WagmiPresalePurchase = () => {
         userAgent: navigator.userAgent,
         chainId: bsc.id,
         walletType: connector?.name || 'unknown',
-        isBinanceWallet: isBinanceWalletDetected
+        isBinanceWallet: isBinanceWalletDetected,
+        isTrustWallet: isTrustWallet()
       };
 
       console.log('Sending payload to backend:', payload);
@@ -475,7 +624,6 @@ const WagmiPresalePurchase = () => {
       console.error('Backend processing failed:', error);
       toast.error(`Backend processing failed. TX: ${txHash.slice(0, 10)}...`);
       
-      // Сохраняем неудачную транзакцию для повторной попытки
       const failedTx = {
         txHash,
         amount,
@@ -495,108 +643,36 @@ const WagmiPresalePurchase = () => {
       processingRef.current = false;
     }
   }, [address, connector, isBinanceWalletDetected]);
-  const isTrustWallet = (): boolean => {
-    if (typeof window === 'undefined') return false;
-    return !!(window.ethereum?.isTrust || navigator.userAgent.includes('Trust'));
-  };
-  
-  // 2. Функция для определения правильного количества газа для разных кошельков
-  const getOptimalGasLimit = async (connector: any, amount: string): Promise<bigint> => {
-    const walletName = connector?.name?.toLowerCase() || '';
-    
-    if (walletName.includes('trust') || isTrustWallet()) {
-      // Trust Wallet требует больше газа для BSC
-      return BigInt(25000);
-    } else if (isBinanceWallet()) {
-      // Binance Wallet оптимизирован для BSC
-      return BigInt(21000);
-    } else {
-      // Для других кошельков используем стандартный газ
-      return BigInt(23000);
-    }
-  };
-  
-  // 3. Функция для получения правильного gas price для BSC
-  const getBSCGasPrice = async (): Promise<bigint> => {
-    try {
-      // Получаем актуальный gas price для BSC
-      const response = await fetch('https://api.bscscan.com/api?module=gastracker&action=gasoracle&apikey=YourApiKeyToken');
-      const data = await response.json();
-      
-      if (data.status === '1' && data.result) {
-        // Используем SafeGasPrice + небольшой буфер
-        const safePriceGwei = parseInt(data.result.SafeGasPrice) + 1;
-        return BigInt(safePriceGwei * 1000000000); // Convert to wei
-      }
-    } catch (error) {
-      console.log('Failed to fetch BSC gas price, using default');
-    }
-    
-    // Fallback gas price для BSC (5 gwei)
-    return BigInt(5000000000);
-  };
-  const retryTransactionForTrustWallet = async () => {
-    if (!isTrustWallet() || !contractAddress || !validateAmount(buyAmount)) {
-      toast.error('Cannot retry: invalid conditions');
-      return;
-    }
-    
-    setIsSubmitting(true);
-    resetTransaction();
-    
-    try {
-      toast.info('🛡️ Retrying with Trust Wallet optimizations...');
-      
-      // Увеличиваем gas limit и используем более высокий gas price для Trust Wallet
-      const increasedGasLimit = BigInt(30000); // Еще больше газа для retry
-      const gasPrice = BigInt(8000000000); // 8 gwei для retry
-      
-      await new Promise(resolve => setTimeout(resolve, 1500)); // Задержка для стабильности
-      
-      sendTransaction({
-        to: contractAddress as `0x${string}`,
-        value: parseEther(buyAmount),
-        gas: increasedGasLimit,
-        gasPrice: gasPrice,
-      });
-      
-      toast.info('🛡️ Retry transaction submitted to Trust Wallet!');
-      
-    } catch (error: any) {
-      console.error('Trust Wallet retry failed:', error);
-      setIsSubmitting(false);
-      toast.error('🛡️ Retry failed. Try with a smaller amount or contact support.');
-    }
-  };
-  // Улучшенная функция покупки с поддержкой Binance Wallet
+
+  // ГЛАВНАЯ ФУНКЦИЯ ПОКУПКИ - ИСПРАВЛЕННАЯ ДЛЯ TRUST WALLET
   const handleBuy = async () => {
     if (isSubmitting || !isConnected || !address) {
       toast.warning('Please connect your wallet first! 🦊');
       return;
     }
-  
+
     if (!contractAddress) {
       toast.error('Contract address not loaded');
       return;
     }
-  
+
     // Валидация суммы
     if (!validateAmount(buyAmount)) {
       toast.error('Please enter a valid amount (0.0001 - 100 BNB)');
       return;
     }
-  
+
     const amount = parseFloat(buyAmount.replace(',', '.'));
     if (amount < 0.0001) {
       toast.error('Minimum amount is 0.0001 BNB');
       return;
     }
-  
+
     if (amount > 100) {
       toast.error('Maximum amount is 100 BNB');
       return;
     }
-  
+
     // Проверка сети
     if (chainId !== bsc.id) {
       try {
@@ -622,14 +698,14 @@ const WagmiPresalePurchase = () => {
         return;
       }
     }
-  
+
     // Проверка баланса с буфером для газа
     if (balance) {
       const balanceInBNB = parseFloat(formatEther(balance.value));
       let gasBuffer = 0.001; // По умолчанию
       
       if (isTrustWallet()) {
-        gasBuffer = 0.003; // Trust Wallet требует больше газа
+        gasBuffer = 0.004; // Trust Wallet требует больше газа
       } else if (isBinanceWalletDetected) {
         gasBuffer = 0.0008; // Binance Wallet более эффективен
       }
@@ -639,10 +715,12 @@ const WagmiPresalePurchase = () => {
         return;
       }
     }
-  
+
     setIsSubmitting(true);
     resetTransaction();
-  
+    setTrustWalletFailedTx(false);
+    setTrustWalletError('');
+
     try {
       console.log('Starting transaction with wallet-specific optimizations...', {
         to: contractAddress,
@@ -652,112 +730,123 @@ const WagmiPresalePurchase = () => {
         isTrustWallet: isTrustWallet(),
         isBinanceWallet: isBinanceWalletDetected
       });
-  
-      // Получаем оптимальные параметры газа для кошелька
-      const gasLimit = await getOptimalGasLimit(connector, buyAmount);
-      const gasPrice = await getBSCGasPrice();
+
+      // СПЕЦИАЛЬНАЯ ОБРАБОТКА ДЛЯ TRUST WALLET
       if (isTrustWallet()) {
+        toast.info('🛡️ Optimizing transaction for Trust Wallet...', {
+          toastId: 'trust-processing'
+        });
+        
         try {
-          const valueHex = parseEther(buyAmount).toString();           // в wei, как строка
-          const gasHex   = gasLimit.toString();                       // например "30000"
-          const priceHex = gasPrice.toString();                       // например "8000000000"
-          const txParams = {
-            from: address,
-            to: contractAddress,
-            value: valueHex,
-            gas: gasHex,
-            gasPrice: priceHex,
-            chainId: bsc.id,      // 56
-            type: 0               // legacy
-          };
-      
-          // вместо viem.sendTransaction — напрямую в Trust Wallet
-          const txHash = await window.ethereum.request({
-            method: 'eth_sendTransaction',
-            params: [txParams],
-          });
-      
-          toast.info(`🛡️ Transaction sent! Hash: ${txHash.slice(0, 10)}...`);
-          // сохранить в pendingTransactions и т.п.
-          return;
-        } catch (err: any) {
-          console.error('Trust Wallet eth_sendTransaction error', err);
-          toast.error(`🛡️ Trust Wallet error: ${err.message || err}`);
-          setIsSubmitting(false);
-          return;
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          const txHash = await sendTrustWalletTransaction();
+          
+          if (txHash) {
+            // Добавляем в pending транзакции
+            addPendingTransaction({
+              txHash: txHash as Hash,
+              amount: buyAmount,
+              userAddress: address,
+              walletType: 'Trust Wallet'
+            });
+            
+            toast.success(`🛡️ Trust Wallet transaction sent! Hash: ${txHash.slice(0, 10)}...`, {
+              toastId: 'trust-success'
+            });
+            
+            // Обрабатываем на бэкенде
+            setTimeout(() => {
+              processTransactionWithBackend(txHash as Hash, buyAmount)
+                .catch(error => {
+                  console.error('Backend processing failed:', error);
+                });
+            }, 4000);
+          }
+        } catch (trustError: any) {
+          console.error('Trust Wallet specific error:', trustError);
+          setTrustWalletFailedTx(true);
+          setTrustWalletError(trustError.message || 'Trust Wallet transaction failed');
+          
+          if (trustError.message?.includes('User denied') || trustError.code === 4001) {
+            toast.warning('🛡️ Transaction cancelled in Trust Wallet');
+          } else if (trustError.message?.includes('insufficient funds')) {
+            toast.error('🛡️ Insufficient BNB in Trust Wallet. Make sure you have enough for gas fees.');
+          } else if (trustError.message?.includes('internal error')) {
+            toast.error(
+              <div>
+                <div>🛡️ Trust Wallet internal error detected!</div>
+                <button 
+                  onClick={() => {
+                    setTrustWalletFailedTx(false);
+                    retryTransactionForTrustWallet();
+                  }}
+                  style={{
+                    marginTop: '8px',
+                    padding: '6px 12px',
+                    background: '#3375BB',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontSize: '0.8rem'
+                  }}
+                >
+                  🔄 Retry with Trust Wallet Fix
+                </button>
+              </div>,
+              {
+                autoClose: false,
+                closeOnClick: false,
+                toastId: 'trust-internal-error'
+              }
+            );
+          } else {
+            toast.error(`🛡️ Trust Wallet error: ${trustError.message}. Use retry button below.`);
+          }
+          
+          throw trustError;
         }
+        
+        setIsSubmitting(false);
+        return;
       }
-      // Специальная обработка для Trust Wallet
-      if (isTrustWallet()) {
-        toast.info('🛡️ Optimizing transaction for Trust Wallet on BSC...');
-        // Небольшая задержка для Trust Wallet
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-  
-      // Специальная обработка для Binance Wallet
+
+      // ДЛЯ ДРУГИХ КОШЕЛЬКОВ (НЕ TRUST WALLET)
+      // Получаем оптимальные параметры газа
+      let gasLimit = BigInt(21000);
+      let gasPrice = BigInt(5000000000); // 5 gwei default
+
       if (isBinanceWalletDetected) {
+        gasLimit = BigInt(21000);
+        gasPrice = BigInt(3000000000); // 3 gwei для Binance Wallet
         toast.info('🔶 Processing with Binance Wallet...');
+      } else {
+        gasLimit = BigInt(23000);
+        gasPrice = BigInt(5000000000); // 5 gwei для других
       }
-      
-      // Отправляем транзакцию с оптимизированными параметрами
+
+      // Отправляем транзакцию через Wagmi для не-Trust кошельков
       sendTransaction({
         to: contractAddress as `0x${string}`,
         value: parseEther(buyAmount),
         gas: gasLimit,
         gasPrice: gasPrice,
       });
-  
-      // Показываем соответствующее сообщение в зависимости от кошелька
-      if (isTrustWallet()) {
-        toast.info('📝 Transaction submitted to Trust Wallet! Please confirm in your wallet...');
-      } else if (isBinanceWalletDetected) {
+
+      // Показываем соответствующее сообщение
+      if (isBinanceWalletDetected) {
         toast.info('📝 Transaction submitted to Binance Wallet! Please confirm...');
       } else {
         toast.info('📝 Transaction submitted! Waiting for confirmation...');
       }
-  
+
     } catch (error: any) {
       console.error('Transaction error:', error);
       setIsSubmitting(false);
       
-      // Специальные сообщения об ошибках для разных кошельков
-      if (isTrustWallet()) {
-        if (error.message?.includes('User denied') || error.code === 4001) {
-          toast.warning('🛡️ Transaction cancelled in Trust Wallet');
-        } else if (error.message?.includes('insufficient funds')) {
-          toast.error('🛡️ Insufficient BNB in Trust Wallet. Make sure you have enough for gas fees.');
-        } else if (error.message?.includes('internal error')) {
-          // Показываем кнопку retry для Trust Wallet при internal error
-          toast.error(
-            <div>
-              <div>🛡️ Trust Wallet internal error detected!</div>
-              <button 
-                onClick={retryTransactionForTrustWallet}
-                style={{
-                  marginTop: '8px',
-                  padding: '6px 12px',
-                  background: '#3375BB',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  cursor: 'pointer',
-                  fontSize: '0.8rem'
-                }}
-              >
-                🔄 Retry with Trust Wallet Fix
-              </button>
-            </div>,
-            {
-              autoClose: false, // Не закрываем автоматически
-              closeOnClick: false,
-            }
-          );
-        } else {
-          toast.error(`🛡️ Trust Wallet error: ${error.message || 'Please try again with a smaller amount'}`);
-        }
-      } else if (isBinanceWalletDetected && error.message?.includes('User denied')) {
-        toast.warning('🔶 Transaction cancelled in Binance Wallet');
-      } else if (error.code === 4001) {
+      // Обработка ошибок для всех кошельков
+      if (error.message?.includes('User denied') || error.code === 4001) {
         toast.warning('Transaction cancelled by user');
       } else if (error.code === -32002) {
         toast.error('Wallet is busy. Please try again.');
@@ -768,50 +857,18 @@ const WagmiPresalePurchase = () => {
       }
     }
   };
-  const checkBSCNetworkStatus = async (): Promise<boolean> => {
-    try {
-      const response = await fetch('https://bsc-dataseed1.binance.org', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          jsonrpc: '2.0',
-          method: 'eth_chainId',
-          params: [],
-          id: 1,
-        }),
-      });
-      
-      const data = await response.json();
-      return data.result === '0x38'; // BSC chainId
-    } catch (error) {
-      console.error('BSC network check failed:', error);
-      return false;
-    }
-  };
-  
-  // 6. Добавьте специальный useEffect для Trust Wallet
-  useEffect(() => {
-    if (isConnected && isTrustWallet()) {
-      console.log('Trust Wallet detected, applying optimizations...');
-      
-      // Показываем специальные инструкции для Trust Wallet
-      const trustWalletTimeout = setTimeout(() => {
-        toast.info('🛡️ Trust Wallet Tips: Make sure you have enough BNB for gas fees (~0.001 BNB)', {
-          autoClose: 6000,
-        });
-      }, 2000);
-      
-      return () => clearTimeout(trustWalletTimeout);
-    }
-  }, [isConnected, connector]);
-  
- 
+
   // Повторная попытка обработки транзакции
   const retryPendingTransaction = (tx: PendingTransaction) => {
     console.log('Retrying pending transaction:', tx.txHash);
     
+    // Если это Trust Wallet и была ошибка, используем специальную retry функцию
+    if (tx.walletType?.toLowerCase().includes('trust') && tx.status === 'failed') {
+      retryTransactionForTrustWallet();
+      return;
+    }
+    
+    // Обычная retry для других кошельков
     processTransactionWithBackend(tx.txHash, tx.amount)
       .catch(error => {
         console.error('Retry failed:', error);
@@ -830,10 +887,14 @@ const WagmiPresalePurchase = () => {
     return Math.floor(tokensReceived).toLocaleString();
   };
 
-  // Effect для обработки успешных транзакций
+  // Effect для обработки успешных транзакций (только для не-Trust кошельков)
   useEffect(() => {
-    if (isReceiptSuccess && txReceipt && txHash) {
+    if (isReceiptSuccess && txReceipt && txHash && !isTrustWallet()) {
       console.log('Transaction confirmed:', txHash);
+      
+      // Сбрасываем состояние ошибок при успехе
+      setTrustWalletFailedTx(false);
+      setTrustWalletError('');
       
       // Добавляем в отложенные для обработки
       addPendingTransaction({
@@ -845,7 +906,7 @@ const WagmiPresalePurchase = () => {
 
       toast.success(`✅ Transaction confirmed! Hash: ${txHash.slice(0, 10)}...`);
       
-      // Обрабатываем на бэкенде с задержкой для Binance Wallet
+      // Обрабатываем на бэкенде с задержкой
       setTimeout(() => {
         processTransactionWithBackend(txHash, buyAmount)
           .catch(error => {
@@ -857,9 +918,9 @@ const WagmiPresalePurchase = () => {
     }
   }, [isReceiptSuccess, txReceipt, txHash, buyAmount, address, processTransactionWithBackend, connector, isBinanceWalletDetected]);
 
-  // Effect для обработки ошибок транзакций
+  // Effect для обработки ошибок транзакций (только для не-Trust кошельков)
   useEffect(() => {
-    if (txError) {
+    if (txError && !isTrustWallet()) {
       console.error('Transaction error:', txError);
       setIsSubmitting(false);
       
@@ -873,7 +934,7 @@ const WagmiPresalePurchase = () => {
 
   // Effect для обработки ошибок получения квитанции
   useEffect(() => {
-    if (isReceiptError) {
+    if (isReceiptError && !isTrustWallet()) {
       console.error('Receipt error');
       setIsSubmitting(false);
       toast.error('Transaction failed to confirm. Please check your wallet.');
@@ -894,7 +955,7 @@ const WagmiPresalePurchase = () => {
 
   const quickAmounts = ['0.1', '0.5', '1.0', '2.0'];
   const isOnBSC = chainId === bsc.id;
-  const isTransactionInProgress = isTxPending || isReceiptLoading || isSubmitting;
+  const isTransactionInProgress = isTxPending || isReceiptLoading || isSubmitting || isRetrying;
 
   if (!isClient) return null;
 
@@ -971,13 +1032,18 @@ const WagmiPresalePurchase = () => {
         {/* Connection Status */}
         {isConnected && address && (
           <div className={styles.connectionStatus}>
-            {isBinanceWalletDetected ? '🔶' : '🌈'} Connected: {address.slice(0, 6)}...{address.slice(-4)}
+            {isTrustWallet() ? '🛡️' : (isBinanceWalletDetected ? '🔶' : '🌈')} Connected: {address.slice(0, 6)}...{address.slice(-4)}
             <div style={{ fontSize: '0.8rem', color: '#00D4AA', marginTop: '4px' }}>
-              Wallet: {connector?.name} {isBinanceWalletDetected && '(Binance)'} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>⚠️ Switch to BSC</span>}
+              Wallet: {connector?.name} {isTrustWallet() && '(Trust)'} {isBinanceWalletDetected && '(Binance)'} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>⚠️ Switch to BSC</span>}
             </div>
             {balance && (
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}>
                 Balance: {parseFloat(formatEther(balance.value)).toFixed(4)} BNB
+              </div>
+            )}
+            {isTrustWallet() && (
+              <div style={{ fontSize: '0.75rem', color: '#3375BB', marginTop: '2px' }}>
+                ✨ Trust Wallet Optimizations Active
               </div>
             )}
             {isBinanceWalletDetected && (
@@ -991,14 +1057,82 @@ const WagmiPresalePurchase = () => {
         {/* Transaction Status */}
         {isTransactionInProgress && (
           <div className={styles.transactionStatus}>
-            {isTxPending && (
+            {isTxPending && !isTrustWallet() && (
               <div className={styles.statusItem}>
                 {isBinanceWalletDetected ? '🔶 Confirm in Binance Wallet...' : '🔄 Waiting for wallet confirmation...'}
               </div>
             )}
-            {isReceiptLoading && (
+            {isReceiptLoading && !isTrustWallet() && (
               <div className={styles.statusItem}>
                 ⏳ Confirming transaction on BSC blockchain...
+              </div>
+            )}
+            {isRetrying && (
+              <div className={styles.statusItem}>
+                🛡️ Retrying with Trust Wallet optimizations...
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Trust Wallet Specific Section */}
+        {isTrustWallet() && isConnected && (
+          <div className={styles.trustWalletTips}>
+            <div className={styles.tipsTitle}>
+              🛡️ Trust Wallet Optimization
+            </div>
+            
+            {/* Статус Trust Wallet */}
+            {trustWalletFailedTx && (
+              <div className={`${styles.trustWalletStatus} ${styles.error}`}>
+                <span className={styles.statusIcon}>⚠️</span>
+                <span className={styles.statusText}>
+                  Transaction failed: {trustWalletError || 'Internal error'}
+                </span>
+              </div>
+            )}
+            
+            {isRetrying && (
+              <div className={`${styles.trustWalletStatus}`}>
+                <span className={styles.statusIcon}>🔄</span>
+                <span className={styles.statusText}>
+                  Retrying with optimized settings...
+                </span>
+              </div>
+            )}
+            
+            <div className={styles.tipsList}>
+              <div className={styles.tip}>💰 Keep extra BNB for gas fees (~0.004 BNB)</div>
+              <div className={styles.tip}>⚡ Direct Trust Wallet integration enabled</div>
+              <div className={styles.tip}>🔄 Auto-retry on internal errors</div>
+              <div className={styles.tip}>🌐 Optimized for BSC network</div>
+            </div>
+            
+            {/* Retry секция */}
+            {trustWalletFailedTx && (
+              <div className={styles.retrySection}>
+                <button 
+                  onClick={() => {
+                    setTrustWalletFailedTx(false);
+                    retryTransactionForTrustWallet();
+                  }}
+                  className={`${styles.trustRetryButton} ${isRetrying ? styles.loading : ''}`}
+                  disabled={isSubmitting || isRetrying || !validateAmount(buyAmount)}
+                >
+                  {isRetrying ? '' : '🔄 Retry with Trust Wallet Optimizations'}
+                </button>
+                
+                <div className={styles.retryNote}>
+                  Retry with increased gas limit (35k) and higher gas price (8+ gwei)
+                </div>
+                
+                {trustWalletError && (
+                  <div className={styles.trustWalletHint}>
+                    <div className={styles.hintText}>
+                      Last error: {trustWalletError.slice(0, 50)}...
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -1136,7 +1270,7 @@ const WagmiPresalePurchase = () => {
         {isConnected && (
           <>
             {/* Binance Wallet Benefits */}
-            {isBinanceWalletDetected && (
+            {isBinanceWalletDetected && !isTrustWallet() && (
               <div className={styles.binanceBenefits}>
                 <div className={styles.benefitsTitle}>
                   🔶 Binance Wallet Benefits
@@ -1207,23 +1341,28 @@ const WagmiPresalePurchase = () => {
               className={styles.buyButton}
             >
               {isTransactionInProgress ? (
-                isTxPending ? (isBinanceWalletDetected ? '🔶 Confirm in Binance Wallet...' : '🔄 Confirm in Wallet...') : 
-                isReceiptLoading ? '⏳ Confirming on BSC...' : 
+                isRetrying ? '🛡️ Retrying with Trust Wallet...' :
+                isTxPending && !isTrustWallet() ? (isBinanceWalletDetected ? '🔶 Confirm in Binance Wallet...' : '🔄 Confirm in Wallet...') : 
+                isReceiptLoading && !isTrustWallet() ? '⏳ Confirming on BSC...' : 
                 '🔄 Processing...'
               ) : !isOnBSC ? (
                 '⚠️ Switch to BSC Network'
               ) : !validateAmount(buyAmount) ? (
                 '❌ Invalid Amount'
               ) : (
-                isBinanceWalletDetected ? '🔶 Buy with Binance Wallet' : '🚀 Buy with Wagmi'
+                isTrustWallet() ? '🛡️ Buy with Trust Wallet' : 
+                isBinanceWalletDetected ? '🔶 Buy with Binance Wallet' : 
+                '🚀 Buy with Wagmi'
               )}
             </motion.button>
 
-            {/* Network Switch Helper for Binance Wallet */}
-            {isConnected && !isOnBSC && isBinanceWalletDetected && (
+            {/* Network Switch Helper */}
+            {isConnected && !isOnBSC && (
               <div className={styles.networkHelper}>
                 <div className={styles.helperText}>
-                  🔶 Binance Wallet detected! Click the button above to automatically switch to BSC network.
+                  {isTrustWallet() ? '🛡️ Trust Wallet detected!' : 
+                   isBinanceWalletDetected ? '🔶 Binance Wallet detected!' : ''}
+                  {' '}Click the button above to automatically switch to BSC network.
                 </div>
               </div>
             )}
