@@ -1,4 +1,4 @@
-// app/wagmi.config.ts - Исправленная версия без TypeScript ошибок
+// app/wagmi.config.ts - Виправлена версія з оптимізованими параметрами газу для BSC
 import { createConfig, http } from 'wagmi';
 import { bsc, mainnet, polygon, optimism, arbitrum, base } from 'wagmi/chains';
 import { connectorsForWallets } from '@rainbow-me/rainbowkit';
@@ -13,30 +13,30 @@ import {
   binanceWallet,
 } from '@rainbow-me/rainbowkit/wallets';
 
-// Специальная настройка для Trust Wallet с множественными RPC
+// Оновлені RPC для кращої сумісності з Trust Wallet
 const BSC_RPC_URLS = [
+  'https://bsc-dataseed.bnbchain.org', // Офіційний Binance endpoint
+  'https://rpc.ankr.com/bsc',
+  'https://bsc-rpc.publicnode.com',
+  'https://bsc.drpc.org',
   'https://bsc-dataseed1.binance.org',
-  'https://bsc-dataseed2.binance.org', 
-  'https://bsc-dataseed3.binance.org',
-  'https://bsc-dataseed4.binance.org',
-  'https://bsc-dataseed1.defibit.io',
-  'https://bsc-dataseed1.ninicoin.io',
+  'https://bsc-dataseed2.binance.org',
 ];
 
-// Функция для получения случайного RPC для Trust Wallet
+// Функція для отримання випадкового RPC
 const getRandomBSCRPC = (): string => {
   const randomIndex = Math.floor(Math.random() * BSC_RPC_URLS.length);
   return BSC_RPC_URLS[randomIndex];
 };
 
-// Настройка кошельков с приоритетом для BSC
+// Настройка кошельків з пріоритетом для BSC
 const connectors = connectorsForWallets(
   [
     {
       groupName: 'Best for BSC',
       wallets: [
-        binanceWallet, // Лучший для BSC
-        trustWallet,   // Популярен, требует специальной настройки
+        binanceWallet,
+        trustWallet,
         metaMaskWallet,
       ],
     },
@@ -60,7 +60,7 @@ const connectors = connectorsForWallets(
 export const config = createConfig({
   connectors,
   chains: [
-    bsc,      // BSC первым для оптимизации
+    bsc,
     mainnet,
     polygon,
     optimism,
@@ -68,7 +68,6 @@ export const config = createConfig({
     base,
   ],
   transports: {
-    // Исправленная конфигурация без timeout в fetchOptions
     [bsc.id]: http(getRandomBSCRPC(), {
       batch: true,
       retryCount: 3,
@@ -81,11 +80,10 @@ export const config = createConfig({
     [base.id]: http(),
   },
   ssr: true,
-  // Увеличиваем интервал опроса для Trust Wallet
   pollingInterval: 4000,
 });
 
-// Глобальные типы
+// Глобальні типи
 declare global {
   interface Window {
     BinanceChain?: {
@@ -95,13 +93,12 @@ declare global {
       on?: (eventName: string, callback: Function) => void;
       removeListener?: (eventName: string, callback: Function) => void;
     };
-    // Убираем дублирующее объявление ethereum - используем расширение существующего типа
     trustwallet?: any;
     TrustWeb3Provider?: any;
   }
 }
 
-// Улучшенная проверка Trust Wallet с типизацией
+// Покращена перевірка Trust Wallet
 export const isTrustWallet = (): boolean => {
   if (typeof window === 'undefined') return false;
   
@@ -119,7 +116,8 @@ export const isTrustWallet = (): boolean => {
   
   return checks.some(check => !!check);
 };
-// Проверка Binance Wallet с типизацией
+
+// Перевірка Binance Wallet
 export const isBinanceWallet = (): boolean => {
   if (typeof window === 'undefined') return false;
   
@@ -132,12 +130,12 @@ export const isBinanceWallet = (): boolean => {
   );
 };
 
-// Функция для получения оптимальных параметров газа для Trust Wallet на BSC
+// ВИПРАВЛЕНА функція для отримання оптимальних параметрів газу
 export const getTrustWalletOptimalGas = async (): Promise<{gasLimit: bigint, gasPrice: bigint}> => {
   try {
-    let gasPriceGwei = 5; // МИНИМУМ 5 gwei для Trust Wallet
+    let gasPriceGwei = 3; // ЗБІЛЬШЕНО мінімум до 3 gwei
     
-    // Пробуем получить актуальный gas price
+    // Отримуємо актуальний gas price з BSC API
     try {
       const response = await fetch('https://api.bscscan.com/api?module=gastracker&action=gasoracle');
       if (response.ok) {
@@ -146,29 +144,72 @@ export const getTrustWalletOptimalGas = async (): Promise<{gasLimit: bigint, gas
         if (data.status === '1' && data.result) {
           const safePriceGwei = parseInt(data.result.SafeGasPrice, 10);
           if (!isNaN(safePriceGwei)) {
-            // Для Trust Wallet ВСЕГДА минимум 5 gwei, даже если сеть предлагает меньше
-            gasPriceGwei = Math.max(safePriceGwei + 2, 5);
+            // Для Trust Wallet використовуємо SafeGasPrice + буфер, мінімум 3 gwei
+            gasPriceGwei = Math.max(safePriceGwei + 1, 3);
+            
+            // Максимум 15 gwei для стандартних операцій
+            gasPriceGwei = Math.min(gasPriceGwei, 15);
           }
         }
       }
     } catch (error) {
-      console.log('Failed to get BSC gas price, using 5 gwei minimum');
+      console.log('Failed to get BSC gas price, using 3 gwei default');
     }
     
     return {
-      gasLimit: BigInt(30000), // Увеличенный лимит для Trust Wallet
-      gasPrice: BigInt(gasPriceGwei * 1000000000) // Convert to wei, минимум 5 gwei
+      gasLimit: BigInt(21000), // Стандартний газ ліміт для BNB трансферів
+      gasPrice: BigInt(gasPriceGwei * 1000000000) // Конвертуємо в wei
     };
   } catch (error) {
     console.error('Failed to get optimal gas for Trust Wallet:', error);
     return {
-      gasLimit: BigInt(30000),
-      gasPrice: BigInt(5000000000) // 5 gwei обязательный минимум
+      gasLimit: BigInt(21000),
+      gasPrice: BigInt(3000000000) // 3 gwei як fallback
     };
   }
 };
 
-// Безопасная функция для запроса к ethereum provider
+// Функція для отримання оптимального gas price для різних кошельків
+export const getOptimalGasPrice = async (walletType: 'trust' | 'binance' | 'other' = 'other'): Promise<bigint> => {
+  try {
+    const response = await fetch('https://api.bscscan.com/api?module=gastracker&action=gasoracle');
+    let baseGasPrice = 3; // Базовий 3 gwei
+    
+    if (response.ok) {
+      const data = await response.json();
+      if (data.status === '1' && data.result) {
+        const safePriceGwei = parseInt(data.result.SafeGasPrice, 10);
+        if (!isNaN(safePriceGwei)) {
+          baseGasPrice = Math.max(safePriceGwei, 3);
+        }
+      }
+    }
+    
+    // Налаштування для різних кошельків
+    switch (walletType) {
+      case 'trust':
+        // Trust Wallet потребує стабільної ціни газу
+        return BigInt(Math.max(baseGasPrice + 1, 3) * 1000000000);
+      case 'binance':
+        // Binance Wallet оптимізований для BSC
+        return BigInt(Math.max(baseGasPrice, 3) * 1000000000);
+      default:
+        // Інші кошельки
+        return BigInt(Math.max(baseGasPrice + 1, 3) * 1000000000);
+    }
+  } catch (error) {
+    console.error('Failed to get optimal gas price:', error);
+    // Fallback значення для різних кошельків
+    const fallbackPrices = {
+      trust: 4, // 4 gwei для Trust Wallet
+      binance: 3, // 3 gwei для Binance Wallet
+      other: 3 // 3 gwei для інших
+    };
+    return BigInt(fallbackPrices[walletType] * 1000000000);
+  }
+};
+
+// Безпечна функція для запиту до ethereum provider
 const safeEthereumRequest = async (method: string, params: any[] = []): Promise<any> => {
   if (!window.ethereum?.request) {
     throw new Error('Ethereum provider not available');
@@ -177,14 +218,14 @@ const safeEthereumRequest = async (method: string, params: any[] = []): Promise<
   return window.ethereum.request({ method, params });
 };
 
-// Улучшенная функция переключения на BSC для Trust Wallet
+// ВИПРАВЛЕНА функція переключення на BSC для Trust Wallet
 export const switchToBSCInTrustWallet = async (): Promise<boolean> => {
   if (!isTrustWallet()) return false;
   
   try {
     console.log('Attempting BSC switch in Trust Wallet...');
     
-    // Проверяем текущую сеть
+    // Перевіряємо поточну мережу
     try {
       const currentChainId = await safeEthereumRequest('eth_chainId');
       
@@ -197,7 +238,7 @@ export const switchToBSCInTrustWallet = async (): Promise<boolean> => {
     }
     
     try {
-      // Пробуем переключиться
+      // Спроба переключитися
       await safeEthereumRequest('wallet_switchEthereumChain', [{ chainId: '0x38' }]);
       
       console.log('BSC switch successful in Trust Wallet');
@@ -206,12 +247,12 @@ export const switchToBSCInTrustWallet = async (): Promise<boolean> => {
     } catch (switchError: any) {
       console.log('Switch error:', switchError);
       
-      // Если сеть не добавлена, добавляем её
+      // Якщо мережа не додана, додаємо її
       if (switchError.code === 4902 || switchError.message?.includes('Unrecognized chain')) {
         try {
           await safeEthereumRequest('wallet_addEthereumChain', [{
             chainId: '0x38',
-            chainName: 'Smart Chain',
+            chainName: 'BNB Smart Chain',
             nativeCurrency: {
               name: 'BNB',
               symbol: 'BNB',
@@ -224,7 +265,7 @@ export const switchToBSCInTrustWallet = async (): Promise<boolean> => {
           
           console.log('BSC network added to Trust Wallet');
           
-          // После добавления пробуем переключиться еще раз
+          // Після додавання пробуємо переключитися ще раз
           await new Promise(resolve => setTimeout(resolve, 1000));
           
           await safeEthereumRequest('wallet_switchEthereumChain', [{ chainId: '0x38' }]);
@@ -233,8 +274,6 @@ export const switchToBSCInTrustWallet = async (): Promise<boolean> => {
         } catch (addError) {
           console.error('Failed to add BSC network to Trust Wallet:', addError);
         }
-      } else {
-        console.error('Trust Wallet switch error:', switchError);
       }
     }
     
@@ -245,7 +284,7 @@ export const switchToBSCInTrustWallet = async (): Promise<boolean> => {
   }
 };
 
-// Функция переключения на BSC для Binance Wallet
+// Функція переключення на BSC для Binance Wallet
 export const switchToBSCInBinanceWallet = async (): Promise<boolean> => {
   if (!isBinanceWallet()) return false;
   
@@ -263,7 +302,7 @@ export const switchToBSCInBinanceWallet = async (): Promise<boolean> => {
       }
     }
     
-    // Метод 2: Через стандартный ethereum provider
+    // Метод 2: Через стандартний ethereum provider
     try {
       await safeEthereumRequest('wallet_switchEthereumChain', [{ chainId: '0x38' }]);
       console.log('BSC switch successful via ethereum provider');
@@ -273,7 +312,7 @@ export const switchToBSCInBinanceWallet = async (): Promise<boolean> => {
         try {
           await safeEthereumRequest('wallet_addEthereumChain', [{
             chainId: '0x38',
-            chainName: 'Binance Smart Chain',
+            chainName: 'BNB Smart Chain',
             nativeCurrency: {
               name: 'BNB',
               symbol: 'BNB',
@@ -297,16 +336,15 @@ export const switchToBSCInBinanceWallet = async (): Promise<boolean> => {
   }
 };
 
-// Улучшенная универсальная функция автоматического переключения на BSC
+// ВИПРАВЛЕНА універсальна функція автоматичного переключення на BSC
 export const autoSwitchToBSC = async (switchChain: Function): Promise<boolean> => {
   try {
     console.log('Auto-switching to BSC...');
     
-    // Специальная обработка для Trust Wallet с дополнительными проверками
+    // Спеціальна обробка для Trust Wallet
     if (isTrustWallet()) {
       console.log('Trust Wallet detected, using specialized BSC switch...');
       
-      // Дополнительная проверка состояния Trust Wallet
       try {
         const accounts = await safeEthereumRequest('eth_accounts');
         if (!accounts || accounts.length === 0) {
@@ -320,48 +358,25 @@ export const autoSwitchToBSC = async (switchChain: Function): Promise<boolean> =
       if (switched) return true;
     }
     
-    // Специальная обработка для Binance Wallet
+    // Спеціальна обробка для Binance Wallet
     if (isBinanceWallet()) {
       const switched = await switchToBSCInBinanceWallet();
       if (switched) return true;
     }
     
-    // Для всех остальных кошельков используем wagmi
+    // Для всіх інших кошельків використовуємо wagmi
     await switchChain({ chainId: bsc.id });
     return true;
     
   } catch (error: any) {
     console.error('Auto BSC switch failed:', error);
     
-    // Для Trust Wallet показываем специальную помощь
-    if (isTrustWallet()) {
-      console.log('Trust Wallet auto-switch failed, trying manual network addition...');
-      
-      // Пытаемся добавить сеть если её нет
-      try {
-        await safeEthereumRequest('wallet_addEthereumChain', [{
-          chainId: '0x38',
-          chainName: 'Smart Chain',
-          nativeCurrency: {
-            name: 'BNB',
-            symbol: 'BNB', 
-            decimals: 18,
-          },
-          rpcUrls: BSC_RPC_URLS,
-          blockExplorerUrls: ['https://bscscan.com'],
-        }]);
-        return true;
-      } catch (addError) {
-        console.error('Failed to add BSC network for Trust Wallet:', addError);
-      }
-    }
-    
-    // Общий fallback для добавления сети
+    // Fallback для додавання мережі
     if (error.code === 4902) {
       try {
         await safeEthereumRequest('wallet_addEthereumChain', [{
           chainId: '0x38',
-          chainName: 'Binance Smart Chain',
+          chainName: 'BNB Smart Chain',
           nativeCurrency: {
             name: 'BNB',
             symbol: 'BNB',
@@ -380,10 +395,10 @@ export const autoSwitchToBSC = async (switchChain: Function): Promise<boolean> =
   }
 };
 
-// Функция для проверки состояния BSC сети
+// Функція для перевірки стану BSC мережі
 export const checkBSCNetworkHealth = async (): Promise<boolean> => {
   try {
-    const response = await fetch('https://bsc-dataseed1.binance.org', {
+    const response = await fetch('https://bsc-dataseed.bnbchain.org', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -402,6 +417,7 @@ export const checkBSCNetworkHealth = async (): Promise<boolean> => {
   }
 };
 
+// ВИПРАВЛЕНА функція валідації транзакції для Trust Wallet
 export const validateTrustWalletTransaction = async (
   to: string, 
   value: bigint, 
@@ -419,7 +435,6 @@ export const validateTrustWalletTransaction = async (
       return { isValid: false, errors, suggestions };
     }
 
-    // Остальные проверки с type assertion...
     const accounts = await ethereum.request({ method: 'eth_accounts' });
     if (accounts.length === 0 || !accounts.includes(userAddress)) {
       errors.push('Wallet not properly connected');
@@ -438,7 +453,8 @@ export const validateTrustWalletTransaction = async (
     });
     
     const balanceWei = BigInt(balance);
-    const gasBuffer = BigInt('5000000000000000'); // 0.005 BNB буфер для газа
+    // ВИПРАВЛЕНО: Збільшено буфер для газу відповідно до нових вимог
+    const gasBuffer = BigInt('10000000000000000'); // 0.01 BNB буфер для газу
     
     if (balanceWei < (value + gasBuffer)) {
       errors.push('Insufficient balance for transaction + gas');
@@ -458,14 +474,15 @@ export const validateTrustWalletTransaction = async (
     return { isValid: false, errors, suggestions };
   }
 };
-// Функция для автоматического исправления проблем Trust Wallet
+
+// Функція для автоматичного виправлення проблем Trust Wallet
 export const autoFixTrustWalletIssues = async (): Promise<boolean> => {
   if (!isTrustWallet()) return false;
 
   try {
     console.log('Auto-fixing Trust Wallet issues...');
 
-    // Исправление 1: Переподключение аккаунтов
+    // Виправлення 1: Переподключення аккаунтів
     try {
       await safeEthereumRequest('wallet_requestPermissions', [{ eth_accounts: {} }]);
     } catch (permError) {
@@ -479,13 +496,10 @@ export const autoFixTrustWalletIssues = async (): Promise<boolean> => {
       console.log('Network state refresh failed:', networkError);
     }
 
-    // Исправление 3: Переключение RPC если возможно
+    // Виправлення 3: Переключення RPC якщо можливо
     try {
       const randomRPC = getRandomBSCRPC();
       console.log('Suggesting RPC switch to:', randomRPC);
-      
-      // Здесь мы не можем автоматически поменять RPC в Trust Wallet,
-      // но можем предложить пользователю
       return true;
     } catch (rpcError) {
       console.log('RPC suggestion failed:', rpcError);
@@ -498,7 +512,7 @@ export const autoFixTrustWalletIssues = async (): Promise<boolean> => {
   }
 };
 
-// Экспорт дополнительных утилит для Trust Wallet
+// Експорт додаткових утиліт для Trust Wallet
 export const trustWalletUtils = {
   getRandomBSCRPC,
   validateTrustWalletTransaction,
@@ -506,16 +520,18 @@ export const trustWalletUtils = {
   isTrustWallet,
   switchToBSCInTrustWallet,
   getTrustWalletOptimalGas,
+  getOptimalGasPrice,
   safeEthereumRequest,
 };
 
-// Константы для Trust Wallet
+// ОНОВЛЕНІ константи для Trust Wallet з новими вимогами газу
 export const TRUST_WALLET_CONSTANTS = {
-  MIN_GAS_LIMIT: 25000,
-  SAFE_GAS_LIMIT: 30000,
-  MIN_GAS_PRICE_GWEI: 5,
-  SAFE_GAS_PRICE_GWEI: 8,
-  RECOMMENDED_GAS_BUFFER: '0.003', // 0.003 BNB
+  MIN_GAS_LIMIT: 21000,
+  SAFE_GAS_LIMIT: 23000,
+  MIN_GAS_PRICE_GWEI: 3, // ЗБІЛЬШЕНО з 5 до 3
+  SAFE_GAS_PRICE_GWEI: 5, // ЗБІЛЬШЕНО з 8 до 5
+  MAX_GAS_PRICE_GWEI: 15, // НОВИЙ: максимальна ціна газу
+  RECOMMENDED_GAS_BUFFER: '0.01', // ЗБІЛЬШЕНО з 0.003 до 0.01 BNB
   BSC_CHAIN_ID: '0x38',
   BSC_CHAIN_ID_DECIMAL: 56,
 };
