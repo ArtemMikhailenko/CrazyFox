@@ -1,4 +1,4 @@
-// components/WagmiPresalePurchase.tsx - Updated with Binance Wallet Support
+// components/WagmiPresalePurchase.tsx - Полная версия с автоматическим переключением на BSC
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
@@ -17,7 +17,7 @@ import {
 import { parseEther, formatEther, type Hash } from 'viem';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { bsc } from 'viem/chains';
-import { isBinanceWallet, switchToBSCInBinanceWallet } from '@/wagmi.config';
+import { isBinanceWallet, switchToBSCInBinanceWallet, autoSwitchToBSC } from '@/wagmi.config';
 import styles from './WagmiPresalePurchase.module.css';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://crfx.org";
@@ -157,6 +157,7 @@ const WagmiPresalePurchase = () => {
   const [pendingTransactions, setPendingTransactions] = useState<PendingTransaction[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isBinanceWalletDetected, setIsBinanceWalletDetected] = useState(false);
+  const [hasShownWelcome, setHasShownWelcome] = useState(false);
 
   const mountedRef = useRef(true);
   const processingRef = useRef(false);
@@ -165,6 +166,146 @@ const WagmiPresalePurchase = () => {
   useEffect(() => {
     setIsBinanceWalletDetected(isBinanceWallet());
   }, [connector]);
+
+  // 1. Автоматическое переключение на BSC при подключении кошелька
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    
+    const handleAutoSwitchToBSC = async () => {
+      // Проверяем что кошелек подключен и сеть не BSC
+      if (isConnected && address && chainId !== bsc.id) {
+        console.log(`Wallet connected on chain ${chainId}, auto-switching to BSC (${bsc.id})...`);
+        
+        // Показываем уведомление
+        toast.info('🔄 Auto-switching to BSC network for optimal experience...', {
+          autoClose: 4000,
+          hideProgressBar: false,
+        });
+
+        try {
+          // Небольшая задержка для стабильности подключения
+          await new Promise(resolve => setTimeout(resolve, 1500));
+
+          const success = await autoSwitchToBSC(switchChain);
+          
+          if (success) {
+            const walletName = connector?.name || 'wallet';
+            toast.success(`✅ Successfully switched to BSC in ${walletName}!`, {
+              autoClose: 3000,
+            });
+            
+            // Дополнительное уведомление для Binance Wallet
+            if (isBinanceWalletDetected) {
+              toast.info('🔶 You\'re now using Binance Wallet on BSC - the optimal setup!', {
+                autoClose: 3000,
+              });
+            }
+          } else {
+            throw new Error('Switch method returned false');
+          }
+
+        } catch (error: any) {
+          console.error('Auto BSC switch failed:', error);
+          
+          // Показываем соответствующее сообщение об ошибке
+          if (error.code === 4001) {
+            toast.warning('⚠️ Network switch was cancelled. Please switch to BSC manually for the best experience.');
+          } else if (error.message?.includes('Connector not found')) {
+            toast.error('Please switch to BSC network manually in your wallet settings.');
+          } else {
+            toast.error('⚠️ Could not auto-switch to BSC. Please switch manually.');
+          }
+          
+          // Показываем подсказку через некоторое время
+          timeoutId = setTimeout(() => {
+            if (chainId !== bsc.id) {
+              toast.info('💡 Tip: Switch to BSC network in your wallet for the full CrazyFox experience!', {
+                autoClose: 5000,
+              });
+            }
+          }, 10000);
+        }
+      }
+    };
+
+    // Запускаем автоматическое переключение
+    if (isConnected && address) {
+      handleAutoSwitchToBSC();
+    }
+
+    // Очистка таймаута при размонтировании
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [isConnected, address, chainId, switchChain, connector, isBinanceWalletDetected]);
+
+  // 2. Отслеживание первого подключения кошелька
+  useEffect(() => {
+    // Этот эффект срабатывает только при изменении статуса подключения
+    if (isConnected && address && !hasShownWelcome) {
+      console.log('Wallet connected:', { 
+        address: address.slice(0, 6) + '...' + address.slice(-4), 
+        chainId, 
+        connector: connector?.name,
+        isBinance: isBinanceWalletDetected 
+      });
+      
+      // Приветственное сообщение
+      toast.success(`🦊 Welcome to CrazyFox! Connected with ${connector?.name || 'wallet'}`, {
+        autoClose: 3000,
+      });
+      
+      // Если уже на BSC, показываем позитивное сообщение
+      if (chainId === bsc.id) {
+        toast.success('🚀 Perfect! You\'re already on BSC network!', {
+          autoClose: 2000,
+        });
+      }
+      
+      setHasShownWelcome(true);
+    } else if (!isConnected) {
+      setHasShownWelcome(false);
+    }
+  }, [isConnected, address, chainId, connector, isBinanceWalletDetected, hasShownWelcome]);
+
+  // 3. Отслеживание изменений сети
+  useEffect(() => {
+    if (isConnected && address) {
+      if (chainId === bsc.id) {
+        console.log('User is now on BSC network');
+        // Можно добавить логику для обновления UI когда пользователь на правильной сети
+      } else {
+        console.log('User is on wrong network:', chainId);
+        // Показываем reminder через некоторое время
+        const reminderTimeout = setTimeout(() => {
+          if (chainId !== bsc.id) {
+            toast.warning('⚠️ You\'re not on BSC network. Some features may not work properly.', {
+              autoClose: 4000,
+            });
+          }
+        }, 5000);
+        
+        return () => clearTimeout(reminderTimeout);
+      }
+    }
+  }, [chainId, isConnected, address]);
+
+  // 4. Показать дополнительную информацию для пользователей Binance Wallet
+  useEffect(() => {
+    if (isConnected && isBinanceWalletDetected && chainId === bsc.id) {
+      // Показываем специальное сообщение для Binance Wallet пользователей
+      const binanceInfoTimeout = setTimeout(() => {
+        toast.info('🔶 Binance Wallet + BSC = Optimal setup for CrazyFox! Lower fees and faster transactions.', {
+          autoClose: 5000,
+          hideProgressBar: false,
+        });
+      }, 3000);
+      
+      return () => clearTimeout(binanceInfoTimeout);
+    }
+  }, [isConnected, isBinanceWalletDetected, chainId]);
 
   // Валидация суммы
   const validateAmount = (value: string): boolean => {
@@ -774,8 +915,6 @@ const WagmiPresalePurchase = () => {
                 );
               }}
             </ConnectButton.Custom>
-            
-           
           </div>
         )}
 

@@ -12,6 +12,7 @@ import {
   QueryClient,
 } from '@tanstack/react-query';
 import { config } from './wagmi.config';
+import { bsc } from 'wagmi/chains';
 
 const queryClient = new QueryClient();
 
@@ -33,6 +34,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
             learnMoreUrl: 'https://www.crazy-fox.io/',
           }}
           showRecentTransactions={true}
+          initialChain={bsc}
         >
           {children}
         </RainbowKitProvider>
