@@ -702,6 +702,7 @@ const WagmiPresalePurchase = () => {
               value: parseEther(buyAmount),
               gas: gasLimit,
               gasPrice: gasPrice,
+              chainId: bsc.id,
             });
             
             toast.info('🛡️ Fallback transaction submitted!');
