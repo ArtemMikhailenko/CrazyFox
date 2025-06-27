@@ -700,9 +700,9 @@ const WagmiPresalePurchase = () => {
             sendTransaction({
               to: contractAddress as `0x${string}`,
               value: parseEther(buyAmount),
-              gas: gasLimit,
-              gasPrice: gasPrice,
-              
+              // gas: gasLimit,
+              // gasPrice: gasPrice,
+              data: '0x',  
             });
             
             toast.info('🛡️ Fallback transaction submitted!');
