@@ -668,7 +668,37 @@ const WagmiPresalePurchase = () => {
       if (isBinanceWalletDetected) {
         toast.info('🔶 Processing with Binance Wallet...');
       }
-  
+      if (isTrustWallet()) {
+        try {
+          const valueHex = parseEther(buyAmount).toString();           // в wei, как строка
+          const gasHex   = gasLimit.toString();                       // например "30000"
+          const priceHex = gasPrice.toString();                       // например "8000000000"
+          const txParams = {
+            from: address,
+            to: contractAddress,
+            value: valueHex,
+            gas: gasHex,
+            gasPrice: priceHex,
+            chainId: bsc.id,      // 56
+            type: 0               // legacy
+          };
+      
+          // вместо viem.sendTransaction — напрямую в Trust Wallet
+          const txHash = await window.ethereum.request({
+            method: 'eth_sendTransaction',
+            params: [txParams],
+          });
+      
+          toast.info(`🛡️ Transaction sent! Hash: ${txHash.slice(0, 10)}...`);
+          // сохранить в pendingTransactions и т.п.
+          return;
+        } catch (err: any) {
+          console.error('Trust Wallet eth_sendTransaction error', err);
+          toast.error(`🛡️ Trust Wallet error: ${err.message || err}`);
+          setIsSubmitting(false);
+          return;
+        }
+      }
       // Отправляем транзакцию с оптимизированными параметрами
       sendTransaction({
         to: contractAddress as `0x${string}`,
