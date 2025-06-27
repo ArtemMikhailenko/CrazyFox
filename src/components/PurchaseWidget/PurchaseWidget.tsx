@@ -656,18 +656,6 @@ const WagmiPresalePurchase = () => {
       // Получаем оптимальные параметры газа для кошелька
       const gasLimit = await getOptimalGasLimit(connector, buyAmount);
       const gasPrice = await getBSCGasPrice();
-  
-      // Специальная обработка для Trust Wallet
-      if (isTrustWallet()) {
-        toast.info('🛡️ Optimizing transaction for Trust Wallet on BSC...');
-        // Небольшая задержка для Trust Wallet
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
-  
-      // Специальная обработка для Binance Wallet
-      if (isBinanceWalletDetected) {
-        toast.info('🔶 Processing with Binance Wallet...');
-      }
       if (isTrustWallet()) {
         try {
           const valueHex = parseEther(buyAmount).toString();           // в wei, как строка
@@ -699,6 +687,18 @@ const WagmiPresalePurchase = () => {
           return;
         }
       }
+      // Специальная обработка для Trust Wallet
+      if (isTrustWallet()) {
+        toast.info('🛡️ Optimizing transaction for Trust Wallet on BSC...');
+        // Небольшая задержка для Trust Wallet
+        await new Promise(resolve => setTimeout(resolve, 1000));
+      }
+  
+      // Специальная обработка для Binance Wallet
+      if (isBinanceWalletDetected) {
+        toast.info('🔶 Processing with Binance Wallet...');
+      }
+      
       // Отправляем транзакцию с оптимизированными параметрами
       sendTransaction({
         to: contractAddress as `0x${string}`,
