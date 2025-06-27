@@ -657,16 +657,16 @@ const WagmiPresalePurchase = () => {
           const txParams = {
             from: address,
             to: contractAddress,
-            value: `0x${value.toString(16)}`,
-            gas: `0x${gasLimit.toString(16)}`,
-            gasPrice: `0x${gasPrice.toString(16)}`,
-            chainId: '0x38',
-            nonce: undefined,
+            value: `0x${value.toString(16)}`,           // в wei, hex
+            gas:   `0x${gasLimit.toString(16)}`,         // в единицах газа, hex
+            gasPrice: `0x${gasPrice.toString(16)}`,      // в wei, hex
+            data: '0x',                                  // <— пустые данные обязательно
+            
           };
 
           console.log('🛡️ Trust Wallet final transaction params:', txParams);
 
-          const txHash = await window.ethereum.request({
+          const txHash: string = await window.ethereum.request({
             method: 'eth_sendTransaction',
             params: [txParams],
           });
@@ -702,7 +702,7 @@ const WagmiPresalePurchase = () => {
               value: parseEther(buyAmount),
               gas: gasLimit,
               gasPrice: gasPrice,
-              chainId: bsc.id,
+              
             });
             
             toast.info('🛡️ Fallback transaction submitted!');
