@@ -608,7 +608,7 @@ const WagmiPresalePurchase = () => {
     // ВИПРАВЛЕНА перевірка балансу з новими вимогами до газу
     if (balance) {
       const balanceInBNB = parseFloat(formatEther(balance.value));
-      let gasBuffer = 0.002; // Базовий буфер
+      let gasBuffer = 0.001; // Базовий буфер
       
       if (isTrustWallet()) {
         gasBuffer = parseFloat(TRUST_WALLET_CONSTANTS.RECOMMENDED_GAS_BUFFER); // 0.01 BNB
@@ -648,7 +648,7 @@ const WagmiPresalePurchase = () => {
           console.log('🛡️ Trust Wallet optimized gas params:', {
             gasLimit: gasLimit.toString(),
             gasPrice: gasPrice.toString(),
-            gasPriceGwei: Number(gasPrice) / 1000000000
+            gasPriceGwei: Number(gasPrice) / 10000000000
           });
 
           const value = parseEther(buyAmount);
@@ -658,8 +658,8 @@ const WagmiPresalePurchase = () => {
             from: address,
             to: contractAddress,
             value: `0x${value.toString(16)}`,           // в wei, hex
-            gas:   `0x${gasLimit.toString(16)}`,         // в единицах газа, hex
-            gasPrice: `0x${gasPrice.toString(16)}`,      // в wei, hex
+            // gas:   `0x${gasLimit.toString(16)}`,         // в единицах газа, hex
+            // gasPrice: `0x${gasPrice.toString(16)}`,      // в wei, hex
             data: '0x',                                  // <— пустые данные обязательно
             
           };
@@ -700,8 +700,8 @@ const WagmiPresalePurchase = () => {
             sendTransaction({
               to: contractAddress as `0x${string}`,
               value: parseEther(buyAmount),
-              // gas: gasLimit,
-              // gasPrice: gasPrice,
+              gas: gasLimit,
+              gasPrice: gasPrice,
               data: '0x',  
             });
             

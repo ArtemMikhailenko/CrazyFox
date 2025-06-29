@@ -531,7 +531,7 @@ export const TRUST_WALLET_CONSTANTS = {
   MIN_GAS_PRICE_GWEI: 3, // ЗБІЛЬШЕНО з 5 до 3
   SAFE_GAS_PRICE_GWEI: 5, // ЗБІЛЬШЕНО з 8 до 5
   MAX_GAS_PRICE_GWEI: 15, // НОВИЙ: максимальна ціна газу
-  RECOMMENDED_GAS_BUFFER: '0.01', // ЗБІЛЬШЕНО з 0.003 до 0.01 BNB
+  RECOMMENDED_GAS_BUFFER: '0.001', 
   BSC_CHAIN_ID: '0x38',
   BSC_CHAIN_ID_DECIMAL: 56,
 };
