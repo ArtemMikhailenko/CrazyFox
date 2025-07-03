@@ -994,7 +994,7 @@ const WagmiPresalePurchase = () => {
         <div className={styles.progressSection}>
           <div className={styles.progressInfo}>
             <span>Stage 1/6</span>
-            <span>${(325000).toLocaleString()} Raised</span>
+            <span>${(329000).toLocaleString()} Raised</span>
           </div>
           <div className={styles.progressBar}>
             <div className={styles.progressFill} style={{ width: '32.5%' }}></div>
