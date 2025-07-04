@@ -993,7 +993,7 @@ const WagmiPresalePurchase = () => {
         {/* Progress */}
         <div className={styles.progressSection}>
           <div className={styles.progressInfo}>
-            <span>Stage 1/6</span>
+            <span>Stage 2/6</span>
             <span>${(329000).toLocaleString()} Raised</span>
           </div>
           <div className={styles.progressBar}>
@@ -1005,8 +1005,8 @@ const WagmiPresalePurchase = () => {
         {/* Price Info */}
         <div className={styles.priceInfo}>
           <div className={styles.priceRow}>
-            <span>Current: $0.005</span>
-            <span>Next: $0.006</span>
+            <span>Current: $0.006</span>
+            <span>Next: $0.007</span>
           </div>
         </div>
 
