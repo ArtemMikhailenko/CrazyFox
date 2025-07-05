@@ -1,6 +1,7 @@
 'use client';
 
 import { motion } from 'framer-motion';
+import { useLanguage } from '@/hooks/useLanguage';
 import styles from './TokenPriceProgression.module.css';
 
 interface PriceStage {
@@ -19,13 +20,44 @@ const TokenPriceProgression: React.FC<TokenPriceProgressionProps> = ({
   currentStage = 2, 
   className = '' 
 }) => {
+  // Language hook
+  const { getComponentText } = useLanguage();
+
   const priceStages: PriceStage[] = [
-    { price: '$0.005', stage: 'Stage 1', isPast: currentStage > 1 },
-    { price: '$0.006', stage: 'Stage 2', isActive: currentStage === 2, isPast: currentStage > 2 },
-    { price: '$0.007', stage: 'Stage 3', isActive: currentStage === 3, isPast: currentStage > 3 },
-    { price: '$0.008', stage: 'Stage 4', isActive: currentStage === 4, isPast: currentStage > 4 },
-    { price: '$0.009', stage: 'Stage 5', isActive: currentStage === 5, isPast: currentStage > 5 },
-    { price: '$0.01', stage: 'Stage 6', isActive: currentStage === 6 }
+    { 
+      price: getComponentText('tokenPriceProgression', 'stages.stage1.price'), 
+      stage: getComponentText('tokenPriceProgression', 'stages.stage1.stage'), 
+      isPast: currentStage > 1 
+    },
+    { 
+      price: getComponentText('tokenPriceProgression', 'stages.stage2.price'), 
+      stage: getComponentText('tokenPriceProgression', 'stages.stage2.stage'), 
+      isActive: currentStage === 2, 
+      isPast: currentStage > 2 
+    },
+    { 
+      price: getComponentText('tokenPriceProgression', 'stages.stage3.price'), 
+      stage: getComponentText('tokenPriceProgression', 'stages.stage3.stage'), 
+      isActive: currentStage === 3, 
+      isPast: currentStage > 3 
+    },
+    { 
+      price: getComponentText('tokenPriceProgression', 'stages.stage4.price'), 
+      stage: getComponentText('tokenPriceProgression', 'stages.stage4.stage'), 
+      isActive: currentStage === 4, 
+      isPast: currentStage > 4 
+    },
+    { 
+      price: getComponentText('tokenPriceProgression', 'stages.stage5.price'), 
+      stage: getComponentText('tokenPriceProgression', 'stages.stage5.stage'), 
+      isActive: currentStage === 5, 
+      isPast: currentStage > 5 
+    },
+    { 
+      price: getComponentText('tokenPriceProgression', 'stages.stage6.price'), 
+      stage: getComponentText('tokenPriceProgression', 'stages.stage6.stage'), 
+      isActive: currentStage === 6 
+    }
   ];
 
   const containerVariants = {
@@ -58,8 +90,10 @@ const TokenPriceProgression: React.FC<TokenPriceProgressionProps> = ({
     >
       <motion.div className={styles.titleSection}>
         <motion.h2 className={styles.title}>
-          <span className={styles.icon}>💰</span>
-          Token Price Progression
+          <span className={styles.icon}>
+            {getComponentText('tokenPriceProgression', 'icon')}
+          </span>
+          {getComponentText('tokenPriceProgression', 'title')}
         </motion.h2>
       </motion.div>
 
@@ -117,7 +151,7 @@ const TokenPriceProgression: React.FC<TokenPriceProgressionProps> = ({
                       repeat: Infinity 
                     }}
                   />
-                  <span>CURRENT</span>
+                  <span>{getComponentText('tokenPriceProgression', 'status.current')}</span>
                 </motion.div>
               )}
 
@@ -128,7 +162,7 @@ const TokenPriceProgression: React.FC<TokenPriceProgressionProps> = ({
                   animate={{ scale: 1, rotate: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  ✓
+                  {getComponentText('tokenPriceProgression', 'status.completed')}
                 </motion.div>
               )}
 
@@ -153,17 +187,21 @@ const TokenPriceProgression: React.FC<TokenPriceProgressionProps> = ({
         transition={{ delay: 1 }}
       >
         <div className={styles.currentStageInfo}>
-          <span className={styles.infoLabel}>Current Stage:</span>
+          <span className={styles.infoLabel}>
+            {getComponentText('tokenPriceProgression', 'info.currentStage')}
+          </span>
           <span className={styles.infoValue}>
             {priceStages[currentStage - 1]?.stage} - {priceStages[currentStage - 1]?.price}
           </span>
         </div>
         <div className={styles.nextStageInfo}>
-          <span className={styles.infoLabel}>Next Stage:</span>
+          <span className={styles.infoLabel}>
+            {getComponentText('tokenPriceProgression', 'info.nextStage')}
+          </span>
           <span className={styles.infoValue}>
             {priceStages[currentStage] ? 
               `${priceStages[currentStage].stage} - ${priceStages[currentStage].price}` : 
-              'Completed'
+              getComponentText('tokenPriceProgression', 'info.completed')
             }
           </span>
         </div>

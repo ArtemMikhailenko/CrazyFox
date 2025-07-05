@@ -1,4 +1,4 @@
-/* Header.module.css - Updated for Wagmi + RainbowKit */
+/* Header.module.css - Updated for better i18n support */
 
 .header {
   position: fixed;
@@ -23,7 +23,7 @@
 .container {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 0 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -37,6 +37,7 @@
   gap: 12px;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .logo img {
@@ -53,37 +54,45 @@
 }
 
 .logoText {
-  font-size: 1.5rem;
+  font-size: 1.4rem;
   font-weight: 700;
   background: linear-gradient(45deg, #ff6b35, #4ecdc4);
   background-clip: text;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   letter-spacing: -0.5px;
+  white-space: nowrap;
 }
 
-/* Desktop Navigation */
+/* Desktop Navigation - УЛУЧШЕНО для переводов */
 .desktopNav {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
+  flex: 1;
+  justify-content: center;
+  max-width: 600px;
+  margin: 0 20px;
 }
 
 .navLink {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 16px;
+  justify-content: center;
+  padding: 10px 14px;
   background: none;
   border: none;
   color: rgba(255, 255, 255, 0.8);
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 500;
-  border-radius: 12px;
+  border-radius: 10px;
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
   overflow: hidden;
+  min-width: 80px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .navLink::before {
@@ -114,34 +123,42 @@
   border: 1px solid rgba(255, 107, 53, 0.4);
 }
 
+/* УДАЛЕНЫ иконки из десктопной навигации для экономии места */
 .navIcon {
-  font-size: 1.1rem;
+  display: none; /* Скрываем иконки в десктопной версии */
 }
 
 .navLabel {
   font-weight: 600;
+  font-size: 0.9rem;
 }
 
 /* Actions */
 .actions {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.languageSwitcher {
+  flex-shrink: 0;
 }
 
 .whitePaperButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
+  gap: 6px;
+  padding: 8px 12px;
   background: rgba(78, 205, 196, 0.1);
   border: 1px solid rgba(78, 205, 196, 0.3);
-  border-radius: 12px;
+  border-radius: 10px;
   color: #4ecdc4;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .whitePaperButton:hover {
@@ -152,7 +169,7 @@
 }
 
 .buttonIcon {
-  font-size: 1rem;
+  font-size: 0.9rem;
 }
 
 .buttonText {
@@ -162,23 +179,25 @@
 /* Wallet Connection */
 .connectWallet {
   position: relative;
+  flex-shrink: 0;
 }
 
 .connectButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: 6px;
+  padding: 10px 16px;
   background: linear-gradient(45deg, #ff6b35, #f7931e);
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 160px;
+  min-width: 140px;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .connectButton:hover {
@@ -189,18 +208,19 @@
 .wrongNetworkButton {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 12px 20px;
+  gap: 6px;
+  padding: 10px 16px;
   background: linear-gradient(45deg, #e74c3c, #c0392b);
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   color: white;
-  font-size: 0.95rem;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  min-width: 160px;
+  min-width: 140px;
   justify-content: center;
+  white-space: nowrap;
 }
 
 .wrongNetworkButton:hover {
@@ -211,22 +231,23 @@
 .connectedWallet {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
 }
 
 .chainButton {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 6px 10px;
   background: rgba(78, 205, 196, 0.1);
   border: 1px solid rgba(78, 205, 196, 0.3);
   border-radius: 8px;
   color: #4ecdc4;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  white-space: nowrap;
 }
 
 .chainButton:hover {
@@ -237,17 +258,17 @@
 .accountButton {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 8px 12px;
+  gap: 4px;
+  padding: 6px 10px;
   background: rgba(255, 107, 53, 0.1);
   border: 1px solid rgba(255, 107, 53, 0.3);
   border-radius: 8px;
   color: #ff6b35;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
-  max-width: 180px;
+  max-width: 140px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -272,6 +293,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.3s ease;
+  flex-shrink: 0;
 }
 
 .mobileMenuButton:hover {
@@ -322,9 +344,16 @@
 }
 
 .mobileMenuContent {
-  padding: 20px 24px;
+  padding: 20px 20px;
   max-height: calc(100vh - 80px);
   overflow-y: auto;
+}
+
+/* Mobile Language Switcher */
+.mobileLanguageSwitcher {
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 /* Mobile Connection Status */
@@ -344,6 +373,7 @@
 
 .connectionIcon {
   font-size: 1.2rem;
+  flex-shrink: 0;
 }
 
 .connectionDetails {
@@ -369,7 +399,7 @@
   font-weight: 600;
 }
 
-/* Mobile Navigation Links */
+/* Mobile Navigation Links - ИКОНКИ СОХРАНЕНЫ в мобильной версии */
 .mobileNavLink {
   display: flex;
   align-items: center;
@@ -401,13 +431,16 @@
   border: 1px solid rgba(255, 107, 53, 0.4);
 }
 
+/* В мобильной версии иконки ОСТАЮТСЯ */
 .mobileNavLink .navIcon {
   font-size: 1.2rem;
   min-width: 24px;
+  flex-shrink: 0;
 }
 
 .mobileNavLink .navLabel {
   font-weight: 600;
+  flex: 1;
 }
 
 /* Mobile Actions */
@@ -664,7 +697,24 @@
   transform: translateY(-2px);
 }
 
-/* Responsive Design */
+/* Responsive Design - УЛУЧШЕННЫЕ медиа-запросы */
+@media (max-width: 1200px) {
+  .desktopNav {
+    gap: 2px;
+    margin: 0 15px;
+  }
+  
+  .navLink {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    min-width: 70px;
+  }
+  
+  .actions {
+    gap: 10px;
+  }
+}
+
 @media (max-width: 1024px) {
   .desktopNav {
     display: none;
@@ -681,11 +731,15 @@
   .whitePaperButton {
     display: none;
   }
+  
+  .container {
+    padding: 0 16px;
+  }
 }
 
 @media (max-width: 768px) {
   .container {
-    padding: 0 16px;
+    padding: 0 12px;
   }
   
   .logo img {
@@ -694,7 +748,7 @@
   }
   
   .logoText {
-    font-size: 1.3rem;
+    font-size: 1.2rem;
   }
   
   .actions {
@@ -704,14 +758,15 @@
   .connectButton,
   .wrongNetworkButton {
     min-width: 120px;
-    padding: 10px 16px;
+    padding: 8px 12px;
     font-size: 0.85rem;
   }
   
   .chainButton,
   .accountButton {
-    padding: 6px 10px;
-    font-size: 0.8rem;
+    padding: 5px 8px;
+    font-size: 0.75rem;
+    max-width: 100px;
   }
   
   .mobileMenuContent {
@@ -738,28 +793,29 @@
 
 @media (max-width: 480px) {
   .header {
-    padding: 12px 0;
+    padding: 10px 0;
   }
   
   .container {
-    padding: 0 12px;
+    padding: 0 8px;
   }
   
   .logoText {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
   }
   
   .connectButton,
   .wrongNetworkButton {
     min-width: 100px;
-    padding: 8px 12px;
+    padding: 6px 10px;
     font-size: 0.8rem;
   }
   
   .chainButton,
   .accountButton {
-    padding: 4px 8px;
-    font-size: 0.75rem;
+    padding: 4px 6px;
+    font-size: 0.7rem;
+    max-width: 80px;
   }
   
   .mobileNavLink {
@@ -776,14 +832,21 @@
   }
 }
 
-/* Dark theme support */
-@media (prefers-color-scheme: dark) {
-  .header {
-    background: rgba(26, 26, 46, 0.9);
+/* Особо узкие экраны */
+@media (max-width: 360px) {
+  .logoText {
+    font-size: 1rem;
   }
   
-  .header.scrolled {
-    background: rgba(26, 26, 46, 0.98);
+  .connectButton,
+  .wrongNetworkButton {
+    min-width: 90px;
+    padding: 5px 8px;
+    font-size: 0.75rem;
+  }
+  
+  .actions {
+    gap: 6px;
   }
 }
 

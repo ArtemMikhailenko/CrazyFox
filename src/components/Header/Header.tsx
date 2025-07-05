@@ -5,7 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useAccount, useChainId } from 'wagmi';
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { bsc } from 'viem/chains';
+import LanguageSwitcher from '@/components/LanguageSwitcher/LanguageSwitcher';
 import styles from './Header.module.css';
+import { useLanguage } from '@/hooks/useLanguage';
 
 interface HeaderProps {
   activeSection: string;
@@ -22,6 +24,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
   // Wagmi hooks для состояния подключения
   const { address, isConnected, connector } = useAccount();
   const chainId = useChainId();
+
+  // Language hook
+  const { getComponentText, getComponentArray } = useLanguage();
 
   // Проверка правильной сети
   const isOnBSC = chainId === bsc.id;
@@ -129,11 +134,11 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
   }, []);
 
   const navigationItems = [
-    { id: 'hero', label: 'Home', icon: '🏠' },
-    { id: 'about', label: 'About', icon: '📋' },
-    { id: 'tokenomics', label: 'Tokenomics', icon: '💰' },
-    { id: 'roadmap', label: 'Roadmap', icon: '🗺️' },
-    { id: 'community', label: 'Community', icon: '👥' }
+    { id: 'hero', label: getComponentText('header', 'navigation.home'), icon: '🏠' },
+    { id: 'about', label: getComponentText('header', 'navigation.about'), icon: '📋' },
+    { id: 'tokenomics', label: getComponentText('header', 'navigation.tokenomics'), icon: '💰' },
+    { id: 'roadmap', label: getComponentText('header', 'navigation.roadmap'), icon: '🗺️' },
+    { id: 'community', label: getComponentText('header', 'navigation.community'), icon: '👥' }
   ];
 
   const handleNavClick = useCallback((sectionId: string) => {
@@ -212,8 +217,8 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
             whileTap={{ scale: 0.95 }}
             onClick={() => handleNavClick('hero')}
           >
-            <img src="/fox.png" alt="CrazyFox Logo" />
-            <span className={styles.logoText}>CrazyFox</span>
+            <img src="/fox.png" alt={getComponentText('header', 'logo.alt')} />
+            <span className={styles.logoText}>{getComponentText('header', 'logo.text')}</span>
           </motion.div>
           
           {/* Desktop Navigation */}
@@ -234,6 +239,9 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
 
           {/* Action Buttons */}
           <div className={styles.actions}>
+            {/* Language Switcher */}
+            <LanguageSwitcher className={styles.languageSwitcher} />
+
             {/* White Paper Button - только на десктопе */}
             {!isMobile && (
               <motion.button
@@ -243,7 +251,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                 whileTap={{ scale: 0.95 }}
               >
                 <span className={styles.buttonIcon}>📄</span>
-                <span className={styles.buttonText}>White Paper</span>
+                <span className={styles.buttonText}>{getComponentText('header', 'buttons.whitePaper')}</span>
               </motion.button>
             )}
 
@@ -283,7 +291,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              🌈 Connect Wallet
+                              🌈 {getComponentText('header', 'buttons.connectWallet')}
                             </motion.button>
                           );
                         }
@@ -297,7 +305,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              ⚠️ Wrong Network
+                              ⚠️ {getComponentText('header', 'buttons.wrongNetwork')}
                             </motion.button>
                           );
                         }
@@ -366,7 +374,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               className={styles.mobileMenuButton}
               onClick={toggleMobileMenu}
               whileTap={{ scale: 0.95 }}
-              aria-label="Toggle mobile menu"
+              aria-label={getComponentText('header', 'aria.toggleMenu')}
               aria-expanded={isMenuOpen}
             >
               <div className={`${styles.hamburger} ${isMenuOpen ? styles.open : ''}`}>
@@ -389,13 +397,23 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               exit="hidden"
             >
               <div className={styles.mobileMenuContent}>
+                {/* Language Switcher в мобильном меню */}
+                <motion.div
+                  className={styles.mobileLanguageSwitcher}
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                >
+                  <LanguageSwitcher variant="compact" />
+                </motion.div>
+
                 {/* Статус подключения в мобильном меню */}
                 {isConnected && address && (
                   <motion.div
                     className={styles.mobileConnectionStatus}
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.1 }}
+                    transition={{ delay: 0.15 }}
                   >
                     <div className={styles.connectionInfo}>
                       <span className={styles.connectionIcon}>
@@ -403,14 +421,14 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                       </span>
                       <div className={styles.connectionDetails}>
                         <div className={styles.walletName}>
-                          {connector?.name} Connected
+                          {connector?.name} {getComponentText('header', 'wallet.connected')}
                         </div>
                         <div className={styles.walletAddress}>
                           {address.slice(0, 6)}...{address.slice(-4)}
                         </div>
                         {!isOnBSC && (
                           <div className={styles.networkWarning}>
-                            Switch to BSC Network
+                            {getComponentText('header', 'wallet.switchToBSC')}
                           </div>
                         )}
                       </div>
@@ -464,7 +482,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                       setIsMenuOpen(false);
                     }}
                   >
-                    📄 White Paper
+                    📄 {getComponentText('header', 'buttons.whitePaper')}
                   </button>
                 </motion.div>
 
@@ -477,10 +495,10 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                     transition={{ delay: 0.3 }}
                   >
                     <p className={styles.promptText}>
-                      🌈 Connect your wallet to participate in the presale
+                      🌈 {getComponentText('header', 'wallet.connectPrompt')}
                     </p>
                     <div className={styles.supportedWallets}>
-                      <span>Supported: MetaMask, Trust Wallet, Coinbase Wallet & more</span>
+                      <span>{getComponentText('header', 'wallet.supportedWallets')}</span>
                     </div>
                   </motion.div>
                 )}
@@ -510,12 +528,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
               <div className={styles.modalHeader}>
                 <div className={styles.modalTitle}>
                   <span className={styles.titleIcon}>📄</span>
-                  <h3>CrazyFox White Paper</h3>
+                  <h3>{getComponentText('header', 'whitePaper.title')}</h3>
                 </div>
                 <button 
                   className={styles.closeButton}
                   onClick={() => setShowWhitePaper(false)}
-                  aria-label="Close modal"
+                  aria-label={getComponentText('header', 'aria.closeModal')}
                 >
                   ✕
                 </button>
@@ -539,16 +557,14 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                   </div>
                   
                   <div className={styles.previewContent}>
-                    <h4>Comprehensive Project Overview</h4>
+                    <h4>{getComponentText('header', 'whitePaper.subtitle')}</h4>
                     <p>
-                      Discover the future of meme coins with CrazyFox. Our white paper covers:
+                      {getComponentText('header', 'whitePaper.description')}
                     </p>
                     <ul>
-                      <li>🚀 Revolutionary tokenomics with presale structure</li>
-                      <li>💰 Aggressive marketing strategy (150M tokens)</li>
-                      <li>🛡️ Maximum security features</li>
-                      <li>🎮 Complete ecosystem roadmap</li>
-                      <li>📊 Technical analysis and comparisons</li>
+                    {getComponentArray('header', 'whitePaper', 5).map((feature: string, index: number) => (
+                        <li key={index}>{feature}</li>
+                      ))}
                     </ul>
                   </div>
                 </div>
@@ -562,7 +578,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                     whileTap={{ scale: 0.95 }}
                   >
                     <span className={styles.downloadIcon}>⬇️</span>
-                    Download PDF
+                    {getComponentText('header', 'whitePaper.actions.download')}
                   </motion.a>
                   
                   <motion.button
@@ -572,12 +588,12 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                     whileTap={{ scale: 0.95 }}
                   >
                     <span className={styles.viewIcon}>👁️</span>
-                    View Online
+                    {getComponentText('header', 'whitePaper.actions.viewOnline')}
                   </motion.button>
                 </div>
 
                 <div className={styles.socialShare}>
-                  <p>Share with your community:</p>
+                  <p>{getComponentText('header', 'whitePaper.actions.share')}</p>
                   <div className={styles.shareButtons}>
                     <motion.button
                       className={styles.shareButton}
@@ -587,7 +603,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                         const url = `https://twitter.com/intent/tweet?text=Check out the CrazyFox White Paper! 🦊🚀&url=${window.location.origin}/whitepaper`;
                         window.open(url, '_blank');
                       }}
-                      aria-label="Share on Twitter"
+                      aria-label={getComponentText('header', 'whitePaper.shareLabels.twitter')}
                     >
                       🐦
                     </motion.button>
@@ -599,7 +615,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                         const url = `https://t.me/share/url?url=${window.location.origin}/whitepaper&text=CrazyFox White Paper 🦊`;
                         window.open(url, '_blank');
                       }}
-                      aria-label="Share on Telegram"
+                      aria-label={getComponentText('header', 'whitePaper.shareLabels.telegram')}
                     >
                       📱
                     </motion.button>
@@ -610,7 +626,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                       onClick={() => {
                         navigator.clipboard.writeText(`${window.location.origin}/whitepaper`);
                       }}
-                      aria-label="Copy link"
+                      aria-label={getComponentText('header', 'whitePaper.shareLabels.copy')}
                     >
                       📋
                     </motion.button>

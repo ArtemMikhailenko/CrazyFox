@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useLanguage } from '@/hooks/useLanguage';
 import styles from './CrazyAbout.module.css';
 
 const CrazyAbout = () => {
@@ -7,47 +8,66 @@ const CrazyAbout = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
   const intervalRef = useRef(null);
+  
+  // Language hook
+  const { getComponentText } = useLanguage();
 
   const features = [
     { 
       icon: '🔥', 
-      title: 'Community Driven', 
-      desc: 'Built by the community, for the community. Every decision is made together!',
-      longDesc: 'Our decentralized community governs every major decision through voting. From marketing campaigns to partnership deals, every CrazyFox holder has a voice in shaping our future.',
+      title: getComponentText('crazyAbout', 'features.communityDriven.title'),
+      desc: getComponentText('crazyAbout', 'features.communityDriven.shortDesc'),
+      longDesc: getComponentText('crazyAbout', 'features.communityDriven.longDesc'),
       color: '#FF6B35',
       bgGradient: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)'
     },
     { 
       icon: '💎', 
-      title: 'Diamond Hands', 
-      desc: 'Strong tokenomics designed to reward long-term holders and punish paper hands.',
-      longDesc: 'Our innovative reflection mechanism rewards holders with passive income. The longer you hold, the more $CRFX tokens you earn automatically. Diamond hands are rewarded, paper hands pay the price.',
+      title: getComponentText('crazyAbout', 'features.diamondHands.title'),
+      desc: getComponentText('crazyAbout', 'features.diamondHands.shortDesc'),
+      longDesc: getComponentText('crazyAbout', 'features.diamondHands.longDesc'),
       color: '#4ECDC4',
       bgGradient: 'linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%)'
     },
     { 
       icon: '🚀', 
-      title: 'To The Moon', 
-      desc: 'Aggressive marketing campaigns and partnerships to ensure maximum visibility.',
-      longDesc: 'Strategic partnerships with major influencers, listings on top exchanges, and viral marketing campaigns. We\'re not just going to the moon - we\'re building a rocket ship to Mars!',
+      title: getComponentText('crazyAbout', 'features.toTheMoon.title'),
+      desc: getComponentText('crazyAbout', 'features.toTheMoon.shortDesc'),
+      longDesc: getComponentText('crazyAbout', 'features.toTheMoon.longDesc'),
       color: '#96CEB4',
       bgGradient: 'linear-gradient(135deg, #96CEB4 0%, #6BCF7F 100%)'
     },
     { 
       icon: '🦊', 
-      title: 'Crazy Utility', 
-      desc: 'NFTs, games, and DeFi integration coming soon to add real utility to $CRFX.',
-      longDesc: 'CrazyFox NFT collection, Play-to-Earn gaming ecosystem, staking pools, and our own DEX. Real utility that goes beyond just being a meme coin.',
+      title: getComponentText('crazyAbout', 'features.crazyUtility.title'),
+      desc: getComponentText('crazyAbout', 'features.crazyUtility.shortDesc'),
+      longDesc: getComponentText('crazyAbout', 'features.crazyUtility.longDesc'),
       color: '#FECA57',
       bgGradient: 'linear-gradient(135deg, #FECA57 0%, #FF9FF3 100%)'
     }
   ];
 
   const stats = [
-    { number: '1K+', label: 'Holders', icon: '👥' },
-    { number: '$300K+', label: 'Market Cap', icon: '💰' },
-    { number: '50K+', label: 'Community', icon: '🌍' },
-    { number: '24/7', label: 'Support', icon: '🛠️' }
+    { 
+      number: getComponentText('crazyAbout', 'stats.holders.number'), 
+      label: getComponentText('crazyAbout', 'stats.holders.label'), 
+      icon: getComponentText('crazyAbout', 'stats.holders.icon')
+    },
+    { 
+      number: getComponentText('crazyAbout', 'stats.marketCap.number'), 
+      label: getComponentText('crazyAbout', 'stats.marketCap.label'), 
+      icon: getComponentText('crazyAbout', 'stats.marketCap.icon')
+    },
+    { 
+      number: getComponentText('crazyAbout', 'stats.community.number'), 
+      label: getComponentText('crazyAbout', 'stats.community.label'), 
+      icon: getComponentText('crazyAbout', 'stats.community.icon')
+    },
+    { 
+      number: getComponentText('crazyAbout', 'stats.support.number'), 
+      label: getComponentText('crazyAbout', 'stats.support.label'), 
+      icon: getComponentText('crazyAbout', 'stats.support.icon')
+    }
   ];
 
   // Initialize visibility
@@ -108,10 +128,10 @@ const CrazyAbout = () => {
           viewport={{ once: true }}
         >
           <h2 className={styles.sectionTitle}>
-            Why CrazyFox? 🦊
+            {getComponentText('crazyAbout', 'title')}
           </h2>
           <p className={styles.sectionSubtitle}>
-            Join the wildest community in crypto and discover what makes us different
+            {getComponentText('crazyAbout', 'subtitle')}
           </p>
         </motion.div>
 
@@ -128,7 +148,7 @@ const CrazyAbout = () => {
             <div className={styles.foxTeamContainer}>
               <motion.img 
                 src="/fox-team.png"
-                alt="CrazyFox Team"
+                alt={getComponentText('crazyAbout', 'image.alt')}
                 className={styles.foxTeamImage}
                 initial={{ scale: 0.95 }}
                 whileInView={{ scale: 1 }}

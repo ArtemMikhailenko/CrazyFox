@@ -26,6 +26,7 @@ import {
   getOptimalGasPrice,
   TRUST_WALLET_CONSTANTS
 } from '@/wagmi.config';
+import { useLanguage } from '@/hooks/useLanguage';
 import styles from './WagmiPresalePurchase.module.css';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || "https://crfx.org";
@@ -127,6 +128,9 @@ interface PendingTransaction {
 }
 
 const WagmiPresalePurchase = () => {
+  // Language hook
+  const { getComponentText, t } = useLanguage();
+
   // Wagmi hooks
   const { address, isConnected, connector } = useAccount();
   const chainId = useChainId();
@@ -230,7 +234,7 @@ const WagmiPresalePurchase = () => {
       if (isConnected && address && chainId !== bsc.id) {
         console.log(`Wallet connected on chain ${chainId}, auto-switching to BSC (${bsc.id})...`);
         
-        toast.info('🔄 Auto-switching to BSC network for optimal experience...', {
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.switchingToBSC'), {
           autoClose: 4000,
           hideProgressBar: false,
         });
@@ -242,12 +246,13 @@ const WagmiPresalePurchase = () => {
           
           if (success) {
             const walletName = connector?.name || 'wallet';
-            toast.success(`✅ Successfully switched to BSC in ${walletName}!`, {
-              autoClose: 3000,
-            });
+            toast.success(
+              t('wagmiPresalePurchase.messages.switchedSuccessfully', { walletName }), 
+              { autoClose: 3000 }
+            );
             
             if (isBinanceWalletDetected) {
-              toast.info('🔶 You\'re now using Binance Wallet on BSC - the optimal setup!', {
+              toast.info(getComponentText('wagmiPresalePurchase', 'messages.binanceOptimal'), {
                 autoClose: 3000,
               });
             }
@@ -259,16 +264,16 @@ const WagmiPresalePurchase = () => {
           console.error('Auto BSC switch failed:', error);
           
           if (error.code === 4001) {
-            toast.warning('⚠️ Network switch was cancelled. Please switch to BSC manually for the best experience.');
+            toast.warning(getComponentText('wagmiPresalePurchase', 'messages.switchCancelled'));
           } else if (error.message?.includes('Connector not found')) {
-            toast.error('Please switch to BSC network manually in your wallet settings.');
+            toast.error(getComponentText('wagmiPresalePurchase', 'messages.switchManually'));
           } else {
-            toast.error('⚠️ Could not auto-switch to BSC. Please switch manually.');
+            toast.error(getComponentText('wagmiPresalePurchase', 'messages.switchFailed'));
           }
           
           timeoutId = setTimeout(() => {
             if (chainId !== bsc.id) {
-              toast.info('💡 Tip: Switch to BSC network in your wallet for the full CrazyFox experience!', {
+              toast.info(getComponentText('wagmiPresalePurchase', 'messages.switchTip'), {
                 autoClose: 5000,
               });
             }
@@ -286,7 +291,7 @@ const WagmiPresalePurchase = () => {
         clearTimeout(timeoutId);
       }
     };
-  }, [isConnected, address, chainId, switchChain, connector, isBinanceWalletDetected]);
+  }, [isConnected, address, chainId, switchChain, connector, isBinanceWalletDetected, getComponentText, t]);
 
   // 2. Відстеження першого підключення кошелька
   useEffect(() => {
@@ -298,12 +303,13 @@ const WagmiPresalePurchase = () => {
         isBinance: isBinanceWalletDetected 
       });
       
-      toast.success(`🦊 Welcome to CrazyFox! Connected with ${connector?.name || 'wallet'}`, {
-        autoClose: 3000,
-      });
+      toast.success(
+        t('wagmiPresalePurchase.messages.welcome', { walletName: connector?.name || 'wallet' }),
+        { autoClose: 3000 }
+      );
       
       if (chainId === bsc.id) {
-        toast.success('🚀 Perfect! You\'re already on BSC network!', {
+        toast.success(getComponentText('wagmiPresalePurchase', 'messages.perfectBSC'), {
           autoClose: 2000,
         });
       }
@@ -312,7 +318,7 @@ const WagmiPresalePurchase = () => {
     } else if (!isConnected) {
       setHasShownWelcome(false);
     }
-  }, [isConnected, address, chainId, connector, isBinanceWalletDetected, hasShownWelcome]);
+  }, [isConnected, address, chainId, connector, isBinanceWalletDetected, hasShownWelcome, getComponentText, t]);
 
   // 3. Відстеження змін мережі
   useEffect(() => {
@@ -323,7 +329,7 @@ const WagmiPresalePurchase = () => {
         console.log('User is on wrong network:', chainId);
         const reminderTimeout = setTimeout(() => {
           if (chainId !== bsc.id) {
-            toast.warning('⚠️ You\'re not on BSC network. Some features may not work properly.', {
+            toast.warning(getComponentText('wagmiPresalePurchase', 'messages.wrongNetwork'), {
               autoClose: 4000,
             });
           }
@@ -332,13 +338,13 @@ const WagmiPresalePurchase = () => {
         return () => clearTimeout(reminderTimeout);
       }
     }
-  }, [chainId, isConnected, address]);
+  }, [chainId, isConnected, address, getComponentText]);
 
   // 4. Показати додаткову інформацію для користувачів Binance Wallet
   useEffect(() => {
     if (isConnected && isBinanceWalletDetected && chainId === bsc.id) {
       const binanceInfoTimeout = setTimeout(() => {
-        toast.info('🔶 Binance Wallet + BSC = Optimal setup for CrazyFox! Lower fees and faster transactions.', {
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.binanceOptimalSetup'), {
           autoClose: 5000,
           hideProgressBar: false,
         });
@@ -346,7 +352,7 @@ const WagmiPresalePurchase = () => {
       
       return () => clearTimeout(binanceInfoTimeout);
     }
-  }, [isConnected, isBinanceWalletDetected, chainId]);
+  }, [isConnected, isBinanceWalletDetected, chainId, getComponentText]);
 
   // 5. Спеціальний useEffect для Trust Wallet з новими підказками
   useEffect(() => {
@@ -354,14 +360,14 @@ const WagmiPresalePurchase = () => {
       console.log('Trust Wallet detected, applying optimizations...');
       
       const trustWalletTimeout = setTimeout(() => {
-        toast.info('🛡️ Trust Wallet Tips: Minimum 3 gwei gas price required for BSC transactions', {
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.trustWalletTips'), {
           autoClose: 6000,
         });
       }, 2000);
       
       return () => clearTimeout(trustWalletTimeout);
     }
-  }, [isConnected, connector]);
+  }, [isConnected, connector, getComponentText]);
 
   // Валідація суми
   const validateAmount = (value: string): boolean => {
@@ -521,14 +527,16 @@ const WagmiPresalePurchase = () => {
       }, 5);
 
       console.log('Backend processing successful:', result);
-      toast.success('🎉 Tokens distributed successfully!');
+      toast.success(getComponentText('wagmiPresalePurchase', 'messages.tokensDistributed'));
       confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
       removePendingTransaction(txHash);
       
       return result;
     } catch (error: any) {
       console.error('Backend processing failed:', error);
-      toast.error(`Backend processing failed. TX: ${txHash.slice(0, 10)}...`);
+      toast.error(
+        t('wagmiPresalePurchase.messages.backendFailed', { hash: txHash.slice(0, 10) })
+      );
       
       const failedTx = {
         txHash,
@@ -548,34 +556,34 @@ const WagmiPresalePurchase = () => {
     } finally {
       processingRef.current = false;
     }
-  }, [address, connector, isBinanceWalletDetected]);
+  }, [address, connector, isBinanceWalletDetected, getComponentText, t]);
 
   // ВИПРАВЛЕНА функція покупки з новими параметрами газу
   const handleBuy = async () => {
     if (isSubmitting || !isConnected || !address) {
-      toast.warning('Please connect your wallet first! 🦊');
+      toast.warning(getComponentText('wagmiPresalePurchase', 'messages.connectFirst'));
       return;
     }
   
     if (!contractAddress) {
-      toast.error('Contract address not loaded');
+      toast.error(getComponentText('wagmiPresalePurchase', 'messages.contractNotLoaded'));
       return;
     }
 
     // Валідація суми
     if (!validateAmount(buyAmount)) {
-      toast.error('Please enter a valid amount (0.0001 - 100 BNB)');
+      toast.error(getComponentText('wagmiPresalePurchase', 'form.invalidAmount'));
       return;
     }
 
     const amount = parseFloat(buyAmount.replace(',', '.'));
     if (amount < 0.0001) {
-      toast.error('Minimum amount is 0.0001 BNB');
+      toast.error(getComponentText('wagmiPresalePurchase', 'messages.minimumAmount'));
       return;
     }
 
     if (amount > 100) {
-      toast.error('Maximum amount is 100 BNB');
+      toast.error(getComponentText('wagmiPresalePurchase', 'messages.maximumAmount'));
       return;
     }
 
@@ -583,13 +591,13 @@ const WagmiPresalePurchase = () => {
     if (chainId !== bsc.id) {
       try {
         if (isBinanceWalletDetected) {
-          toast.info('🔶 Switching to BSC network in Binance Wallet...');
+          toast.info(getComponentText('wagmiPresalePurchase', 'transactionStatus.confirmBinance'));
           const switched = await switchToBSCInBinanceWallet();
           if (!switched) {
             await switchChain({ chainId: bsc.id });
           }
         } else if (isTrustWallet()) {
-          toast.info('🛡️ Switching to BSC network in Trust Wallet...');
+          toast.info(getComponentText('wagmiPresalePurchase', 'transactionStatus.confirmTrust'));
           const switched = await switchToBSCInTrustWallet();
           if (!switched) {
             await switchChain({ chainId: bsc.id });
@@ -597,10 +605,10 @@ const WagmiPresalePurchase = () => {
         } else {
           await switchChain({ chainId: bsc.id });
         }
-        toast.info('Switching to BSC network...');
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.switchingToBSC'));
         return;
       } catch (error) {
-        toast.error('Please switch to BSC network manually');
+        toast.error(getComponentText('wagmiPresalePurchase', 'messages.switchManually'));
         return;
       }
     }
@@ -617,7 +625,11 @@ const WagmiPresalePurchase = () => {
       }
       
       if (balanceInBNB < (amount + gasBuffer)) {
-        toast.error(`Insufficient BNB balance. Need ${(amount + gasBuffer).toFixed(4)} BNB (including gas)`);
+        toast.error(
+          t('wagmiPresalePurchase.messages.insufficientBalance', { 
+            amount: (amount + gasBuffer).toFixed(4) 
+          })
+        );
         return;
       }
     }
@@ -637,7 +649,7 @@ const WagmiPresalePurchase = () => {
 
       // КРИТИЧНІ ВИПРАВЛЕННЯ ДЛЯ TRUST WALLET з новими параметрами газу
       if (isTrustWallet()) {
-        toast.info('🛡️ Trust Wallet detected - using optimized BSC parameters...');
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.trustWalletDetected'));
         
         await new Promise(resolve => setTimeout(resolve, 2000));
 
@@ -657,11 +669,8 @@ const WagmiPresalePurchase = () => {
           const txParams = {
             from: address,
             to: contractAddress,
-            value: `0x${value.toString(16)}`,           // в wei, hex
-            // gas:   `0x${gasLimit.toString(16)}`,         // в единицах газа, hex
-            // gasPrice: `0x${gasPrice.toString(16)}`,      // в wei, hex
-            data: '0x',                                  // <— пустые данные обязательно
-            
+            value: `0x${value.toString(16)}`,
+            data: '0x',
           };
 
           console.log('🛡️ Trust Wallet final transaction params:', txParams);
@@ -671,7 +680,9 @@ const WagmiPresalePurchase = () => {
             params: [txParams],
           });
 
-          toast.success(`🛡️ Trust Wallet transaction sent! Hash: ${txHash.slice(0, 10)}...`);
+          toast.success(
+            t('wagmiPresalePurchase.messages.transactionSent', { hash: txHash.slice(0, 10) })
+          );
           
           addPendingTransaction({
             txHash: txHash as Hash,
@@ -693,7 +704,7 @@ const WagmiPresalePurchase = () => {
           
           // Fallback: Wagmi з Trust Wallet параметрами
           try {
-            toast.info('🛡️ Using Trust Wallet fallback method...');
+            toast.info(getComponentText('wagmiPresalePurchase', 'messages.fallbackMethod'));
             
             const { gasLimit, gasPrice } = await getOptimalGasParams(connector, buyAmount);
             
@@ -705,7 +716,7 @@ const WagmiPresalePurchase = () => {
               data: '0x',  
             });
             
-            toast.info('🛡️ Fallback transaction submitted!');
+            toast.info(getComponentText('wagmiPresalePurchase', 'messages.fallbackSubmitted'));
             return;
             
           } catch (fallbackError: any) {
@@ -713,15 +724,20 @@ const WagmiPresalePurchase = () => {
             
             // ОНОВЛЕНА допомога з новими рекомендаціями
             if (amount >= 0.01) {
+              const solutionsText = getComponentText('wagmiPresalePurchase', 'trustWalletErrors.solutions');
+              const solutionsList = [
+                getComponentText('wagmiPresalePurchase', 'trustWalletErrors.solutionsList.0'),
+                getComponentText('wagmiPresalePurchase', 'trustWalletErrors.solutionsList.1'),
+                getComponentText('wagmiPresalePurchase', 'trustWalletErrors.solutionsList.2'),
+                getComponentText('wagmiPresalePurchase', 'trustWalletErrors.solutionsList.3'),
+                getComponentText('wagmiPresalePurchase', 'trustWalletErrors.solutionsList.4')
+              ].join('\n');
+
               toast.error(
                 <div>
-                  <div>🛡️ Trust Wallet BSC Error Solutions (Updated):</div>
+                  <div>{solutionsText}</div>
                   <div style={{ fontSize: '0.8rem', marginTop: '8px' }}>
-                    • Gas price now requires 3+ gwei (increased from 1 gwei)<br/>
-                    • Try amount ≤ 0.01 BNB first<br/>
-                    • Update Trust Wallet to latest version<br/>
-                    • Ensure 0.01+ BNB for gas fees<br/>
-                    • Use BSC network auto-fee settings
+                    {solutionsList}
                   </div>
                   <button 
                     onClick={() => {
@@ -739,7 +755,7 @@ const WagmiPresalePurchase = () => {
                       fontSize: '0.8rem'
                     }}
                   >
-                    🔄 Try 0.01 BNB
+                    {getComponentText('wagmiPresalePurchase', 'trustWalletErrors.tryAmount01')}
                   </button>
                 </div>,
                 { autoClose: false }
@@ -753,7 +769,7 @@ const WagmiPresalePurchase = () => {
 
       // BINANCE WALLET - з оновленими параметрами
       else if (isBinanceWalletDetected) {
-        toast.info('🔶 Processing with Binance Wallet...');
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.binanceProcessing'));
         
         const { gasLimit, gasPrice } = await getOptimalGasParams(connector, buyAmount);
         
@@ -764,7 +780,7 @@ const WagmiPresalePurchase = () => {
           gasPrice: gasPrice,
         });
         
-        toast.info('📝 Transaction submitted to Binance Wallet!');
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.binanceSubmitted'));
       }
 
       // ІНШІ КОШЕЛЬКИ з оновленими параметрами
@@ -778,7 +794,7 @@ const WagmiPresalePurchase = () => {
           gasPrice: gasPrice,
         });
         
-        toast.info('📝 Transaction submitted!');
+        toast.info(getComponentText('wagmiPresalePurchase', 'messages.transactionSubmitted'));
       }
 
     } catch (error: any) {
@@ -787,19 +803,24 @@ const WagmiPresalePurchase = () => {
       
       if (isTrustWallet()) {
         if (error.message?.includes('User denied') || error.code === 4001) {
-          toast.warning('🛡️ Transaction cancelled');
+          toast.warning(getComponentText('wagmiPresalePurchase', 'messages.transactionCancelled'));
         } else if (error.message?.includes('insufficient funds')) {
-          toast.error('🛡️ Insufficient BNB. Need 0.01+ BNB for gas fees.');
+          toast.error(getComponentText('wagmiPresalePurchase', 'messages.insufficientBNB'));
         } else if (error.message?.includes('internal error')) {
+          const internalErrorText = getComponentText('wagmiPresalePurchase', 'trustWalletErrors.internalError');
+          const internalSolutions = [
+            getComponentText('wagmiPresalePurchase', 'trustWalletErrors.internalSolutions.0'),
+            getComponentText('wagmiPresalePurchase', 'trustWalletErrors.internalSolutions.1'),
+            getComponentText('wagmiPresalePurchase', 'trustWalletErrors.internalSolutions.2'),
+            getComponentText('wagmiPresalePurchase', 'trustWalletErrors.internalSolutions.3'),
+            getComponentText('wagmiPresalePurchase', 'trustWalletErrors.internalSolutions.4')
+          ].join('\n');
+
           toast.error(
             <div>
-              <div>🛡️ Trust Wallet Internal Error - Updated Solutions:</div>
+              <div>{internalErrorText}</div>
               <div style={{ fontSize: '0.8rem', marginTop: '8px' }}>
-                1. <strong>Update Trust Wallet</strong> (most important)<br/>
-                2. Use 3+ gwei gas price (BSC requirement increased)<br/>
-                3. Try smaller amount (0.005-0.01 BNB)<br/>
-                4. Settings → Advanced → Reset Account<br/>
-                5. Switch to auto gas fee settings
+                {internalSolutions}
               </div>
               <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
                 <button 
@@ -817,7 +838,7 @@ const WagmiPresalePurchase = () => {
                     fontSize: '0.75rem'
                   }}
                 >
-                  🧪 Try 0.005 BNB
+                  {getComponentText('wagmiPresalePurchase', 'trustWalletErrors.tryAmount005')}
                 </button>
                 <button 
                   onClick={() => {
@@ -834,7 +855,7 @@ const WagmiPresalePurchase = () => {
                     fontSize: '0.75rem'
                   }}
                 >
-                  🔄 Try 0.01 BNB
+                  {getComponentText('wagmiPresalePurchase', 'trustWalletErrors.tryAmount01')}
                 </button>
               </div>
             </div>,
@@ -845,9 +866,11 @@ const WagmiPresalePurchase = () => {
         }
       } else {
         if (error.code === 4001) {
-          toast.warning('Transaction cancelled');
+          toast.warning(getComponentText('wagmiPresalePurchase', 'messages.transactionCancelled'));
         } else {
-          toast.error(`Transaction failed: ${error.message}`);
+          toast.error(
+            t('wagmiPresalePurchase.messages.transactionFailed', { message: error.message })
+          );
         }
       }
     }
@@ -860,7 +883,7 @@ const WagmiPresalePurchase = () => {
     processTransactionWithBackend(tx.txHash, tx.amount)
       .catch(error => {
         console.error('Retry failed:', error);
-        toast.error('Retry failed. Please contact support with your transaction hash.');
+        toast.error(getComponentText('wagmiPresalePurchase', 'messages.retryFailed'));
       });
   };
 
@@ -887,7 +910,9 @@ const WagmiPresalePurchase = () => {
         walletType: connector?.name || 'unknown'
       });
 
-      toast.success(`✅ Transaction confirmed! Hash: ${txHash.slice(0, 10)}...`);
+      toast.success(
+        t('wagmiPresalePurchase.messages.transactionConfirmed', { hash: txHash.slice(0, 10) })
+      );
       
       setTimeout(() => {
         processTransactionWithBackend(txHash, buyAmount)
@@ -898,7 +923,7 @@ const WagmiPresalePurchase = () => {
 
       setIsSubmitting(false);
     }
-  }, [isReceiptSuccess, txReceipt, txHash, buyAmount, address, processTransactionWithBackend, connector, isBinanceWalletDetected]);
+  }, [isReceiptSuccess, txReceipt, txHash, buyAmount, address, processTransactionWithBackend, connector, isBinanceWalletDetected, t]);
 
   // Effect для обробки помилок транзакцій
   useEffect(() => {
@@ -907,21 +932,23 @@ const WagmiPresalePurchase = () => {
       setIsSubmitting(false);
       
       if (txError.message.includes('User rejected')) {
-        toast.warning('Transaction was rejected');
+        toast.warning(getComponentText('wagmiPresalePurchase', 'messages.transactionRejected'));
       } else {
-        toast.error(`Transaction failed: ${txError.message}`);
+        toast.error(
+          t('wagmiPresalePurchase.messages.transactionFailed', { message: txError.message })
+        );
       }
     }
-  }, [txError]);
+  }, [txError, getComponentText, t]);
 
   // Effect для обробки помилок отримання квитанції
   useEffect(() => {
     if (isReceiptError) {
       console.error('Receipt error');
       setIsSubmitting(false);
-      toast.error('Transaction failed to confirm. Please check your wallet.');
+      toast.error(getComponentText('wagmiPresalePurchase', 'messages.receiptFailed'));
     }
-  }, [isReceiptError]);
+  }, [isReceiptError, getComponentText]);
 
   // Ініціалізація компонента
   useEffect(() => {
@@ -940,6 +967,7 @@ const WagmiPresalePurchase = () => {
   const isTransactionInProgress = isTxPending || isReceiptLoading || isSubmitting;
 
   if (!isClient) return null;
+
   return (
     <motion.div 
       className={styles.presaleContainer}
@@ -950,32 +978,42 @@ const WagmiPresalePurchase = () => {
       {/* Header */}
       <div className={styles.header}>
         <h3 className={styles.title}>
-          🦊 CRFX PRESALE
+          {getComponentText('wagmiPresalePurchase', 'header.title')}
         </h3>
         <div className={styles.subtitle}>
-          Moon Mission Starting Soon
+          {getComponentText('wagmiPresalePurchase', 'header.subtitle')}
         </div>
       </div>
 
       {/* Countdown Timer */}
       <div className={styles.countdown}>
-        <div className={styles.countdownTitle}>🚀 Mission Launch In:</div>
+        <div className={styles.countdownTitle}>
+          {getComponentText('wagmiPresalePurchase', 'countdown.title')}
+        </div>
         <div className={styles.countdownGrid}>
           <div className={styles.countdownItem}>
             <div className={styles.countdownNumber}>{timeLeft.days}</div>
-            <div className={styles.countdownLabel}>Days</div>
+            <div className={styles.countdownLabel}>
+              {getComponentText('wagmiPresalePurchase', 'countdown.labels.days')}
+            </div>
           </div>
           <div className={styles.countdownItem}>
             <div className={styles.countdownNumber}>{timeLeft.hours}</div>
-            <div className={styles.countdownLabel}>Hours</div>
+            <div className={styles.countdownLabel}>
+              {getComponentText('wagmiPresalePurchase', 'countdown.labels.hours')}
+            </div>
           </div>
           <div className={styles.countdownItem}>
             <div className={styles.countdownNumber}>{timeLeft.minutes}</div>
-            <div className={styles.countdownLabel}>Min</div>
+            <div className={styles.countdownLabel}>
+              {getComponentText('wagmiPresalePurchase', 'countdown.labels.minutes')}
+            </div>
           </div>
           <div className={styles.countdownItem}>
             <div className={styles.countdownNumber}>{timeLeft.seconds}</div>
-            <div className={styles.countdownLabel}>Sec</div>
+            <div className={styles.countdownLabel}>
+              {getComponentText('wagmiPresalePurchase', 'countdown.labels.seconds')}
+            </div>
           </div>
         </div>
         <div style={{ 
@@ -984,7 +1022,7 @@ const WagmiPresalePurchase = () => {
           marginTop: '8px',
           textAlign: 'center'
         }}>
-          Ends: September 18, 2025 (UTC)
+          {getComponentText('wagmiPresalePurchase', 'countdown.endDate')}
         </div>
       </div>
 
@@ -993,43 +1031,45 @@ const WagmiPresalePurchase = () => {
         {/* Progress */}
         <div className={styles.progressSection}>
           <div className={styles.progressInfo}>
-            <span>Stage 2/6</span>
-            <span>${(329000).toLocaleString()} Raised</span>
+            <span>{getComponentText('wagmiPresalePurchase', 'progress.stage')}</span>
+            <span>{t('wagmiPresalePurchase.progress.raised', { amount: '$329,000' })}</span>
           </div>
           <div className={styles.progressBar}>
             <div className={styles.progressFill} style={{ width: '32.5%' }}></div>
           </div>
-          <div className={styles.progressText}>32.5% Complete</div>
+          <div className={styles.progressText}>
+            {getComponentText('wagmiPresalePurchase', 'progress.complete')}
+          </div>
         </div>
 
         {/* Price Info */}
         <div className={styles.priceInfo}>
           <div className={styles.priceRow}>
-            <span>Current: $0.006</span>
-            <span>Next: $0.007</span>
+            <span>{getComponentText('wagmiPresalePurchase', 'price.current')}</span>
+            <span>{getComponentText('wagmiPresalePurchase', 'price.next')}</span>
           </div>
         </div>
 
         {/* Connection Status */}
         {isConnected && address && (
           <div className={styles.connectionStatus}>
-            {isBinanceWalletDetected ? '🔶' : isTrustWallet() ? '🛡️' : '🌈'} Connected: {address.slice(0, 6)}...{address.slice(-4)}
+            {isBinanceWalletDetected ? '🔶' : isTrustWallet() ? '🛡️' : '🌈'} {t('wagmiPresalePurchase.connection.connected', { address: address.slice(0, 6) + '...' + address.slice(-4) })}
             <div style={{ fontSize: '0.8rem', color: '#00D4AA', marginTop: '4px' }}>
-              Wallet: {connector?.name} {isBinanceWalletDetected && '(Binance)'} {isTrustWallet() && '(Trust)'} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>⚠️ Switch to BSC</span>}
+              {t('wagmiPresalePurchase.connection.wallet', { walletName: connector?.name })} {isBinanceWalletDetected && '(Binance)'} {isTrustWallet() && '(Trust)'} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>{getComponentText('wagmiPresalePurchase', 'connection.switchToBSC')}</span>}
             </div>
             {balance && (
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}>
-                Balance: {parseFloat(formatEther(balance.value)).toFixed(4)} BNB
+                {t('wagmiPresalePurchase.connection.balance', { balance: parseFloat(formatEther(balance.value)).toFixed(4) })}
               </div>
             )}
             {isBinanceWalletDetected && (
               <div style={{ fontSize: '0.75rem', color: '#ffc107', marginTop: '2px' }}>
-                ✨ Optimized for Binance Wallet
+                {t('wagmiPresalePurchase.connection.optimizedFor', { walletName: 'Binance Wallet' })}
               </div>
             )}
             {isTrustWallet() && (
               <div style={{ fontSize: '0.75rem', color: '#00bcd4', marginTop: '2px' }}>
-                🛡️ Trust Wallet with 3+ gwei gas pricing
+                {getComponentText('wagmiPresalePurchase', 'connection.gasRequirement')}
               </div>
             )}
           </div>
@@ -1040,14 +1080,14 @@ const WagmiPresalePurchase = () => {
           <div className={styles.transactionStatus}>
             {isTxPending && (
               <div className={styles.statusItem}>
-                {isBinanceWalletDetected ? '🔶 Confirm in Binance Wallet...' : 
-                 isTrustWallet() ? '🛡️ Confirm in Trust Wallet...' : 
-                 '🔄 Waiting for wallet confirmation...'}
+                {isBinanceWalletDetected ? getComponentText('wagmiPresalePurchase', 'transactionStatus.confirmBinance') : 
+                 isTrustWallet() ? getComponentText('wagmiPresalePurchase', 'transactionStatus.confirmTrust') : 
+                 getComponentText('wagmiPresalePurchase', 'transactionStatus.confirmWallet')}
               </div>
             )}
             {isReceiptLoading && (
               <div className={styles.statusItem}>
-                ⏳ Confirming transaction on BSC blockchain...
+                {getComponentText('wagmiPresalePurchase', 'transactionStatus.confirming')}
               </div>
             )}
           </div>
@@ -1056,21 +1096,31 @@ const WagmiPresalePurchase = () => {
         {/* Pending Transactions */}
         {pendingTransactions.length > 0 && (
           <div className={styles.pendingTransactions}>
-            <div className={styles.pendingTitle}>⏳ Pending Transactions</div>
+            <div className={styles.pendingTitle}>
+              {getComponentText('wagmiPresalePurchase', 'pendingTransactions.title')}
+            </div>
             {pendingTransactions.map((tx) => (
               <div key={tx.txHash} className={styles.pendingTransaction}>
-                <div className={styles.pendingAmount}>Amount: {tx.amount} BNB</div>
-                <div className={styles.pendingHash}>Hash: {tx.txHash.slice(0, 10)}...</div>
-                <div className={styles.pendingStatus}>Status: {tx.status}</div>
+                <div className={styles.pendingAmount}>
+                  {t('wagmiPresalePurchase.pendingTransactions.amount', { amount: tx.amount })}
+                </div>
+                <div className={styles.pendingHash}>
+                  {t('wagmiPresalePurchase.pendingTransactions.hash', { hash: tx.txHash.slice(0, 10) })}
+                </div>
+                <div className={styles.pendingStatus}>
+                  {t('wagmiPresalePurchase.pendingTransactions.status', { status: tx.status })}
+                </div>
                 {tx.walletType && (
-                  <div className={styles.pendingWallet}>Wallet: {tx.walletType}</div>
+                  <div className={styles.pendingWallet}>
+                    {t('wagmiPresalePurchase.pendingTransactions.wallet', { walletType: tx.walletType })}
+                  </div>
                 )}
                 <div className={styles.pendingActions}>
                   <button onClick={() => retryPendingTransaction(tx)} className={styles.retryButton}>
-                    Retry API Call
+                    {getComponentText('wagmiPresalePurchase', 'pendingTransactions.retryButton')}
                   </button>
                   <button onClick={() => removePendingTransaction(tx.txHash)} className={styles.cancelButton}>
-                    Remove
+                    {getComponentText('wagmiPresalePurchase', 'pendingTransactions.removeButton')}
                   </button>
                 </div>
               </div>
@@ -1081,7 +1131,9 @@ const WagmiPresalePurchase = () => {
         {/* Connect Wallet */}
         {!isConnected && (
           <div className={styles.connectSection}>
-            <p className={styles.connectText}>Connect your wallet to participate:</p>
+            <p className={styles.connectText}>
+              {getComponentText('wagmiPresalePurchase', 'connectWallet.title')}
+            </p>
             <ConnectButton.Custom>
               {({
                 account,
@@ -1113,7 +1165,7 @@ const WagmiPresalePurchase = () => {
                             type="button"
                             className={styles.connectButton}
                           >
-                            🌈 Connect Wallet
+                            {getComponentText('wagmiPresalePurchase', 'connectWallet.connectButton')}
                           </button>
                         );
                       }
@@ -1125,7 +1177,7 @@ const WagmiPresalePurchase = () => {
                             type="button"
                             className={styles.wrongNetworkButton}
                           >
-                            ⚠️ Wrong network
+                            {getComponentText('wagmiPresalePurchase', 'connectWallet.wrongNetwork')}
                           </button>
                         );
                       }
@@ -1188,12 +1240,24 @@ const WagmiPresalePurchase = () => {
             {isBinanceWalletDetected && (
               <div className={styles.binanceBenefits}>
                 <div className={styles.benefitsTitle}>
-                  🔶 Binance Wallet Benefits
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.binance.title')}
                 </div>
                 <div className={styles.benefitsList}>
-                  <div className={styles.benefit}>⚡ Native BSC integration</div>
-                  <div className={styles.benefit}>💰 Lower transaction fees</div>
-                  <div className={styles.benefit}>🚀 Faster confirmations</div>
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.binance.benefits.0') && (
+                    <div className={styles.benefit}>
+                      {getComponentText('wagmiPresalePurchase', 'walletBenefits.binance.benefits.0')}
+                    </div>
+                  )}
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.binance.benefits.1') && (
+                    <div className={styles.benefit}>
+                      {getComponentText('wagmiPresalePurchase', 'walletBenefits.binance.benefits.1')}
+                    </div>
+                  )}
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.binance.benefits.2') && (
+                    <div className={styles.benefit}>
+                      {getComponentText('wagmiPresalePurchase', 'walletBenefits.binance.benefits.2')}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -1202,19 +1266,33 @@ const WagmiPresalePurchase = () => {
             {isTrustWallet() && (
               <div className={styles.trustWalletInfo}>
                 <div className={styles.trustWalletTitle}>
-                  🛡️ Trust Wallet Gas Requirements
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.trustWallet.title')}
                 </div>
                 <div className={styles.trustWalletDetails}>
-                  <div className={styles.gasRequirement}>✅ Gas Price: 3+ gwei (Updated)</div>
-                  <div className={styles.gasRequirement}>✅ Gas Limit: 21,000-23,000</div>
-                  <div className={styles.gasRequirement}>✅ Buffer: 0.01 BNB recommended</div>
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.trustWallet.requirements.0') && (
+                    <div className={styles.gasRequirement}>
+                      {getComponentText('wagmiPresalePurchase', 'walletBenefits.trustWallet.requirements.0')}
+                    </div>
+                  )}
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.trustWallet.requirements.1') && (
+                    <div className={styles.gasRequirement}>
+                      {getComponentText('wagmiPresalePurchase', 'walletBenefits.trustWallet.requirements.1')}
+                    </div>
+                  )}
+                  {getComponentText('wagmiPresalePurchase', 'walletBenefits.trustWallet.requirements.2') && (
+                    <div className={styles.gasRequirement}>
+                      {getComponentText('wagmiPresalePurchase', 'walletBenefits.trustWallet.requirements.2')}
+                    </div>
+                  )}
                 </div>
               </div>
             )}
 
             {/* Quick Amounts */}
             <div className={styles.quickAmounts}>
-              <label className={styles.inputLabel}>Quick amounts (BNB):</label>
+              <label className={styles.inputLabel}>
+                {getComponentText('wagmiPresalePurchase', 'form.quickAmountsLabel')}
+              </label>
               <div className={styles.quickButtons}>
                 {quickAmounts.map((amount) => (
                   <button
@@ -1231,38 +1309,44 @@ const WagmiPresalePurchase = () => {
 
             {/* Amount Input */}
             <div className={styles.amountInput}>
-              <label className={styles.inputLabel}>Amount (BNB):</label>
+              <label className={styles.inputLabel}>
+                {getComponentText('wagmiPresalePurchase', 'form.amountLabel')}
+              </label>
               <input
                 type="number"
                 value={buyAmount}
                 onChange={(e) => handleAmountChange(e.target.value)}
                 disabled={isTransactionInProgress}
                 className={styles.input}
-                placeholder="0.0"
+                placeholder={getComponentText('wagmiPresalePurchase', 'form.amountPlaceholder')}
                 min="0.0001"
                 max="100"
                 step="0.01"
               />
               {!validateAmount(buyAmount) && buyAmount !== '' && (
                 <div style={{ fontSize: '0.8rem', color: '#ff6b6b', marginTop: '4px' }}>
-                  Please enter a valid amount (0.0001 - 100 BNB)
+                  {getComponentText('wagmiPresalePurchase', 'form.invalidAmount')}
                 </div>
               )}
               {isTrustWallet() && validateAmount(buyAmount) && (
                 <div style={{ fontSize: '0.75rem', color: '#00bcd4', marginTop: '4px' }}>
-                  🛡️ Trust Wallet: {((parseFloat(buyAmount.replace(',', '.')) || 0) * 3 * 23000 / 1000000000).toFixed(6)} BNB gas fee (3 gwei)
+                  {t('wagmiPresalePurchase.form.trustWalletGasFee', { 
+                    fee: ((parseFloat(buyAmount.replace(',', '.')) || 0) * 3 * 23000 / 1000000000).toFixed(6) 
+                  })}
                 </div>
               )}
             </div>
 
             {/* You Receive */}
             <div className={styles.receiveSection}>
-              <div className={styles.receiveLabel}>You receive:</div>
+              <div className={styles.receiveLabel}>
+                {getComponentText('wagmiPresalePurchase', 'form.youReceive')}
+              </div>
               <div className={styles.receiveAmount}>
-                {calculateTokens()} CRFX 🦊
+                {t('wagmiPresalePurchase.form.tokensAmount', { amount: calculateTokens() })}
               </div>
               <div className={styles.receiveRate}>
-                Rate: {tokensPerBnb.toLocaleString()} CRFX per BNB
+                {t('wagmiPresalePurchase.form.rate', { rate: tokensPerBnb.toLocaleString() })}
               </div>
             </div>
 
@@ -1276,20 +1360,20 @@ const WagmiPresalePurchase = () => {
             >
               {isTransactionInProgress ? (
                 isTxPending ? (
-                  isBinanceWalletDetected ? '🔶 Confirm in Binance Wallet...' : 
-                  isTrustWallet() ? '🛡️ Confirm in Trust Wallet...' : 
-                  '🔄 Confirm in Wallet...'
+                  isBinanceWalletDetected ? getComponentText('wagmiPresalePurchase', 'buyButton.confirmBinance') : 
+                  isTrustWallet() ? getComponentText('wagmiPresalePurchase', 'buyButton.confirmTrust') : 
+                  getComponentText('wagmiPresalePurchase', 'buyButton.confirmWallet')
                 ) : 
-                isReceiptLoading ? '⏳ Confirming on BSC...' : 
-                '🔄 Processing...'
+                isReceiptLoading ? getComponentText('wagmiPresalePurchase', 'buyButton.confirming') : 
+                getComponentText('wagmiPresalePurchase', 'buyButton.processing')
               ) : !isOnBSC ? (
-                '⚠️ Switch to BSC Network'
+                getComponentText('wagmiPresalePurchase', 'buyButton.switchNetwork')
               ) : !validateAmount(buyAmount) ? (
-                '❌ Invalid Amount'
+                getComponentText('wagmiPresalePurchase', 'buyButton.invalidAmount')
               ) : (
-                isBinanceWalletDetected ? '🔶 Buy with Binance Wallet' : 
-                isTrustWallet() ? '🛡️ Buy with Trust Wallet (3+ gwei)' : 
-                '🚀 Buy with Wagmi'
+                isBinanceWalletDetected ? getComponentText('wagmiPresalePurchase', 'buyButton.buyWithBinance') : 
+                isTrustWallet() ? getComponentText('wagmiPresalePurchase', 'buyButton.buyWithTrust') : 
+                getComponentText('wagmiPresalePurchase', 'buyButton.buyWithWagmi')
               )}
             </motion.button>
 
@@ -1297,7 +1381,7 @@ const WagmiPresalePurchase = () => {
             {isConnected && !isOnBSC && isBinanceWalletDetected && (
               <div className={styles.networkHelper}>
                 <div className={styles.helperText}>
-                  🔶 Binance Wallet detected! Click the button above to automatically switch to BSC network.
+                  {getComponentText('wagmiPresalePurchase', 'networkHelper.binance')}
                 </div>
               </div>
             )}
@@ -1306,7 +1390,7 @@ const WagmiPresalePurchase = () => {
             {isConnected && !isOnBSC && isTrustWallet() && (
               <div className={styles.networkHelper}>
                 <div className={styles.helperText}>
-                  🛡️ Trust Wallet detected! Click the button above to automatically switch to BSC network with optimized gas settings.
+                  {getComponentText('wagmiPresalePurchase', 'networkHelper.trust')}
                 </div>
               </div>
             )}
@@ -1314,21 +1398,23 @@ const WagmiPresalePurchase = () => {
             {/* Gas Price Information */}
             {isConnected && isOnBSC && (
               <div className={styles.gasInfo}>
-                <div className={styles.gasInfoTitle}>⛽ Current Gas Settings</div>
+                <div className={styles.gasInfoTitle}>
+                  {getComponentText('wagmiPresalePurchase', 'gasInfo.title')}
+                </div>
                 <div className={styles.gasInfoContent}>
                   {isTrustWallet() && (
                     <div style={{ fontSize: '0.8rem', color: '#00bcd4' }}>
-                      🛡️ Trust Wallet: Optimized for 3-5 gwei (BSC requirement)
+                      {getComponentText('wagmiPresalePurchase', 'gasInfo.trustWallet')}
                     </div>
                   )}
                   {isBinanceWalletDetected && (
                     <div style={{ fontSize: '0.8rem', color: '#ffc107' }}>
-                      🔶 Binance Wallet: Native BSC integration with optimal gas
+                      {getComponentText('wagmiPresalePurchase', 'gasInfo.binanceWallet')}
                     </div>
                   )}
                   {!isTrustWallet() && !isBinanceWalletDetected && (
                     <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)' }}>
-                      ⚡ Standard wallet: Auto-optimized gas for BSC
+                      {getComponentText('wagmiPresalePurchase', 'gasInfo.standardWallet')}
                     </div>
                   )}
                 </div>

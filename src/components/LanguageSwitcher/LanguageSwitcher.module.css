@@ -1,0 +1,234 @@
+/* src/components/LanguageSwitcher/LanguageSwitcher.module.css */
+
+.languageSwitcher {
+    position: relative;
+    display: inline-block;
+  }
+  
+  .currentLanguage {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 80px;
+    justify-content: center;
+  }
+  
+  .currentLanguage:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+  }
+  
+  .currentLanguage:focus {
+    outline: 2px solid #4ECDC4;
+    outline-offset: 2px;
+  }
+  
+  .flag {
+    font-size: 1rem;
+    line-height: 1;
+  }
+  
+  .languageCode {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .dropdownIcon {
+    font-size: 0.75rem;
+    transition: transform 0.3s ease;
+  }
+  
+  .open .dropdownIcon {
+    transform: rotate(180deg);
+  }
+  
+  /* Dropdown Menu */
+  .dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background: linear-gradient(135deg, rgba(26, 26, 46, 0.95) 0%, rgba(30, 41, 59, 0.95) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    z-index: 1000;
+    min-width: 150px;
+    overflow: hidden;
+  }
+  
+  .dropdownHeader {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  .languageOption {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+  }
+  
+  .languageOption:hover {
+    background: rgba(78, 205, 196, 0.1);
+    color: #4ECDC4;
+  }
+  
+  .languageOption:focus {
+    outline: none;
+    background: rgba(78, 205, 196, 0.15);
+    color: #4ECDC4;
+  }
+  
+  .languageOption.active {
+    background: rgba(78, 205, 196, 0.2);
+    color: #4ECDC4;
+    position: relative;
+  }
+  
+  .languageOption.active::after {
+    content: '✓';
+    position: absolute;
+    right: 1rem;
+    color: #4ECDC4;
+    font-weight: bold;
+  }
+  
+  .optionFlag {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+  
+  .optionName {
+    flex: 1;
+  }
+  
+  /* Loading State */
+  .loading {
+    opacity: 0.6;
+    pointer-events: none;
+  }
+  
+  .loading .currentLanguage {
+    cursor: not-allowed;
+  }
+  
+  /* Mobile Styles */
+  @media (max-width: 768px) {
+    .currentLanguage {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.8rem;
+      min-width: 70px;
+    }
+    
+    .languageCode {
+      display: none;
+    }
+    
+    .flag {
+      font-size: 1.1rem;
+    }
+    
+    .dropdown {
+      right: -10px;
+      min-width: 140px;
+    }
+    
+    .dropdownHeader {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.75rem;
+    }
+    
+    .languageOption {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .currentLanguage {
+      padding: 0.3rem 0.5rem;
+      min-width: 60px;
+    }
+    
+    .dropdown {
+      right: -5px;
+      min-width: 120px;
+    }
+  }
+  
+  /* Animation for dropdown */
+  .dropdown {
+    animation: dropdownSlideIn 0.2s ease-out;
+  }
+  
+  @keyframes dropdownSlideIn {
+    from {
+      opacity: 0;
+      transform: translateY(-10px) scale(0.95);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+  
+  /* High contrast mode */
+  @media (prefers-contrast: high) {
+    .currentLanguage {
+      border-width: 2px;
+      background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .dropdown {
+      border-width: 2px;
+      background: rgba(0, 0, 0, 0.9);
+    }
+    
+    .languageOption:hover,
+    .languageOption:focus {
+      background: rgba(78, 205, 196, 0.3);
+    }
+  }
+  
+  /* Reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    .currentLanguage,
+    .languageOption,
+    .dropdownIcon {
+      transition: none;
+    }
+    
+    .dropdown {
+      animation: none;
+    }
+    
+    .currentLanguage:hover {
+      transform: none;
+    }
+  }

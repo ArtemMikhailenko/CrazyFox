@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
 import confetti from 'canvas-confetti';
+import { useLanguage } from '@/hooks/useLanguage';
 import styles from './CrazyTokenomics.module.css';
 
 const CrazyTokenomics = () => {
@@ -9,64 +10,67 @@ const CrazyTokenomics = () => {
   const [isVisible, setIsVisible] = useState(false);
   const [showFireworks, setShowFireworks] = useState(false);
 
+  // Language hook
+  const { getComponentText } = useLanguage();
+
   const tokenData = useMemo(() => [
     { 
-      label: 'Presale', 
-      percentage: 55, 
+      label: getComponentText('crazyTokenomics', 'tokenDistribution.presale.label'),
+      percentage: getComponentText('crazyTokenomics', 'tokenDistribution.presale.percentage'),
       color: '#FF6B35', 
-      icon: '🚀',
-      description: 'Early investor allocation',
-      details: '550M tokens for community presale',
+      icon: getComponentText('crazyTokenomics', 'tokenDistribution.presale.icon'),
+      description: getComponentText('crazyTokenomics', 'tokenDistribution.presale.description'),
+      details: getComponentText('crazyTokenomics', 'tokenDistribution.presale.details'),
       gradient: 'linear-gradient(135deg, #FF6B35 0%, #F7931E 100%)'
     },
     { 
-      label: 'Listing & Liquidity', 
-      percentage: 10, 
+      label: getComponentText('crazyTokenomics', 'tokenDistribution.listing.label'),
+      percentage: getComponentText('crazyTokenomics', 'tokenDistribution.listing.percentage'),
       color: '#4ECDC4', 
-      icon: '💧',
-      description: 'DEX listing and liquidity pool',
-      details: '100M tokens for trading launch',
+      icon: getComponentText('crazyTokenomics', 'tokenDistribution.listing.icon'),
+      description: getComponentText('crazyTokenomics', 'tokenDistribution.listing.description'),
+      details: getComponentText('crazyTokenomics', 'tokenDistribution.listing.details'),
       gradient: 'linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%)'
     },
     { 
-      label: 'Marketing & Partnerships', 
-      percentage: 15, 
+      label: getComponentText('crazyTokenomics', 'tokenDistribution.marketing.label'),
+      percentage: getComponentText('crazyTokenomics', 'tokenDistribution.marketing.percentage'),
       color: '#45B7D1', 
-      icon: '📢',
-      description: 'Aggressive marketing campaigns',
-      details: '150M tokens for moon mission',
+      icon: getComponentText('crazyTokenomics', 'tokenDistribution.marketing.icon'),
+      description: getComponentText('crazyTokenomics', 'tokenDistribution.marketing.description'),
+      details: getComponentText('crazyTokenomics', 'tokenDistribution.marketing.details'),
       gradient: 'linear-gradient(135deg, #45B7D1 0%, #96CEB4 100%)'
     },
     { 
-      label: 'Development', 
-      percentage: 10, 
+      label: getComponentText('crazyTokenomics', 'tokenDistribution.development.label'),
+      percentage: getComponentText('crazyTokenomics', 'tokenDistribution.development.percentage'),
       color: '#96CEB4', 
-      icon: '⚙️',
-      description: 'Platform development and utilities',
-      details: '100M tokens for building ecosystem',
+      icon: getComponentText('crazyTokenomics', 'tokenDistribution.development.icon'),
+      description: getComponentText('crazyTokenomics', 'tokenDistribution.development.description'),
+      details: getComponentText('crazyTokenomics', 'tokenDistribution.development.details'),
       gradient: 'linear-gradient(135deg, #96CEB4 0%, #6BCF7F 100%)'
     },
     { 
-      label: 'Team & Advisors', 
-      percentage: 10, 
+      label: getComponentText('crazyTokenomics', 'tokenDistribution.team.label'),
+      percentage: getComponentText('crazyTokenomics', 'tokenDistribution.team.percentage'),
       color: '#FECA57', 
-      icon: '👥',
-      description: 'Team allocation with vesting',
-      details: '100M tokens locked for 12 months',
+      icon: getComponentText('crazyTokenomics', 'tokenDistribution.team.icon'),
+      description: getComponentText('crazyTokenomics', 'tokenDistribution.team.description'),
+      details: getComponentText('crazyTokenomics', 'tokenDistribution.team.details'),
       gradient: 'linear-gradient(135deg, #FECA57 0%, #FF9FF3 100%)'
     }
-  ], []);
+  ], [getComponentText]);
 
   const contractDetails = useMemo(() => ({
     address: "0xa2c959a7Fbf6d96eA4170e724D871E0556cd8556",
-    totalSupply: "1,000,000,000",
-    network: "Binance Smart Chain",
-    symbol: "$CRFX",
+    totalSupply: getComponentText('crazyTokenomics', 'contractDetails.totalSupply.value'),
+    network: getComponentText('crazyTokenomics', 'contractDetails.network.value'),
+    symbol: getComponentText('crazyTokenomics', 'contractDetails.symbol.value'),
     taxes: {
       buy: 0,
       sell: 0
     }
-  }), []);
+  }), [getComponentText]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -79,7 +83,7 @@ const CrazyTokenomics = () => {
   const copyToClipboard = useCallback(async (text:any) => {
     try {
       await navigator.clipboard.writeText(text);
-      toast.success('Contract address copied! 🦊', {
+      toast.success(getComponentText('crazyTokenomics', 'contractDetails.contractAddress.copySuccess'), {
         position: "top-right",
         autoClose: 2000,
         theme: "dark"
@@ -96,9 +100,9 @@ const CrazyTokenomics = () => {
       setShowFireworks(true);
       setTimeout(() => setShowFireworks(false), 1000);
     } catch (err) {
-      toast.error('Failed to copy!', { theme: "dark" });
+      toast.error(getComponentText('crazyTokenomics', 'contractDetails.contractAddress.copyError'), { theme: "dark" });
     }
-  }, []);
+  }, [getComponentText]);
 
   const handleSliceHover = useCallback((index:any) => {
     setActiveSlice(index);
@@ -111,8 +115,11 @@ const CrazyTokenomics = () => {
   const createPieSlice = useCallback((item:any, index:any) => {
     const cumulativePercentage = tokenData
       .slice(0, index)
+                              //@ts-ignore
+
       .reduce((sum, data) => sum + data.percentage, 0);
-    
+                            //@ts-ignore
+
     const startAngle = (cumulativePercentage / 100) * 360 - 90;
     const endAngle = ((cumulativePercentage + item.percentage) / 100) * 360 - 90;
     
@@ -161,7 +168,6 @@ const CrazyTokenomics = () => {
 
   return (
     <div className={styles.tokenomicsSection}>
-
       <div className={styles.tokenomicsContainer}>
         <motion.h2 
           className={styles.tokenomicsTitle}
@@ -170,9 +176,15 @@ const CrazyTokenomics = () => {
           transition={{ duration: 0.6 }}
           viewport={{ once: true }}
         >
-          <span className={styles.titleIcon}>💰</span>
-          Crazy Tokenomics
-          {showFireworks && <span className={styles.fireworks}>🎆</span>}
+          <span className={styles.titleIcon}>
+            {getComponentText('crazyTokenomics', 'titleIcon')}
+          </span>
+          {getComponentText('crazyTokenomics', 'title')}
+          {showFireworks && (
+            <span className={styles.fireworks}>
+              {getComponentText('crazyTokenomics', 'fireworks')}
+            </span>
+          )}
         </motion.h2>
 
         <div className={styles.tokenomicsContent}>
@@ -207,8 +219,6 @@ const CrazyTokenomics = () => {
                     createPieSlice(item, index)
                   )}
                 </svg>
-                
-                
               </div>
             </div>
             
@@ -222,7 +232,7 @@ const CrazyTokenomics = () => {
             >
               <img 
                 src="/fox-tokenomic.png"
-                alt="CrazyFox Tokenomics"
+                alt={getComponentText('crazyTokenomics', 'image.alt')}
                 className={styles.muscleFoxImage}
                 loading="lazy"
               />
@@ -231,13 +241,13 @@ const CrazyTokenomics = () => {
               {/* Floating stats around fox */}
               <div className={styles.floatingStats}>
                 <div className={styles.floatingStat} style={{ top: '10%', right: '-20px' }}>
-                  📈 +2000%
+                  📈 {getComponentText('crazyTokenomics', 'floatingStats.percentage')}
                 </div>
                 <div className={styles.floatingStat} style={{ bottom: '20%', left: '-20px' }}>
-                  🔥 HODL
+                  🔥 {getComponentText('crazyTokenomics', 'floatingStats.hodl')}
                 </div>
                 <div className={styles.floatingStat} style={{ top: '60%', right: '-30px' }}>
-                  🚀 MOON
+                  🚀 {getComponentText('crazyTokenomics', 'floatingStats.moon')}
                 </div>
               </div>
             </motion.div>
@@ -276,6 +286,7 @@ const CrazyTokenomics = () => {
                     <div 
                       className={styles.progressFill}
                       style={{ 
+                        //@ts-ignore
                         width: `${item.percentage * 1.8}%`,
                         background: item.gradient 
                       }}
@@ -296,8 +307,10 @@ const CrazyTokenomics = () => {
           viewport={{ once: true }}
         >
           <h3 className={styles.contractTitle}>
-            <span className={styles.contractIcon}>📊</span>
-            Contract Details
+            <span className={styles.contractIcon}>
+              {getComponentText('crazyTokenomics', 'contractDetails.titleIcon')}
+            </span>
+            {getComponentText('crazyTokenomics', 'contractDetails.title')}
             <div className={styles.titleGlow} />
           </h3>
           
@@ -305,16 +318,28 @@ const CrazyTokenomics = () => {
             <div className={styles.contractInfo}>
               <div className={styles.infoGrid}>
                 <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>🎯 Total Supply:</span>
-                  <span className={styles.infoValue}>{contractDetails.totalSupply} $CRFX</span>
+                  <span className={styles.infoLabel}>
+                    {getComponentText('crazyTokenomics', 'contractDetails.totalSupply.label')}
+                  </span>
+                  <span className={styles.infoValue}>
+                    {contractDetails.totalSupply}
+                  </span>
                 </div>
                 <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>🌐 Network:</span>
-                  <span className={styles.infoValue}>{contractDetails.network}</span>
+                  <span className={styles.infoLabel}>
+                    {getComponentText('crazyTokenomics', 'contractDetails.network.label')}
+                  </span>
+                  <span className={styles.infoValue}>
+                    {contractDetails.network}
+                  </span>
                 </div>
                 <div className={styles.infoItem}>
-                  <span className={styles.infoLabel}>💎 Symbol:</span>
-                  <span className={styles.infoValue}>{contractDetails.symbol}</span>
+                  <span className={styles.infoLabel}>
+                    {getComponentText('crazyTokenomics', 'contractDetails.symbol.label')}
+                  </span>
+                  <span className={styles.infoValue}>
+                    {contractDetails.symbol}
+                  </span>
                 </div>
               </div>
               
@@ -322,12 +347,14 @@ const CrazyTokenomics = () => {
                 className={styles.contractAddress}
                 onClick={() => copyToClipboard(contractDetails.address)}
               >
-                <div className={styles.addressLabel}>📋 Contract Address:</div>
+                <div className={styles.addressLabel}>
+                  {getComponentText('crazyTokenomics', 'contractDetails.contractAddress.label')}
+                </div>
                 <div className={styles.addressText}>
                   {contractDetails.address.slice(0, 12)}...{contractDetails.address.slice(-10)}
                 </div>
                 <button className={styles.copyButton}>
-                  Copy Address 🔗
+                  {getComponentText('crazyTokenomics', 'contractDetails.contractAddress.copyButton')}
                 </button>
                 
                 {/* Hover effect */}

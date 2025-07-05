@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, useAnimation, useInView } from 'framer-motion';
+import { useLanguage } from '@/hooks/useLanguage';
 import styles from './CrazyCommunity.module.css';
 
 const CrazyCommunity = () => {
@@ -9,6 +10,9 @@ const CrazyCommunity = () => {
   const containerRef = useRef(null);
   const isInView = useInView(containerRef, { once: true, amount: 0.2 });
   const controls = useAnimation();
+
+  // Language hook
+  const { getComponentText } = useLanguage();
 
   // Community stats
   const [stats, setStats] = useState({
@@ -20,33 +24,33 @@ const CrazyCommunity = () => {
   const socialPlatforms = [
     { 
       icon: '💬', 
-      name: 'Telegram', 
-      members: '50K+', 
+      name: getComponentText('crazyCommunity', 'socialPlatforms.telegram.name'),
+      members: getComponentText('crazyCommunity', 'socialPlatforms.telegram.members'),
       color: '#0088cc',
       gradient: 'linear-gradient(135deg, #0088cc, #00a6d6)',
-      description: 'Join our main community hub for daily discussions and exclusive updates',
+      description: getComponentText('crazyCommunity', 'socialPlatforms.telegram.description'),
       url: 'https://t.me/crazyfoxmeme',
-      highlight: '🔥 Most Active'
+      highlight: getComponentText('crazyCommunity', 'socialPlatforms.telegram.highlight')
     },
     { 
       icon: '🐦', 
-      name: 'Twitter/X', 
-      members: '25K+', 
+      name: getComponentText('crazyCommunity', 'socialPlatforms.twitter.name'),
+      members: getComponentText('crazyCommunity', 'socialPlatforms.twitter.members'),
       color: '#1da1f2',
       gradient: 'linear-gradient(135deg, #1da1f2, #0d8bd9)',
-      description: 'Latest news, market updates and community announcements',
+      description: getComponentText('crazyCommunity', 'socialPlatforms.twitter.description'),
       url: 'https://x.com/crazyfoxmeme?s=21',
-      highlight: '📢 News Hub'
+      highlight: getComponentText('crazyCommunity', 'socialPlatforms.twitter.highlight')
     },
     { 
       icon: '🎵', 
-      name: 'TikTok', 
-      members: '15K+', 
+      name: getComponentText('crazyCommunity', 'socialPlatforms.tiktok.name'),
+      members: getComponentText('crazyCommunity', 'socialPlatforms.tiktok.members'),
       color: '#000000',
       gradient: 'linear-gradient(135deg, #000000, #ff0050)',
-      description: 'Viral fox content, memes and community highlights',
+      description: getComponentText('crazyCommunity', 'socialPlatforms.tiktok.description'),
       url: 'https://www.tiktok.com/@crazyfoxmeme?_t=ZM-8wpwWp3NVAu&_r=1',
-      highlight: '🎬 Viral Content'
+      highlight: getComponentText('crazyCommunity', 'socialPlatforms.tiktok.highlight')
     }
   ];
 
@@ -119,26 +123,39 @@ const CrazyCommunity = () => {
         <motion.div className={styles.header} variants={cardVariants}>
           <div className={styles.titleContainer}>
             <h2 className={styles.title}>
-              🦊 Join the Fox Revolution
+              {getComponentText('crazyCommunity', 'header.title')}
             </h2>
             <p className={styles.subtitle}>
-              Connect with the wildest crypto community! Over <span className={styles.highlight}>90K+ active foxes</span> worldwide 
-              sharing strategies, memes, and building the future of $CRFX together! 🚀
+              {getComponentText('crazyCommunity', 'header.subtitle')
+                .split('{highlight}')
+                .map((part, index) => 
+                  index === 1 ? (
+                    <span key={index} className={styles.highlight}>
+                      {getComponentText('crazyCommunity', 'header.highlightText')}
+                    </span>
+                  ) : part
+                )}
             </p>
             
             {/* Quick Stats Bar */}
             <div className={styles.quickStats}>
               <div className={styles.quickStat}>
                 <span className={styles.quickNumber}>{stats.members.toLocaleString()}+</span>
-                <span className={styles.quickLabel}>Active Members</span>
+                <span className={styles.quickLabel}>
+                  {getComponentText('crazyCommunity', 'stats.activeMembers')}
+                </span>
               </div>
               <div className={styles.quickStat}>
                 <span className={styles.quickNumber}>{(stats.messages / 1000000).toFixed(1)}M+</span>
-                <span className={styles.quickLabel}>Messages</span>
+                <span className={styles.quickLabel}>
+                  {getComponentText('crazyCommunity', 'stats.messages')}
+                </span>
               </div>
               <div className={styles.quickStat}>
                 <span className={styles.quickNumber}>{stats.countries}+</span>
-                <span className={styles.quickLabel}>Countries</span>
+                <span className={styles.quickLabel}>
+                  {getComponentText('crazyCommunity', 'stats.countries')}
+                </span>
               </div>
             </div>
           </div>
@@ -174,7 +191,7 @@ const CrazyCommunity = () => {
                       {platform.name}
                     </h3>
                     <div className={styles.memberCount}>
-                      {platform.members} Foxes
+                      {platform.members}
                     </div>
                   </div>
                 </div>
@@ -185,7 +202,7 @@ const CrazyCommunity = () => {
 
                 <div className={styles.cardFooter}>
                   <div className={styles.joinButton} style={{ background: platform.gradient }}>
-                    <span>Join Community</span>
+                    <span>{getComponentText('crazyCommunity', 'buttons.joinCommunity')}</span>
                     <span className={styles.arrow}>→</span>
                   </div>
                 </div>
@@ -205,11 +222,10 @@ const CrazyCommunity = () => {
           <div className={styles.ctaCard}>
             <div className={styles.ctaHeader}>
               <h3 className={styles.ctaTitle}>
-                Ready to Go Crazy? 🌟
+                {getComponentText('crazyCommunity', 'cta.title')}
               </h3>
               <p className={styles.ctaText}>
-                Join thousands of foxes building the future of meme coins. 
-                Get exclusive updates, participate in giveaways, and be part of history!
+                {getComponentText('crazyCommunity', 'cta.description')}
               </p>
             </div>
             
@@ -222,7 +238,7 @@ const CrazyCommunity = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                🚀 Join Telegram Now
+                {getComponentText('crazyCommunity', 'cta.primaryButton')}
               </motion.a>
               
               <motion.a
@@ -233,7 +249,7 @@ const CrazyCommunity = () => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                💎 Follow on X
+                {getComponentText('crazyCommunity', 'cta.secondaryButton')}
               </motion.a>
             </div>
 
@@ -241,15 +257,15 @@ const CrazyCommunity = () => {
             <div className={styles.trustIndicators}>
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>✅</span>
-                <span>Verified Community</span>
+                <span>{getComponentText('crazyCommunity', 'trustIndicators.verified')}</span>
               </div>
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>🔒</span>
-                <span>Safe & Secure</span>
+                <span>{getComponentText('crazyCommunity', 'trustIndicators.secure')}</span>
               </div>
               <div className={styles.trustItem}>
                 <span className={styles.trustIcon}>🌍</span>
-                <span>Global Community</span>
+                <span>{getComponentText('crazyCommunity', 'trustIndicators.global')}</span>
               </div>
             </div>
           </div>

@@ -70,7 +70,7 @@ const HomeContent = () => {
 
       <HeroSection isLoaded={isLoaded} />
 
-      <TokenPriceProgression currentStage={1} />
+      <TokenPriceProgression currentStage={2} />
 
       <motion.section 
         id="about" 
