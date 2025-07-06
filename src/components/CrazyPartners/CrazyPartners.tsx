@@ -80,7 +80,7 @@ const CrazyPartners = () => {
                 key={`${partner.name}-${index}`}
                 className={styles.partnerCard}
                 whileHover={{ 
-                  y: -8,
+                
                   rotateY: 5,
                   transition: { duration: 0.3 }
                 }}
