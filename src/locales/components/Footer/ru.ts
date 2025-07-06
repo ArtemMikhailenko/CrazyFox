@@ -38,7 +38,7 @@ export const footerLocale = {
     },
     quickStats: {
       currentPrice: {
-        value: "$0.005",
+        value: "$0.006",
         label: "Текущая Цена"
       },
       holders: {

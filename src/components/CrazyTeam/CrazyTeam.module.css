@@ -1,0 +1,531 @@
+/* CrazyTeam.module.css */
+.teamSection {
+    position: relative;
+    padding: 4rem 0;
+    overflow: hidden;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+  }
+  
+
+  .container {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    position: relative;
+    z-index: 1;
+    width: 100%;
+  }
+  
+  .header {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  
+  .title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 900;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.8rem;
+  }
+  
+  .title::after {
+    content: '✨';
+    position: absolute;
+    right: -50px;
+    top: 0;
+    font-size: 1.5rem;
+    animation: sparkle 3s ease-in-out infinite;
+  }
+  
+  @keyframes sparkle {
+    0%, 100% { opacity: 0.7; transform: scale(1) rotate(0deg); }
+    50% { opacity: 1; transform: scale(1.1) rotate(15deg); }
+  }
+  
+  .subtitle {
+    font-size: clamp(1rem, 2vw, 1.2rem);
+    color: rgba(255, 255, 255, 0.8);
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+  }
+  
+  .teamGrid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+    max-width: 1400px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .memberCard {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(20px);
+    border: 2px solid rgba(255, 107, 53, 0.15);
+    border-radius: 20px;
+    padding: 1.2rem;
+    position: relative;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    overflow: hidden;
+    cursor: pointer;
+    height: fit-content;
+  }
+  
+  .memberCard:hover {
+    transform: translateY(-8px) scale(1.02);
+    border-color: rgba(78, 205, 196, 0.5);
+    box-shadow: 
+      0 20px 40px rgba(78, 205, 196, 0.25),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+    background: rgba(255, 255, 255, 0.08);
+  }
+  
+  .memberCard::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+    pointer-events: none;
+    border-radius: inherit;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+  }
+  
+  .memberCard:hover::before {
+    opacity: 1;
+  }
+  
+  .cardGlow {
+    position: absolute;
+    top: -15px;
+    left: -15px;
+    right: -15px;
+    bottom: -15px;
+    background: linear-gradient(45deg, rgba(255, 107, 53, 0.1), rgba(78, 205, 196, 0.1));
+    border-radius: 25px;
+    filter: blur(15px);
+    z-index: -1;
+    opacity: 0.5;
+    transition: all 0.4s ease;
+  }
+  
+  .memberCard:hover .cardGlow {
+    opacity: 0.8;
+    filter: blur(20px);
+  }
+  
+  .photoContainer {
+    position: relative;
+    width: 180px;
+    height: 200px;
+    margin: 0 auto 1.2rem;
+    border-radius: 25px 25px 80px 25px;
+    overflow: hidden;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 
+      0 10px 30px rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  
+  .memberCard:hover .photoContainer {
+    transform: scale(1.08) rotate(2deg);
+    border-radius: 25px 80px 25px 25px;
+    box-shadow: 
+      0 20px 50px rgba(78, 205, 196, 0.4),
+      0 0 0 2px rgba(78, 205, 196, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+  
+  .memberPhoto {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #1a1f3a;
+    transition: all 0.4s ease;
+    filter: brightness(0.95) contrast(1.1) saturate(1.1);
+  }
+  
+  .memberCard:hover .memberPhoto {
+    transform: scale(1.03);
+    filter: brightness(1.1) contrast(1.2) saturate(1.2);
+  }
+  
+  .photoOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+      rgba(255, 107, 53, 0.2) 0%, 
+      rgba(78, 205, 196, 0.3) 50%,
+      rgba(69, 183, 209, 0.2) 100%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    mix-blend-mode: overlay;
+  }
+  
+  .memberCard:hover .photoOverlay {
+    opacity: 1;
+  }
+  
+  .photoContainer::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1, #FF6B35);
+    background-size: 300% 300%;
+    border-radius: inherit;
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.4s ease;
+    animation: gradientShift 3s ease infinite;
+  }
+  
+  .memberCard:hover .photoContainer::before {
+    opacity: 1;
+  }
+  
+  @keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+  }
+  
+  .memberInfo {
+    text-align: center;
+  }
+  
+  .memberName {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.3rem;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+  
+  .memberRole {
+    font-size: 0.85rem;
+    color: #4ECDC4;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
+  }
+  
+  .memberDescription {
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.75);
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    height: 3.5rem;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+  }
+  
+  .skillsContainer {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+  
+  .skillTag {
+    background: rgba(78, 205, 196, 0.15);
+    color: #4ECDC4;
+    padding: 0.2rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid rgba(78, 205, 196, 0.25);
+    transition: all 0.3s ease;
+  }
+  
+  .skillTag:hover {
+    background: rgba(78, 205, 196, 0.25);
+    border-color: rgba(78, 205, 196, 0.4);
+    transform: translateY(-1px);
+  }
+  
+  .linkedinButton {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: linear-gradient(45deg, #0077B5, #00A0DC);
+    color: white;
+    padding: 0.6rem 1rem;
+    border-radius: 20px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 119, 181, 0.25);
+    width: 100%;
+    justify-content: center;
+  }
+  
+  .linkedinButton::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+  }
+  
+  .linkedinButton:hover::before {
+    left: 100%;
+  }
+  
+  .linkedinButton:hover {
+    background: linear-gradient(45deg, #005885, #0077B5);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 119, 181, 0.4);
+  }
+  
+  .linkedinIcon {
+    font-size: 1rem;
+  }
+  
+  .teamStats {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+    background: rgba(255, 255, 255, 0.04);
+    backdrop-filter: blur(15px);
+    border: 1px solid rgba(255, 107, 53, 0.2);
+    border-radius: 20px;
+    padding: 2rem;
+    margin-top: 2rem;
+    max-width: 1000px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .statItem {
+    text-align: center;
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+  
+  .statItem:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-3px);
+  }
+  
+  .statNumber {
+    font-size: 2rem;
+    font-weight: 900;
+    background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 0.5rem;
+  }
+  
+  .statLabel {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 1400px) {
+    .teamGrid {
+      gap: 1.2rem;
+    }
+    
+    .memberCard {
+      padding: 1rem;
+    }
+    
+    .photoContainer {
+      width: 160px;
+      height: 180px;
+    }
+  }
+  
+  @media (max-width: 1200px) {
+    .teamGrid {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 2rem;
+      max-width: 800px;
+    }
+    
+    .memberCard {
+      padding: 1.5rem;
+    }
+    
+    .photoContainer {
+      width: 170px;
+      height: 190px;
+    }
+    
+    .memberDescription {
+      height: auto;
+      -webkit-line-clamp: unset;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .teamSection {
+      padding: 3rem 0;
+      min-height: auto;
+    }
+    
+    .container {
+      padding: 0 1rem;
+    }
+    
+    .header {
+      margin-bottom: 2.5rem;
+    }
+    
+    .title::after {
+      position: relative;
+      right: auto;
+      display: block;
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+    
+    .teamGrid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      margin-bottom: 2.5rem;
+    }
+    
+    .memberCard {
+      padding: 1.8rem;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    
+    .photoContainer {
+      width: 180px;
+      height: 200px;
+    }
+    
+    .memberName {
+      font-size: 1.4rem;
+    }
+    
+    .memberRole {
+      font-size: 0.9rem;
+    }
+    
+    .memberDescription {
+      font-size: 0.9rem;
+    }
+    
+    .teamStats {
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      padding: 1.5rem;
+    }
+    
+    .statNumber {
+      font-size: 1.8rem;
+    }
+  }
+  
+  @media (max-width: 480px) {
+    .teamSection {
+      padding: 2rem 0;
+    }
+    
+    .title {
+      font-size: 1.8rem;
+    }
+    
+    .subtitle {
+      font-size: 0.95rem;
+    }
+    
+    .memberCard {
+      padding: 1.5rem;
+    }
+    
+    .photoContainer {
+      width: 160px;
+      height: 180px;
+    }
+    
+    .memberName {
+      font-size: 1.2rem;
+    }
+    
+    .memberRole {
+      font-size: 0.8rem;
+    }
+    
+    .memberDescription {
+      font-size: 0.85rem;
+    }
+    
+    .teamStats {
+      grid-template-columns: 1fr;
+      padding: 1.2rem;
+    }
+    
+    .skillsContainer {
+      gap: 0.2rem;
+    }
+    
+    .skillTag {
+      font-size: 0.65rem;
+      padding: 0.15rem 0.4rem;
+    }
+    
+    .linkedinButton {
+      padding: 0.6rem 0.8rem;
+      font-size: 0.75rem;
+    }
+    
+    /* Reduce animations on mobile for better performance */
+    .memberCard:hover {
+      transform: translateY(-3px);
+    }
+    
+    .statItem:hover {
+      transform: none;
+    }
+    
+    .skillTag:hover {
+      transform: none;
+    }
+    
+    .memberCard:hover .photoContainer {
+      transform: scale(1.05) rotate(1deg);
+    }
+  }

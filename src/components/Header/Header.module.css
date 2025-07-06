@@ -176,7 +176,7 @@
   font-weight: 600;
 }
 
-/* Wallet Connection */
+/* Wallet Connection - УЛУЧШЕНО для переводов */
 .connectWallet {
   position: relative;
   flex-shrink: 0;
@@ -198,6 +198,9 @@
   min-width: 140px;
   justify-content: center;
   white-space: nowrap;
+  max-width: 180px; /* Ограничиваем максимальную ширину */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .connectButton:hover {
@@ -221,6 +224,9 @@
   min-width: 140px;
   justify-content: center;
   white-space: nowrap;
+  max-width: 180px; /* Ограничиваем максимальную ширину */
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .wrongNetworkButton:hover {
@@ -757,9 +763,10 @@
   
   .connectButton,
   .wrongNetworkButton {
-    min-width: 120px;
+    min-width: 110px; /* Уменьшили минимальную ширину */
+    max-width: 140px; /* Ограничили максимальную ширину */
     padding: 8px 12px;
-    font-size: 0.85rem;
+    font-size: 0.8rem; /* Уменьшили размер шрифта */
   }
   
   .chainButton,
@@ -801,14 +808,16 @@
   }
   
   .logoText {
-    font-size: 1.1rem;
+    font-size: 1rem; /* Еще больше уменьшили */
   }
   
   .connectButton,
   .wrongNetworkButton {
-    min-width: 100px;
-    padding: 6px 10px;
-    font-size: 0.8rem;
+    min-width: 90px; /* Очень компактные кнопки */
+    /* max-width: 120px; */
+    padding: 6px 8px;
+    font-size: 0.75rem; /* Мелкий шрифт */
+    gap: 4px; /* Меньший отступ между иконкой и текстом */
   }
   
   .chainButton,
@@ -830,12 +839,20 @@
   .whitePaperModal {
     border-radius: 16px;
   }
+  
+  .actions {
+    gap: 4px; /* Минимальный отступ между элементами */
+  }
 }
 
-/* Особо узкие экраны */
+/* Особо узкие экраны - СКРЫВАЕМ текст логотипа */
 @media (max-width: 360px) {
   .logoText {
-    font-size: 1rem;
+    display: none; /* Полностью скрываем текст CrazyFox на очень узких экранах */
+  }
+  
+  .logo {
+    gap: 0; /* Убираем отступ между иконкой и текстом */
   }
   
   .connectButton,
@@ -847,6 +864,28 @@
   
   .actions {
     gap: 6px;
+  }
+}
+
+/* Дополнительная адаптация для языков с длинными словами */
+@media (max-width: 400px) {
+  .logoText {
+    font-size: 0.9rem; /* Уменьшаем размер текста перед полным скрытием */
+  }
+  
+  .container {
+    padding: 0 8px;
+  }
+}
+
+/* Русский язык - дополнительные ограничения */
+@media (max-width: 380px) {
+  .logoText {
+    display: none; /* Скрываем раньше для русского языка */
+  }
+  
+  .logo {
+    gap: 0;
   }
 }
 

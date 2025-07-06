@@ -304,7 +304,7 @@ const WagmiPresalePurchase = () => {
       });
       
       toast.success(
-        t('wagmiPresalePurchase.messages.welcome', { walletName: connector?.name || 'wallet' }),
+        getComponentText('wagmiPresalePurchase', 'messages.welcome') + ` ${connector?.name || 'wallet'}`,
         { autoClose: 3000 }
       );
       
@@ -535,7 +535,7 @@ const WagmiPresalePurchase = () => {
     } catch (error: any) {
       console.error('Backend processing failed:', error);
       toast.error(
-        t('wagmiPresalePurchase.messages.backendFailed', { hash: txHash.slice(0, 10) })
+        getComponentText('wagmiPresalePurchase', 'messages.backendFailed') + ` TX: ${txHash.slice(0, 10)}...`
       );
       
       const failedTx = {
@@ -626,9 +626,7 @@ const WagmiPresalePurchase = () => {
       
       if (balanceInBNB < (amount + gasBuffer)) {
         toast.error(
-          t('wagmiPresalePurchase.messages.insufficientBalance', { 
-            amount: (amount + gasBuffer).toFixed(4) 
-          })
+          getComponentText('wagmiPresalePurchase', 'messages.insufficientBalance') + ` ${(amount + gasBuffer).toFixed(4)} BNB`
         );
         return;
       }
@@ -681,7 +679,7 @@ const WagmiPresalePurchase = () => {
           });
 
           toast.success(
-            t('wagmiPresalePurchase.messages.transactionSent', { hash: txHash.slice(0, 10) })
+            getComponentText('wagmiPresalePurchase', 'messages.transactionSent') + ` ${txHash.slice(0, 10)}...`
           );
           
           addPendingTransaction({
@@ -869,7 +867,7 @@ const WagmiPresalePurchase = () => {
           toast.warning(getComponentText('wagmiPresalePurchase', 'messages.transactionCancelled'));
         } else {
           toast.error(
-            t('wagmiPresalePurchase.messages.transactionFailed', { message: error.message })
+            getComponentText('wagmiPresalePurchase', 'messages.transactionFailed') + `: ${error.message}`
           );
         }
       }
@@ -911,7 +909,7 @@ const WagmiPresalePurchase = () => {
       });
 
       toast.success(
-        t('wagmiPresalePurchase.messages.transactionConfirmed', { hash: txHash.slice(0, 10) })
+        getComponentText('wagmiPresalePurchase', 'messages.transactionConfirmed') + ` ${txHash.slice(0, 10)}...`
       );
       
       setTimeout(() => {
@@ -935,7 +933,7 @@ const WagmiPresalePurchase = () => {
         toast.warning(getComponentText('wagmiPresalePurchase', 'messages.transactionRejected'));
       } else {
         toast.error(
-          t('wagmiPresalePurchase.messages.transactionFailed', { message: txError.message })
+          getComponentText('wagmiPresalePurchase', 'messages.transactionFailed') + `: ${txError.message}`
         );
       }
     }
@@ -1032,7 +1030,7 @@ const WagmiPresalePurchase = () => {
         <div className={styles.progressSection}>
           <div className={styles.progressInfo}>
             <span>{getComponentText('wagmiPresalePurchase', 'progress.stage')}</span>
-            <span>{t('wagmiPresalePurchase.progress.raised', { amount: '$329,000' })}</span>
+            <span>{getComponentText('wagmiPresalePurchase', 'progress.raised')}: $329,000</span>
           </div>
           <div className={styles.progressBar}>
             <div className={styles.progressFill} style={{ width: '32.5%' }}></div>
@@ -1053,18 +1051,18 @@ const WagmiPresalePurchase = () => {
         {/* Connection Status */}
         {isConnected && address && (
           <div className={styles.connectionStatus}>
-            {isBinanceWalletDetected ? '🔶' : isTrustWallet() ? '🛡️' : '🌈'} {t('wagmiPresalePurchase.connection.connected', { address: address.slice(0, 6) + '...' + address.slice(-4) })}
+            {isBinanceWalletDetected ? '🔶' : isTrustWallet() ? '🛡️' : '🌈'} {getComponentText('wagmiPresalePurchase', 'connection.connected')}: {address.slice(0, 6)}...{address.slice(-4)}
             <div style={{ fontSize: '0.8rem', color: '#00D4AA', marginTop: '4px' }}>
-              {t('wagmiPresalePurchase.connection.wallet', { walletName: connector?.name })} {isBinanceWalletDetected && '(Binance)'} {isTrustWallet() && '(Trust)'} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>{getComponentText('wagmiPresalePurchase', 'connection.switchToBSC')}</span>}
+              {getComponentText('wagmiPresalePurchase', 'connection.wallet')}: {connector?.name} {isBinanceWalletDetected && '(Binance)'} {isTrustWallet() && '(Trust)'} {!isOnBSC && <span style={{ color: '#ff6b6b' }}>{getComponentText('wagmiPresalePurchase', 'connection.switchToBSC')}</span>}
             </div>
             {balance && (
               <div style={{ fontSize: '0.8rem', color: 'rgba(255,255,255,0.7)', marginTop: '2px' }}>
-                {t('wagmiPresalePurchase.connection.balance', { balance: parseFloat(formatEther(balance.value)).toFixed(4) })}
+                {getComponentText('wagmiPresalePurchase', 'connection.balance')}: {parseFloat(formatEther(balance.value)).toFixed(4)} BNB
               </div>
             )}
             {isBinanceWalletDetected && (
               <div style={{ fontSize: '0.75rem', color: '#ffc107', marginTop: '2px' }}>
-                {t('wagmiPresalePurchase.connection.optimizedFor', { walletName: 'Binance Wallet' })}
+                {getComponentText('wagmiPresalePurchase', 'connection.optimizedFor')}: Binance Wallet
               </div>
             )}
             {isTrustWallet() && (
@@ -1102,17 +1100,17 @@ const WagmiPresalePurchase = () => {
             {pendingTransactions.map((tx) => (
               <div key={tx.txHash} className={styles.pendingTransaction}>
                 <div className={styles.pendingAmount}>
-                  {t('wagmiPresalePurchase.pendingTransactions.amount', { amount: tx.amount })}
+                  {getComponentText('wagmiPresalePurchase', 'pendingTransactions.amount')}: {tx.amount} BNB
                 </div>
                 <div className={styles.pendingHash}>
-                  {t('wagmiPresalePurchase.pendingTransactions.hash', { hash: tx.txHash.slice(0, 10) })}
+                  {getComponentText('wagmiPresalePurchase', 'pendingTransactions.hash')}: {tx.txHash.slice(0, 10)}...
                 </div>
                 <div className={styles.pendingStatus}>
-                  {t('wagmiPresalePurchase.pendingTransactions.status', { status: tx.status })}
+                  {getComponentText('wagmiPresalePurchase', 'pendingTransactions.status')}: {tx.status}
                 </div>
                 {tx.walletType && (
                   <div className={styles.pendingWallet}>
-                    {t('wagmiPresalePurchase.pendingTransactions.wallet', { walletType: tx.walletType })}
+                    {getComponentText('wagmiPresalePurchase', 'pendingTransactions.wallet')}: {tx.walletType}
                   </div>
                 )}
                 <div className={styles.pendingActions}>
@@ -1330,9 +1328,7 @@ const WagmiPresalePurchase = () => {
               )}
               {isTrustWallet() && validateAmount(buyAmount) && (
                 <div style={{ fontSize: '0.75rem', color: '#00bcd4', marginTop: '4px' }}>
-                  {t('wagmiPresalePurchase.form.trustWalletGasFee', { 
-                    fee: ((parseFloat(buyAmount.replace(',', '.')) || 0) * 3 * 23000 / 1000000000).toFixed(6) 
-                  })}
+                  🛡️ Trust Wallet: {((parseFloat(buyAmount.replace(',', '.')) || 0) * 3 * 23000 / 1000000000).toFixed(6)} BNB {getComponentText('wagmiPresalePurchase', 'form.gasFee')} (3 gwei)
                 </div>
               )}
             </div>
@@ -1343,10 +1339,10 @@ const WagmiPresalePurchase = () => {
                 {getComponentText('wagmiPresalePurchase', 'form.youReceive')}
               </div>
               <div className={styles.receiveAmount}>
-                {t('wagmiPresalePurchase.form.tokensAmount', { amount: calculateTokens() })}
+                {calculateTokens()} CRFX 🦊
               </div>
               <div className={styles.receiveRate}>
-                {t('wagmiPresalePurchase.form.rate', { rate: tokensPerBnb.toLocaleString() })}
+                {getComponentText('wagmiPresalePurchase', 'form.rate')}: {tokensPerBnb.toLocaleString()} CRFX per BNB
               </div>
             </div>
 

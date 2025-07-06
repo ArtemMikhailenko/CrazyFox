@@ -15,7 +15,7 @@ export const wagmiPresalePurchaseLocale = {
     },
     progress: {
       stage: "Stage 2/6",
-      raised: "{amount} Raised",
+      raised: "Raised",
       complete: "32.5% Complete"
     },
     price: {

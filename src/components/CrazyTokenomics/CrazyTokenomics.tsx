@@ -1,3 +1,4 @@
+// Updated CrazyTokenomics.tsx with audit field
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { toast } from 'react-toastify';
@@ -66,6 +67,7 @@ const CrazyTokenomics = () => {
     totalSupply: getComponentText('crazyTokenomics', 'contractDetails.totalSupply.value'),
     network: getComponentText('crazyTokenomics', 'contractDetails.network.value'),
     symbol: getComponentText('crazyTokenomics', 'contractDetails.symbol.value'),
+    auditUrl: "https://apespace.io/honeypot/0xa2c959a7fbf6d96ea4170e724d871e0556cd8556",
     taxes: {
       buy: 0,
       sell: 0
@@ -340,6 +342,20 @@ const CrazyTokenomics = () => {
                   <span className={styles.infoValue}>
                     {contractDetails.symbol}
                   </span>
+                </div>
+                {/* NEW AUDIT FIELD */}
+                <div className={styles.infoItem}>
+                  <span className={styles.infoLabel}>
+                    {getComponentText('crazyTokenomics', 'contractDetails.audit.label')}
+                  </span>
+                  <a 
+                    href={contractDetails.auditUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.auditLink}
+                  >
+                    {getComponentText('crazyTokenomics', 'contractDetails.audit.value')}
+                  </a>
                 </div>
               </div>
               

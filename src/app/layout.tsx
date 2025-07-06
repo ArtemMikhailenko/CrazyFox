@@ -21,13 +21,13 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "CrazyFox ($CFOX) | The Wildest Meme Coin on BSC 🦊🚀",
+    default: "CrazyFox ($CRFX) | The Wildest Meme Coin on BSC 🦊🚀",
     template: "%s | CrazyFox - Revolutionary Meme Coin"
   },
-  description: "Join the CrazyFox revolution! 🦊 The most exciting meme coin on Binance Smart Chain with 500K+ community members, epic tokenomics, and moon-bound potential. Buy $CFOX now and become part of the fox pack! 🚀💎",
+  description: "Join the CrazyFox revolution! 🦊 The most exciting meme coin on Binance Smart Chain with 500K+ community members, epic tokenomics, and moon-bound potential. Buy $CRFX now and become part of the fox pack! 🚀💎",
   keywords: [
     "CrazyFox",
-    "CFOX",
+    "CRFX",
     "meme coin",
     "cryptocurrency",
     "Binance Smart Chain",
@@ -76,8 +76,8 @@ export const metadata: Metadata = {
     locale: 'en_US',
     url: 'https://www.crazy-fox.io/',
     siteName: 'CrazyFox - Revolutionary Meme Coin',
-    title: 'CrazyFox ($CFOX) | The Wildest Meme Coin Revolution 🦊🚀',
-    description: '🦊 Join 500K+ foxes in the craziest crypto community! CrazyFox ($CFOX) is the most exciting meme coin on BSC with epic tokenomics, amazing roadmap, and moon potential. Buy $CFOX now! 🚀💎',
+    title: 'CrazyFox ($CRFX) | The Wildest Meme Coin Revolution 🦊🚀',
+    description: '🦊 Join 500K+ foxes in the craziest crypto community! CrazyFox ($CRFX) is the most exciting meme coin on BSC with epic tokenomics, amazing roadmap, and moon potential. Buy $CRFX now! 🚀💎',
     images: [
       {
         url: '/og-image.png',
@@ -90,7 +90,7 @@ export const metadata: Metadata = {
         url: '/og-image.png',
         width: 1080,
         height: 1080,
-        alt: 'CrazyFox Logo - $CFOX Token',
+        alt: 'CrazyFox Logo - $CRFX Token',
         type: 'image/png',
       },
     ],
@@ -99,8 +99,8 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     site: '@CrazyFoxBSC',
     creator: '@CrazyFoxBSC',
-    title: 'CrazyFox ($CFOX) | The Wildest Meme Coin Revolution 🦊🚀',
-    description: '🦊 Join the fox pack! 500K+ community members, epic tokenomics, and moon-bound potential. The craziest meme coin on BSC! Buy $CFOX now! 🚀💎 #CrazyFox #CFOX #MemeCoin #BSC',
+    title: 'CrazyFox ($CRFX) | The Wildest Meme Coin Revolution 🦊🚀',
+    description: '🦊 Join the fox pack! 500K+ community members, epic tokenomics, and moon-bound potential. The craziest meme coin on BSC! Buy $CRFX now! 🚀💎 #CrazyFox #CRFX #MemeCoin #BSC',
     images: {
       url: '/og-image.png',
       alt: 'CrazyFox - Revolutionary Meme Coin on BSC',
@@ -205,7 +205,7 @@ export const metadata: Metadata = {
     'msapplication-TileImage': '/mstile-144x144.png',
     'msapplication-config': '/browserconfig.xml',
     
-    'crypto:symbol': 'CFOX',
+    'crypto:symbol': 'CRFX',
     'crypto:network': 'BSC',
     'crypto:contract': '0x742d35Cc7cF66f5e8f20A4C1b8c4A6b8b4E6F5d1C2',
     
@@ -326,7 +326,7 @@ export default function RootLayout({
               "@context": "https://schema.org",
               "@type": ["Organization", "WebSite"],
               "name": "CrazyFox",
-              "alternateName": "CFOX",
+              "alternateName": "CRFX",
               "description": "The wildest meme coin on Binance Smart Chain with revolutionary tokenomics and an amazing community of 500K+ members.",
               "url": "https://crazyfox.io",
               "logo": "https://crazyfox.io/fox.png",
@@ -345,11 +345,11 @@ export default function RootLayout({
                 "availableLanguage": ["English", "Spanish", "Chinese", "Japanese", "Korean"]
               },
               "foundingDate": "2024",
-              "keywords": "meme coin, cryptocurrency, BSC, DeFi, CrazyFox, CFOX",
+              "keywords": "meme coin, cryptocurrency, BSC, DeFi, CrazyFox, CRFX",
               "mainEntity": {
                 "@type": "FinancialProduct",
                 "name": "CrazyFox Token",
-                "alternateName": "CFOX",
+                "alternateName": "CRFX",
                 "description": "Revolutionary meme coin on Binance Smart Chain",
                 "category": "Cryptocurrency",
                 "provider": {

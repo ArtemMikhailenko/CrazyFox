@@ -754,3 +754,56 @@
     display: none;
   }
 }
+/* Add this to your CrazyTokenomics.module.css */
+
+/* Audit link styling */
+.auditLink {
+  color: #4ECDC4;
+  font-weight: 700;
+  font-family: 'Courier New', monospace;
+  text-shadow: 0 0 8px rgba(78, 205, 196, 0.3);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.auditLink::after {
+  content: '🔗';
+  font-size: 0.8rem;
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.auditLink:hover {
+  color: #FF6B35;
+  text-shadow: 0 0 12px rgba(255, 107, 53, 0.5);
+  transform: translateX(2px);
+}
+
+.auditLink:hover::after {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.auditLink:focus {
+  outline: 2px solid #4ECDC4;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Update infoGrid for better responsiveness with 4 items */
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+@media (max-width: 768px) {
+  .infoGrid {
+    grid-template-columns: 1fr;
+    gap: 0.8rem;
+  }
+}

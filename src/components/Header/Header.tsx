@@ -291,7 +291,7 @@ const Header: React.FC<HeaderProps> = ({ activeSection, scrollToSection }) => {
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                             >
-                              🌈 {getComponentText('header', 'buttons.connectWallet')}
+                              {getComponentText('header', 'buttons.connectWallet')}
                             </motion.button>
                           );
                         }

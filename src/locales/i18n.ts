@@ -32,6 +32,10 @@ import { crazyCommunityLocale as crazyCommunityEn } from './components/CrazyComm
 import { crazyCommunityLocale as crazyCommunityRu } from './components/CrazyCommunity/ru';
 import { crazyCommunityLocale as crazyCommunityZh } from './components/CrazyCommunity/zh';
 
+import { crazyTeamLocale as crazyTeamEn } from './components/CrazyTeam/en';
+import { crazyTeamLocale as crazyTeamRu } from './components/CrazyTeam/ru';
+import { crazyTeamLocale as crazyTeamZh } from './components/CrazyTeam/zh';
+
 import { footerLocale as footerEn } from './components/Footer/en';
 import { footerLocale as footerRu } from './components/Footer/ru';
 import { footerLocale as footerZh } from './components/Footer/zh';
@@ -51,6 +55,7 @@ const resources = {
       crazyTokenomics: crazyTokenomicsEn,
       crazyFoxSpaceRoadmap: crazyFoxSpaceRoadmapEn,
       crazyCommunity: crazyCommunityEn,
+      crazyTeam: crazyTeamEn,
       footer: footerEn,
       wagmiPresalePurchase: wagmiPresalePurchaseEn,
       common: {
@@ -74,6 +79,7 @@ const resources = {
       crazyTokenomics: crazyTokenomicsRu,
       crazyFoxSpaceRoadmap: crazyFoxSpaceRoadmapRu,
       crazyCommunity: crazyCommunityRu,
+      crazyTeam: crazyTeamRu,
       footer: footerRu,
       wagmiPresalePurchase: wagmiPresalePurchaseRu,
       common: {
@@ -97,6 +103,7 @@ const resources = {
       crazyTokenomics: crazyTokenomicsZh,
       crazyFoxSpaceRoadmap: crazyFoxSpaceRoadmapZh,
       crazyCommunity: crazyCommunityZh,
+      crazyTeam: crazyTeamZh,
       footer: footerZh,
       wagmiPresalePurchase: wagmiPresalePurchaseZh,
       common: {
