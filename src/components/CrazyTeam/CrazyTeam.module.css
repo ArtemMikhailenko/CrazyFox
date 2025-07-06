@@ -126,8 +126,8 @@
   
   .photoContainer {
     position: relative;
-    width: 180px;
-    height: 200px;
+    width: 220px;
+    height: 240px;
     margin: 0 auto 1.2rem;
     border-radius: 25px 25px 80px 25px;
     overflow: hidden;
