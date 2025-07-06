@@ -1,0 +1,978 @@
+/* CrazyPartners.module.css */
+
+/* Основные анимации */
+@keyframes scrollLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes borderFlow {
+  0% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+  100% { 
+    background-position: 0% 50%; 
+  }
+}
+
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Основная секция */
+.partnersSection {
+  padding: 8rem 0;
+
+  position: relative;
+  overflow: hidden;
+}
+
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Заголовок секции */
+.partnersHeader {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.sectionTitle {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.1;
+  animation: borderFlow 4s ease-in-out infinite;
+}
+
+.sectionDescription {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Карусель */
+.carouselContainer {
+  position: relative;
+  overflow: hidden;
+  margin: 4rem 0;
+  mask: linear-gradient(90deg, 
+    transparent 0%, 
+    black 8%, 
+    black 92%, 
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(90deg, 
+    transparent 0%, 
+    black 8%, 
+    black 92%, 
+    transparent 100%
+  );
+}
+
+.carouselTrack {
+  display: flex;
+  gap: 2rem;
+  animation: scrollLeft 45s linear infinite;
+  width: fit-content;
+}
+
+.carouselTrack:hover {
+  animation-play-state: paused;
+}
+
+/* Карточка партнера - интересная форма */
+.partnerCard {
+  flex: 0 0 auto;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(25px);
+  border-radius: 50% 20% 50% 20%;
+  padding: 2rem;
+  /* width: 160px; */
+  /* height: 160px; */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.partnerCard:nth-child(2n) {
+  border-radius: 20% 50% 20% 50%;
+}
+
+.partnerCard:nth-child(3n) {
+  border-radius: 30% 70% 30% 70%;
+}
+
+.partnerCard:nth-child(4n) {
+  border-radius: 60% 40% 60% 40%;
+}
+
+.partnerCard:nth-child(5n) {
+  border-radius: 25% 75% 25% 75%;
+}
+
+.partnerCard:hover {
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+  box-shadow: 
+    0 20px 40px rgba(78, 205, 196, 0.15),
+    0 0 0 1px rgba(78, 205, 196, 0.2);
+  animation: floatSoft 3s ease-in-out infinite;
+}
+
+/* Анимированная граница */
+.cardBorder {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: inherit;
+  padding: 2px;
+  background: linear-gradient(45deg, 
+    rgba(78, 205, 196, 0.6), 
+    rgba(255, 107, 53, 0.6), 
+    rgba(69, 183, 209, 0.6),
+    rgba(78, 205, 196, 0.6)
+  );
+  background-size: 300% 300%;
+  animation: borderFlow 6s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.partnerCard:hover .cardBorder {
+  opacity: 1;
+}
+
+.cardBorder::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  right: 2px;
+  bottom: 2px;
+  border-radius: inherit;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(25px);
+}
+
+/* Блик на карточке */
+.cardShine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.partnerCard:hover .cardShine {
+  left: 100%;
+}
+
+/* Удаляем категорию партнера */
+
+/* Логотип партнера */
+.partnerLogo {
+  width: 180px;
+  /* height: 100px; */
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+
+
+.partnerCard:hover .logoGlow {
+  opacity: 1;
+}
+
+.partnerLogo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 20px;
+  filter: brightness(0.9) contrast(1.1) saturate(1.1);
+  transition: all 0.4s ease;
+}
+
+.partnerCard:hover .partnerLogo img {
+  filter: brightness(1.1) contrast(1.2) saturate(1.2);
+  transform: scale(1.15);
+}
+
+.fallbackLogo {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.5rem;
+  font-weight: bold;
+  color: white;
+}
+
+/* Удаляем информацию о партнере */
+
+/* Градиент внизу карточки */
+.cardGradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to top, 
+    rgba(78, 205, 196, 0.1) 0%, 
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.partnerCard:hover .cardGradient {
+  opacity: 1;
+}
+
+/* Угловые акценты */
+.cornerAccent {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(78, 205, 196, 0.4);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.topLeft {
+  top: 15px;
+  left: 15px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+}
+
+.bottomRight {
+  bottom: 15px;
+  right: 15px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 8px;
+}
+
+.partnerCard:hover .cornerAccent {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Статистика */
+.statsRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-top: 5rem;
+  padding: 3rem 0;
+}
+
+.statItem {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.statItem::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(78, 205, 196, 0.05) 50%, 
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.statItem:hover {
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: rgba(78, 205, 196, 0.2);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(78, 205, 196, 0.1);
+}
+
+.statItem:hover::before {
+  left: 100%;
+}
+
+.statNumber {
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.8rem;
+  line-height: 1;
+}
+
+.statLabel {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .partnersSection {
+    padding: 4rem 0;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  .partnersHeader {
+    margin-bottom: 3rem;
+  }
+
+  .sectionDescription {
+    font-size: 1rem;
+  }
+
+  .carouselTrack {
+    gap: 1.5rem;
+    animation-duration: 35s;
+  }
+
+  .partnerCard {
+    /* width: 120px; */
+    /* height: 120px; */
+    padding: 1.5rem;
+  }
+
+  /* .partnerLogo {
+    width: 70px;
+    height: 70px;
+  } */
+
+  .fallbackLogo {
+    width: 70px;
+    height: 70px;
+    font-size: 1.8rem;
+  }
+
+  .partnerName {
+    font-size: 1rem;
+  }
+
+  .statsRow {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .statItem {
+    padding: 2rem 1rem;
+  }
+
+  .statNumber {
+    font-size: 2.5rem;
+  }
+
+  .statLabel {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .carouselTrack {
+    animation-duration: 30s;
+  }
+
+  .partnerCard {
+    /* width: 100px; */
+    /* height: 100px; */
+    padding: 1rem;
+  }
+
+  /* .partnerLogo {
+    width: 60px;
+    height: 60px;
+  } */
+
+  .fallbackLogo {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .statsRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Основные анимации */
+@keyframes scrollLeft {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+
+@keyframes glow {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 1; }
+}
+
+@keyframes borderFlow {
+  0% { 
+    background-position: 0% 50%; 
+  }
+  50% { 
+    background-position: 100% 50%; 
+  }
+  100% { 
+    background-position: 0% 50%; 
+  }
+}
+
+@keyframes floatSoft {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-3px); }
+}
+
+/* Основная секция */
+.partners-section {
+  padding: 8rem 0;
+  background: 
+    radial-gradient(ellipse at 25% 20%, rgba(255, 107, 53, 0.08) 0%, transparent 60%),
+    radial-gradient(ellipse at 75% 80%, rgba(78, 205, 196, 0.06) 0%, transparent 60%),
+    linear-gradient(135deg, rgba(69, 183, 209, 0.02) 0%, rgba(255, 107, 53, 0.02) 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.partners-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23FF6B35' fill-opacity='0.02'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E") repeat;
+  pointer-events: none;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Заголовок секции */
+.partners-header {
+  text-align: center;
+  margin-bottom: 5rem;
+}
+
+.section-title {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4, #45B7D1);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.1;
+  animation: borderFlow 4s ease-in-out infinite;
+}
+
+.section-description {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Карусель */
+.carousel-container {
+  position: relative;
+  overflow: hidden;
+  margin: 4rem 0;
+  mask: linear-gradient(90deg, 
+    transparent 0%, 
+    black 8%, 
+    black 92%, 
+    transparent 100%
+  );
+  -webkit-mask: linear-gradient(90deg, 
+    transparent 0%, 
+    black 8%, 
+    black 92%, 
+    transparent 100%
+  );
+}
+
+.carousel-track {
+  display: flex;
+  gap: 2rem;
+  animation: scrollLeft 45s linear infinite;
+  width: fit-content;
+}
+
+.carousel-track:hover {
+  animation-play-state: paused;
+}
+
+/* Карточка партнера - улучшенный дизайн */
+.partner-card {
+  flex: 0 0 auto;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(25px);
+  border-radius: 24px;
+  padding: 2rem 1.5rem;
+  width: 200px;
+  height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.partner-card:hover {
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.12) 0%, rgba(255, 255, 255, 0.04) 100%);
+  box-shadow: 
+    0 20px 40px rgba(78, 205, 196, 0.15),
+    0 0 0 1px rgba(78, 205, 196, 0.2);
+  animation: floatSoft 3s ease-in-out infinite;
+}
+
+/* Анимированная граница */
+.card-border {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  border-radius: 24px;
+  padding: 1px;
+  background: linear-gradient(45deg, 
+    rgba(78, 205, 196, 0.6), 
+    rgba(255, 107, 53, 0.6), 
+    rgba(69, 183, 209, 0.6),
+    rgba(78, 205, 196, 0.6)
+  );
+  background-size: 300% 300%;
+  animation: borderFlow 6s ease-in-out infinite;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.partner-card:hover .card-border {
+  opacity: 1;
+}
+
+.card-border::before {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  right: 1px;
+  bottom: 1px;
+  border-radius: 23px;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  backdrop-filter: blur(25px);
+}
+
+/* Блик на карточке */
+.card-shine {
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(255, 255, 255, 0.1) 50%, 
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.partner-card:hover .card-shine {
+  left: 100%;
+}
+
+/* Категория партнера */
+.partner-category {
+  background: linear-gradient(45deg, rgba(78, 205, 196, 0.2), rgba(69, 183, 209, 0.2));
+  border: 1px solid rgba(78, 205, 196, 0.3);
+  color: #4ECDC4;
+  padding: 0.4rem 0.8rem;
+  border-radius: 15px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  z-index: 2;
+  position: relative;
+}
+
+/* Логотип партнера */
+.partner-logo {
+  width: 80px;
+  height: 80px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+}
+
+.logo-glow {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  right: -10px;
+  bottom: -10px;
+  background: radial-gradient(circle, rgba(78, 205, 196, 0.3) 0%, transparent 70%);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  animation: glow 3s ease-in-out infinite;
+}
+
+.partner-card:hover .logo-glow {
+  opacity: 1;
+}
+
+.partner-logo img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border-radius: 15px;
+  filter: brightness(0.9) contrast(1.1) saturate(1.1);
+  transition: all 0.4s ease;
+}
+
+.partner-card:hover .partner-logo img {
+  filter: brightness(1.1) contrast(1.2) saturate(1.2);
+  transform: scale(1.1);
+}
+
+.fallback-logo {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: bold;
+  color: white;
+}
+
+/* Информация о партнере */
+.partner-info {
+  text-align: center;
+  z-index: 2;
+  position: relative;
+}
+
+.partner-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 0.5rem 0;
+  transition: color 0.3s ease;
+}
+
+.partner-card:hover .partner-name {
+  color: #4ECDC4;
+}
+
+.partner-description {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+  line-height: 1.4;
+  transition: color 0.3s ease;
+}
+
+.partner-card:hover .partner-description {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+/* Градиент внизу карточки */
+.card-gradient {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 60px;
+  background: linear-gradient(to top, 
+    rgba(78, 205, 196, 0.1) 0%, 
+    transparent 100%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.partner-card:hover .card-gradient {
+  opacity: 1;
+}
+
+/* Угловые акценты */
+.corner-accent {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(78, 205, 196, 0.4);
+  opacity: 0;
+  transition: all 0.4s ease;
+}
+
+.corner-accent.top-left {
+  top: 15px;
+  left: 15px;
+  border-right: none;
+  border-bottom: none;
+  border-top-left-radius: 8px;
+}
+
+.corner-accent.bottom-right {
+  bottom: 15px;
+  right: 15px;
+  border-left: none;
+  border-top: none;
+  border-bottom-right-radius: 8px;
+}
+
+.partner-card:hover .corner-accent {
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+/* Статистика */
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 2rem;
+  margin-top: 5rem;
+  padding: 3rem 0;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 2.5rem 1.5rem;
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  transition: all 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, 
+    transparent 0%, 
+    rgba(78, 205, 196, 0.05) 50%, 
+    transparent 100%
+  );
+  transition: left 0.6s ease;
+}
+
+.stat-item:hover {
+  background: 
+    linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.02) 100%);
+  border-color: rgba(78, 205, 196, 0.2);
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(78, 205, 196, 0.1);
+}
+
+.stat-item:hover::before {
+  left: 100%;
+}
+
+.stat-number {
+  font-size: 3.5rem;
+  font-weight: 900;
+  background: linear-gradient(45deg, #FF6B35, #4ECDC4);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 0.8rem;
+  line-height: 1;
+}
+
+.stat-label {
+  font-size: 1.1rem;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+  .partners-section {
+    padding: 4rem 0;
+  }
+
+  .container {
+    padding: 0 1rem;
+  }
+
+  .partners-header {
+    margin-bottom: 3rem;
+  }
+
+  .section-description {
+    font-size: 1rem;
+  }
+
+  .carousel-track {
+    gap: 1.5rem;
+    animation-duration: 35s;
+  }
+
+  .partner-card {
+    width: 170px;
+    height: 240px;
+    padding: 1.5rem 1rem;
+  }
+
+  .partner-logo {
+    width: 60px;
+    height: 60px;
+  }
+
+  .fallback-logo {
+    width: 60px;
+    height: 60px;
+    font-size: 1.5rem;
+  }
+
+  .partner-name {
+    font-size: 1rem;
+  }
+
+  .partner-description {
+    font-size: 0.8rem;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-top: 3rem;
+  }
+
+  .stat-item {
+    padding: 2rem 1rem;
+  }
+
+  .stat-number {
+    font-size: 2.5rem;
+  }
+
+  .stat-label {
+    font-size: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-track {
+    animation-duration: 30s;
+  }
+
+  .partner-card {
+    width: 150px;
+    height: 220px;
+    padding: 1rem 0.8rem;
+  }
+
+  .partner-logo {
+    width: 50px;
+    height: 50px;
+  }
+
+  .fallback-logo {
+    width: 50px;
+    height: 50px;
+    font-size: 1.2rem;
+  }
+
+  .stats-row {
+    grid-template-columns: 1fr;
+  }
+}

@@ -21,7 +21,7 @@ import Footer from '@/components/Footer/Footer';
 
 import styles from './page.module.css';
 import CrazyTeam from '@/components/CrazyTeam/CrazyTeam';
-// import CrazyPartners from '@/components/CrazyPartners/CrazyPartners';
+import CrazyPartners from '@/components/CrazyPartners/CrazyPartners';
 
 const client = createThirdwebClient({
   clientId: process.env.NEXT_PUBLIC_THIRDWEB_CLIENT_ID || "d28d89a66e8eb5e73d6a9c8eeaa0645a"
@@ -106,7 +106,7 @@ const HomeContent = () => {
       >
         <CrazyRoadmapMap />
       </motion.section>
-      {/* <CrazyPartners/> */}
+      <CrazyPartners/>
       <motion.section 
         id="community" 
         className={styles.community}
