@@ -1030,10 +1030,10 @@ const WagmiPresalePurchase = () => {
         <div className={styles.progressSection}>
           <div className={styles.progressInfo}>
             <span>{getComponentText('wagmiPresalePurchase', 'progress.stage')}</span>
-            <span>{getComponentText('wagmiPresalePurchase', 'progress.raised')}: $329,000</span>
+            <span>{getComponentText('wagmiPresalePurchase', 'progress.raised')}: $389,000</span>
           </div>
           <div className={styles.progressBar}>
-            <div className={styles.progressFill} style={{ width: '32.5%' }}></div>
+            <div className={styles.progressFill} style={{ width: '38.5%' }}></div>
           </div>
           <div className={styles.progressText}>
             {getComponentText('wagmiPresalePurchase', 'progress.complete')}

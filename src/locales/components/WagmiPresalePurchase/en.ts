@@ -16,16 +16,16 @@ export const wagmiPresalePurchaseLocale = {
     progress: {
       stage: "Stage 2/6",
       raised: "Raised",
-      complete: "32.5% Complete"
+      complete: "38.5% Complete"
     },
     price: {
       current: "Current: $0.006",
       next: "Next: $0.007"
     },
     connection: {
-      connected: "Connected: {address}",
-      wallet: "Wallet: {walletName}",
-      balance: "Balance: {balance} BNB",
+      connected: "Connected: ",
+      wallet: "Wallet: ",
+      balance: "Balance:  BNB",
       switchToBSC: "⚠️ Switch to BSC",
       optimizedFor: "✨ Optimized for {walletName}",
       gasRequirement: "🛡️ Trust Wallet with 3+ gwei gas pricing"
@@ -38,10 +38,10 @@ export const wagmiPresalePurchaseLocale = {
     },
     pendingTransactions: {
       title: "⏳ Pending Transactions",
-      amount: "Amount: {amount} BNB",
-      hash: "Hash: {hash}...",
-      status: "Status: {status}",
-      wallet: "Wallet: {walletType}",
+      amount: "Amount:  BNB",
+      hash: "Hash: ...",
+      status: "Status:",
+      wallet: "Wallet:",
       retryButton: "Retry API Call",
       removeButton: "Remove"
     },
@@ -73,10 +73,10 @@ export const wagmiPresalePurchaseLocale = {
       amountLabel: "Amount (BNB):",
       amountPlaceholder: "0.0",
       invalidAmount: "Please enter a valid amount (0.0001 - 100 BNB)",
-      trustWalletGasFee: "🛡️ Trust Wallet: {fee} BNB gas fee (3 gwei)",
+      trustWalletGasFee: "🛡️ Trust Wallet: BNB gas fee (3 gwei)",
       youReceive: "You receive:",
-      tokensAmount: "{amount} CRFX 🦊",
-      rate: "Rate: {rate} CRFX per BNB"
+      tokensAmount: " CRFX 🦊",
+      rate: "Rate:  CRFX per BNB"
     },
     buyButton: {
       confirmBinance: "🔶 Confirm in Binance Wallet...",

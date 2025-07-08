@@ -16,16 +16,16 @@ export const wagmiPresalePurchaseLocale = {
     progress: {
       stage: "Этап 2/6",
       raised: "Собрано",
-      complete: "32.5% Завершено"
+      complete: "38.5% Завершено"
     },
     price: {
       current: "Текущая: $0.006",
       next: "Следующая: $0.007"
     },
     connection: {
-      connected: "Подключен: {address}",
-      wallet: "Кошелек: {walletName}",
-      balance: "Баланс: {balance} BNB",
+      connected: "Подключен: ",
+      wallet: "Кошелек: ",
+      balance: "Баланс:  BNB",
       switchToBSC: "⚠️ Переключить на BSC",
       optimizedFor: "✨ Оптимизировано для {walletName}",
       gasRequirement: "🛡️ Trust Wallet с ценой газа 3+ gwei"
@@ -38,10 +38,10 @@ export const wagmiPresalePurchaseLocale = {
     },
     pendingTransactions: {
       title: "⏳ Ожидающие Транзакции",
-      amount: "Сумма: {amount} BNB",
-      hash: "Хеш: {hash}...",
-      status: "Статус: {status}",
-      wallet: "Кошелек: {walletType}",
+      amount: "Сумма:  BNB",
+      hash: "Хеш:...",
+      status: "Статус: ",
+      wallet: "Кошелек: ",
       retryButton: "Повторить API Вызов",
       removeButton: "Удалить"
     },
